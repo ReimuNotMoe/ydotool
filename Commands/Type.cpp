@@ -19,12 +19,10 @@ static int time_keydelay = 12;
 
 static void ShowHelp(){
 	fprintf(stderr, "Usage: type [--delay milliseconds] [--key-delay milliseconds] [--args N] [--file <filepath>] <things to type>\n"
-		"  --help                    Show this help\n"
-		"  --delay milliseconds      Delay time before start typing\n"
-		"  --key-delay milliseconds  Delay time between keystrokes. Default 12ms\n"
-		"  --file filepath           Specify a file, the contents of which will be be typed \n"
-		"                            as if passed as an argument. The filepath may also be \n"
-		"                            '-' to read from stdin\n");
+		"  --help                    Show this help.\n"
+		"  --delay milliseconds      Delay time before start typing.\n"
+		"  --key-delay milliseconds  Delay time between keystrokes. Default 12ms.\n"
+		"  --file filepath           Specify a file, the contents of which will be be typed as if passed as an argument. The filepath may also be '-' to read from stdin.\n");
 
 }
 

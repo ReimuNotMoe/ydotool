@@ -76,7 +76,7 @@ int Command_MouseMove(int argc, const char *argv[]) {
 		}
 
 	} catch (std::exception &e) {
-		fprintf(stderr, "ydotool: key: error: %s\n", e.what());
+		fprintf(stderr, "ydotool: %s: error: %s\n", argv[0], e.what());
 		return 2;
 	}
 
