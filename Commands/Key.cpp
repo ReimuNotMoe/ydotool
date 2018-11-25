@@ -20,7 +20,7 @@ static int time_keydelay = 12;
 static void ShowHelp(){
 	fprintf(stderr, "Usage: key [--delay <ms>] [--key-delay <ms>] [--repeat <times>] [--repeat-delay <ms>] <key sequence> ...\n"
 		"  --help                Show this help.\n"
-		"  --delay ms            Delay time before start typing. Default 100ms.\n"
+		"  --delay ms            Delay time before start pressing keys. Default 100ms.\n"
 		"  --key-delay ms        Delay time between keystrokes. Default 12ms.\n"
 		"  --repeat times        Times to repeat the key sequence.\n"
 		"  --repeat-delay ms     Delay time between repetitions. Default 0ms.\n"
