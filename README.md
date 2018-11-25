@@ -9,6 +9,7 @@ Currently implemented command(s):
 - `key` - Press keys
 - `mousemove` - Move mouse pointer to absolute position
 - `mousemove_relative` - Move mouse pointer to relative position
+- `click` - Click on mouse buttons
 
 ## Compatibility
 This program requires access to `/dev/uinput`.
@@ -35,6 +36,10 @@ Move mouse pointer to 100,100:
 Relatively move mouse pointer to -100,100:
 
     ydotool mousemove_relative -- -100 100
+
+Mouse right click:
+
+    ydotool click 2
 
 ## Build
 ### Dependencies

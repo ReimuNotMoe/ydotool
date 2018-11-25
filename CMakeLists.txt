@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 set(SOURCE_FILES
         ydotool.cpp CommonIncludes.hpp Commands.hpp Commands.cpp
-        Commands/Type.cpp Commands/Key.cpp Commands/MouseMove.cpp)
+        Commands/Type.cpp Commands/Key.cpp Commands/MouseMove.cpp Commands/Click.cpp)
 
 
 add_executable(ydotool ${SOURCE_FILES})
