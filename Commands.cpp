@@ -17,6 +17,7 @@ std::unordered_map<std::string, void *> CommandTable;
 void InitCommands() {
 	CommandTable["type"] = (void *)Command_Type;
 	CommandTable["key"] = (void *)Command_Key;
+	CommandTable["click"] = (void *)Command_Click;
 	CommandTable["mousemove"] = (void *)Command_MouseMove;
 	CommandTable["mousemove_relative"] = (void *)Command_MouseMove;
 }
