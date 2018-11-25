@@ -7,6 +7,8 @@ Replace `x` with `y`. :P
 Currently implemented command(s):
 - `type` - Type a string
 - `key` - Press keys
+- `mousemove` - Move mouse pointer to absolute position
+- `mousemove_relative` - Move mouse pointer to relative position
 
 ## Compatibility
 This program requires access to `/dev/uinput`.
@@ -25,6 +27,14 @@ Switch to tty1:
 Close a window in graphical environment:
 
     ydotool key Alt+F4
+
+Move mouse pointer to 100,100:
+
+    ydotool mousemove 100 100
+
+Relatively move mouse pointer to -100,100:
+
+    ydotool mousemove_relative -- -100 100
 
 ## Build
 ### Dependencies

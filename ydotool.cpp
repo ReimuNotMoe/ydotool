@@ -28,8 +28,11 @@ static void ShowHelp() {
 }
 
 int InituInput() {
-	if (!myuInput)
-		myuInput = new uInput({{"ydotool virtual device"}});
+	if (!myuInput) {
+		uInputSetup us({"ydotool virtual device"});
+
+		myuInput = new uInput({us});
+	}
 
 	return 0;
 }
