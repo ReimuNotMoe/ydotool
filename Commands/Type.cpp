@@ -22,9 +22,6 @@ static void ShowHelp(){
 		"  --help                    Show this help\n"
 		"  --delay milliseconds      Delay time before start typing\n"
 		"  --key-delay milliseconds  Delay time between keystrokes. Default 12ms\n"
-		"  --args N                  How many arguments to expect in the exec command. This \n"
-		"                            is useful for ending an exec and continuing with more \n"
-		"                            ydotool commands\n"
 		"  --file filepath           Specify a file, the contents of which will be be typed \n"
 		"                            as if passed as an argument. The filepath may also be \n"
 		"                            '-' to read from stdin\n");
@@ -89,7 +86,6 @@ int Command_Type(int argc, const char *argv[]) {
 	}
 
 	int time_delay = 100;
-	int args_count = -1;
 	int text_start = -1;
 
 	std::string file_path;
@@ -102,7 +98,6 @@ int Command_Type(int argc, const char *argv[]) {
 			("help", "Show this help")
 			("delay", po::value<int>())
 			("key-delay", po::value<int>())
-			("args", po::value<int>())
 			("file", po::value<std::string>())
 			("extra-args", po::value(&extra_args));
 
@@ -134,12 +129,6 @@ int Command_Type(int argc, const char *argv[]) {
 			time_keydelay = vm["key-delay"].as<int>();
 			std::cerr << "Key delay was set to "
 				  << time_keydelay << " milliseconds.\n";
-		}
-
-		if (vm.count("args")) {
-			args_count = vm["args"].as<int>();
-			std::cerr << "Argument count was set to "
-				  << args_count << ".\n";
 		}
 
 		if (vm.count("file")) {

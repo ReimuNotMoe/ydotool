@@ -16,5 +16,5 @@ std::unordered_map<std::string, void *> CommandTable;
 
 void InitCommands() {
 	CommandTable["type"] = (void *)Command_Type;
-
+	CommandTable["key"] = (void *)Command_Key;
 }
