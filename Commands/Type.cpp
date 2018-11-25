@@ -143,10 +143,34 @@ int Command_Type(int argc, const char *argv[]) {
 				  << args_count << ".\n";
 		}
 
+		if (vm.count("file")) {
+			file_path = vm["file"].as<std::string>();
+			std::cerr << "File path was set to "
+				  << file_path << ".\n";
+		} else {
+			if (extra_args.empty()) {
+				std::cerr << "What do you want to type?\n"
+					"Use `ydotool type --help' for help.\n";
+
+				return 1;
+			}
+		}
+
 
 	} catch (std::exception &e) {
 		fprintf(stderr, "ydotool: type: error: %s\n", e.what());
 		return 2;
+	}
+
+	int fd = -1;
+
+	if (!file_path.empty()) {
+		fd = open(file_path.c_str(), O_RDONLY);
+
+		if (fd == -1) {
+			fprintf(stderr, "ydotool: type: error: failed to open %s: %s\n", file_path.c_str(), strerror(errno));
+			return 2;
+		}
 	}
 
 	uInput1 = new uInput(uInputSetup(uInputDeviceInfo("ydotool virtual device")));
@@ -154,8 +178,27 @@ int Command_Type(int argc, const char *argv[]) {
 	if (time_delay)
 		usleep(time_delay * 1000);
 
-	for (auto &txt : extra_args) {
-		TypeText(txt);
+	if (fd > 0) {
+		std::string buf;
+		buf.resize(128);
+
+		ssize_t rc;
+		while ((rc = read(fd, &buf[0], 128))) {
+			if (rc > 0) {
+				buf.resize(rc);
+				TypeText(buf);
+				buf.resize(128);
+			} else if (rc < 0) {
+				fprintf(stderr, "ydotool: type: error: read %s failed: %s\n", file_path.c_str(), strerror(errno));
+				return 2;
+			}
+		}
+
+		close(fd);
+	} else {
+		for (auto &txt : extra_args) {
+			TypeText(txt);
+		}
 	}
 
 	return argc;
