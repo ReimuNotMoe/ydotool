@@ -17,6 +17,9 @@
 #include <iostream>
 #include <cstdio>
 #include <cstdlib>
+#include <cerrno>
+
+#include <fcntl.h>
 
 #include <uInputPlus/uInput.hpp>
 
