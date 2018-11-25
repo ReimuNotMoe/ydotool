@@ -26,5 +26,6 @@ extern int InituInput();
 namespace po = boost::program_options;
 
 extern int Command_Type(int argc, const char *argv[]);
+extern int Command_Key(int argc, const char *argv[]);
 
 #endif //YDOTOOL_COMMANDS_HPP

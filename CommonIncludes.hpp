@@ -15,6 +15,10 @@
 
 
 #include <iostream>
+#include <algorithm>
+#include <sstream>
+#include <stdexcept>
+
 #include <cstdio>
 #include <cstdlib>
 #include <cerrno>
