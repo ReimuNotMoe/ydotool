@@ -13,6 +13,10 @@
 #include "CommonIncludes.hpp"
 #include "Commands.hpp"
 
+using namespace uInputPlus;
+
+uInput *myuInput = nullptr;
+
 static void ShowHelp() {
 	fprintf(stderr, "Usage: ydotool <cmd> <args>\n"
 		"Available commands:\n");
@@ -21,6 +25,13 @@ static void ShowHelp() {
 		fprintf(stderr, "  %s\n", it.first.c_str());
 	}
 
+}
+
+int InituInput() {
+	if (!myuInput)
+		myuInput = new uInput({{"ydotool virtual device"}});
+
+	return 0;
 }
 
 int main(int argc, const char **argv) {

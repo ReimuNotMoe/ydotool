@@ -10,21 +10,3 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-#ifndef YDOTOOL_COMMANDS_HPP
-#define YDOTOOL_COMMANDS_HPP
-
-#include "CommonIncludes.hpp"
-
-using namespace uInputPlus;
-
-extern std::unordered_map<std::string, void *> CommandTable;
-extern uInput *myuInput;
-
-extern void InitCommands();
-extern int InituInput();
-
-namespace po = boost::program_options;
-
-extern int Command_Type(int argc, const char *argv[]);
-
-#endif //YDOTOOL_COMMANDS_HPP
