@@ -15,7 +15,6 @@
 
 using namespace uInputPlus;
 
-static uInput *uInput1 = nullptr;
 static int time_keydelay = 12;
 
 static void ShowHelp(){
@@ -59,20 +58,20 @@ static int TypeText(const std::string &text) {
 
 		if (isUpper) {
 			sleep_time = 250 * time_keydelay;
-			uInput1->SendKey(KEY_LEFTSHIFT, 1);
+			myuInput->SendKey(KEY_LEFTSHIFT, 1);
 			usleep(sleep_time);
 		} else {
 			sleep_time = 500 * time_keydelay;
 		}
 
-		uInput1->SendKey(key_code, 1);
+		myuInput->SendKey(key_code, 1);
 		usleep(sleep_time);
-		uInput1->SendKey(key_code, 0);
+		myuInput->SendKey(key_code, 0);
 		usleep(sleep_time);
 
 
 		if (isUpper) {
-			uInput1->SendKey(KEY_LEFTSHIFT, 0);
+			myuInput->SendKey(KEY_LEFTSHIFT, 0);
 			usleep(sleep_time);
 		}
 
@@ -173,7 +172,7 @@ int Command_Type(int argc, const char *argv[]) {
 		}
 	}
 
-	uInput1 = new uInput(uInputSetup(uInputDeviceInfo("ydotool virtual device")));
+	InituInput();
 
 	if (time_delay)
 		usleep(time_delay * 1000);
