@@ -66,7 +66,7 @@ static std::vector<int> KeyStroke2Code(const std::string &ks) {
 		if (t_ks != KeyStringTable.end()) {
 			list_keycodes.push_back(t_ks->second);
 		} else {
-			auto t_kts = KeyTextStringTable.find(it[0]);
+			auto t_kts = KeyTextStringTable.find(tolower(it[0]));
 
 			if (t_kts != KeyTextStringTable.end()) {
 				list_keycodes.push_back(t_kts->second);
