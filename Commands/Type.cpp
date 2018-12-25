@@ -14,6 +14,7 @@
 
 
 using namespace uInputPlus;
+using namespace evdevPlus;
 
 static int time_keydelay = 12;
 
@@ -35,13 +36,13 @@ static int TypeText(const std::string &text) {
 
 		int key_code;
 
-		auto itk = KeyTextStringTable.find(c);
+		auto itk = Table_LowerKeys.find(c);
 
-		if (itk != KeyTextStringTable.end()) {
+		if (itk != Table_LowerKeys.end()) {
 			key_code = itk->second;
 		} else {
-			auto itku = KeyTextStringTableUpper.find(c);
-			if (itku != KeyTextStringTableUpper.end()) {
+			auto itku = Table_UpperKeys.find(c);
+			if (itku != Table_UpperKeys.end()) {
 				isUpper = 1;
 				key_code = itku->second;
 			} else {

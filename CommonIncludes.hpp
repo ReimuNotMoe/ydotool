@@ -26,6 +26,7 @@
 #include <fcntl.h>
 
 #include <uInputPlus/uInput.hpp>
+#include <evdevPlus/evdevPlus.hpp>
 
 #include <boost/program_options.hpp>
 

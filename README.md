@@ -44,6 +44,7 @@ Mouse right click:
 ## Build
 ### Dependencies
 - [uInputPlus](https://github.com/YukiWorkshop/libuInputPlus)
+- [libevdevPlus](https://github.com/YukiWorkshop/libevdevPlus)
 - boost::program_options
 
 ### Compile

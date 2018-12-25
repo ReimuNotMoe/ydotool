@@ -14,6 +14,7 @@
 
 
 using namespace uInputPlus;
+using namespace evdevPlus;
 
 static int time_keydelay = 12;
 
@@ -61,14 +62,14 @@ static std::vector<int> KeyStroke2Code(const std::string &ks) {
 				itc = toupper(itc);
 		}
 
-		auto t_ks = KeyStringTable.find(it);
+		auto t_ks = Table_FunctionKeys.find(it);
 
-		if (t_ks != KeyStringTable.end()) {
+		if (t_ks != Table_FunctionKeys.end()) {
 			list_keycodes.push_back(t_ks->second);
 		} else {
-			auto t_kts = KeyTextStringTable.find(tolower(it[0]));
+			auto t_kts = Table_LowerKeys.find(tolower(it[0]));
 
-			if (t_kts != KeyTextStringTable.end()) {
+			if (t_kts != Table_LowerKeys.end()) {
 				list_keycodes.push_back(t_kts->second);
 			} else {
 				throw std::invalid_argument("no matching keycode");
