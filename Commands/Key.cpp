@@ -62,8 +62,13 @@ static std::vector<int> KeyStroke2Code(const std::string &ks) {
 				itc = toupper(itc);
 		}
 
-		auto t_ks = Table_FunctionKeys.find(it);
+		auto t_kms = Table_ModifierKeys.find(it);
+		if (t_kms != Table_ModifierKeys.end()) {
+			list_keycodes.push_back(t_kms->second);
+			continue;
+		}
 
+		auto t_ks = Table_FunctionKeys.find(it);
 		if (t_ks != Table_FunctionKeys.end()) {
 			list_keycodes.push_back(t_ks->second);
 		} else {
@@ -81,17 +86,19 @@ static std::vector<int> KeyStroke2Code(const std::string &ks) {
 }
 
 
-static int EmitKeyCodes(long key_delay, const std::vector<int> &list_keycodes) {
+static int EmitKeyCodes(long key_delay, const std::vector<std::vector<int>> &list_keycodes) {
 	auto sleep_time = (uint)(key_delay * 1000 / (list_keycodes.size() * 2));
 
 	for (auto &it : list_keycodes) {
-		myuInput->SendKey(it, 1);
-		usleep(sleep_time);
-	}
+		for (auto &it_m : it) {
+			myuInput->SendKey(it_m, 1);
+			usleep(sleep_time);
+		}
 
-	for (auto i = list_keycodes.size(); i-- > 0; ) {
-		myuInput->SendKey(list_keycodes[i], 0);
-		usleep(sleep_time);
+		for (auto i = it.size(); i-- > 0;) {
+			myuInput->SendKey(it[i], 0);
+			usleep(sleep_time);
+		}
 	}
 
 	return 0;
@@ -186,17 +193,16 @@ int Command_Key(int argc, const char *argv[]) {
 	if (time_delay)
 		usleep(time_delay * 1000);
 
-	std::vector<int> keycodes;
+	std::vector<std::vector<int>> keycodes;
 
 	for (auto &ks : extra_args) {
 		auto thiskc = KeyStroke2Code(ks);
 
-		std::move(thiskc.begin(), thiskc.end(), std::back_inserter(keycodes));
+		keycodes.emplace_back(thiskc);
 	}
 
 	while (repeats--) {
 		EmitKeyCodes(time_delay, keycodes);
-
 	}
 
 	return argc;
