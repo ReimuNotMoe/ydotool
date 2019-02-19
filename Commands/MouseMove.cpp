@@ -18,18 +18,18 @@ using namespace uInputPlus;
 static int time_keydelay = 12;
 
 static void ShowHelp(const char *argv_0){
-	fprintf(stderr, "Usage: %s [--delay <ms>] <x> <y>\n"
-		"  --help                Show this help.\n"
-		"  --delay ms            Delay time before start moving. Default 100ms.\n", argv_0);
+	std::cerr << "Usage: " << argv_0 << " [--delay <ms>] <x> <y>\n"
+			<< "  --help                Show this help.\n"
+			<< "  --delay ms            Delay time before start moving. Default 100ms." << std::endl;
 }
 
 
 int Command_MouseMove(int argc, const char *argv[]) {
 
-	printf("argc = %d\n", argc);
+	std::cout << "argc = " << argc << "\n";
 
 	for (int i=1; i<argc; i++) {
-		printf("argv[%d] = %s \n", i, argv[i]);
+		std::cout << "argv["<<i<<"] = " << argv[i] << "\n";
 	}
 
 	int time_delay = 100;
@@ -76,7 +76,7 @@ int Command_MouseMove(int argc, const char *argv[]) {
 		}
 
 	} catch (std::exception &e) {
-		fprintf(stderr, "ydotool: %s: error: %s\n", argv[0], e.what());
+		std::cerr <<  "ydotool: " << argv[0] << ": error: " << e.what() << std::endl;
 		return 2;
 	}
 

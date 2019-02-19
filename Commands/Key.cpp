@@ -19,18 +19,18 @@ using namespace evdevPlus;
 static int time_keydelay = 12;
 
 static void ShowHelp(){
-	fprintf(stderr, "Usage: key [--delay <ms>] [--key-delay <ms>] [--repeat <times>] [--repeat-delay <ms>] <key sequence> ...\n"
-		"  --help                Show this help.\n"
-		"  --delay ms            Delay time before start pressing keys. Default 100ms.\n"
-		"  --key-delay ms        Delay time between keystrokes. Default 12ms.\n"
-		"  --repeat times        Times to repeat the key sequence.\n"
-		"  --repeat-delay ms     Delay time between repetitions. Default 0ms.\n"
-		"\n"
-		"Each key sequence can be any number of modifiers and keys, separated by plus (+)\n"
-		"For example: alt+r Alt+F4 CTRL+alt+f3 aLT+1+2+3 ctrl+Backspace \n"
-		"\n"
-		"Since we are emulating keyboard input, combination like Shift+# is invalid.\n"
-		"Because typing a `#' involves pressing Shift and 3.\n");
+	std::cerr << "Usage: key [--delay <ms>] [--key-delay <ms>] [--repeat <times>] [--repeat-delay <ms>] <key sequence> ...\n"
+		<< "  --help                Show this help.\n"
+		<< "  --delay ms            Delay time before start pressing keys. Default 100ms.\n"
+		<< "  --key-delay ms        Delay time between keystrokes. Default 12ms.\n"
+		<< "  --repeat times        Times to repeat the key sequence.\n"
+		<< "  --repeat-delay ms     Delay time between repetitions. Default 0ms.\n"
+		<< "\n"
+		<< "Each key sequence can be any number of modifiers and keys, separated by plus (+)\n"
+		<< "For example: alt+r Alt+F4 CTRL+alt+f3 aLT+1+2+3 ctrl+Backspace \n"
+		<< "\n"
+		<< "Since we are emulating keyboard input, combination like Shift+# is invalid.\n"
+		<< "Because typing a `#' involves pressing Shift and 3." << std::endl;
 }
 
 std::vector<std::string> ExplodeString(const std::string &str, char delim) {
@@ -106,10 +106,10 @@ static int EmitKeyCodes(long key_delay, const std::vector<std::vector<int>> &lis
 
 int Command_Key(int argc, const char *argv[]) {
 
-	printf("argc = %d\n", argc);
+	std::cout << "argc = " << argc << "\n";
 
 	for (int i=1; i<argc; i++) {
-		printf("argv[%d] = %s \n", i, argv[i]);
+		std::cout << "argv["<<i<<"] = " << argv[i] << "\n";
 	}
 
 	int time_delay = 100;
@@ -184,7 +184,7 @@ int Command_Key(int argc, const char *argv[]) {
 		}
 
 	} catch (std::exception &e) {
-		fprintf(stderr, "ydotool: key: error: %s\n", e.what());
+		std::cerr << "ydotool: key: error: " << e.what() << std::endl;;
 		return 2;
 	}
 

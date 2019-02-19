@@ -18,11 +18,11 @@ using namespace uInputPlus;
 uInput *myuInput = nullptr;
 
 static void ShowHelp() {
-	fprintf(stderr, "Usage: ydotool <cmd> <args>\n"
-		"Available commands:\n");
+	std::cerr << "Usage: ydotool <cmd> <args>\n"
+		"Available commands:\n";
 
 	for (auto &it : CommandTable) {
-		fprintf(stderr, "  %s\n", it.first.c_str());
+		std::cerr << it.first << std::endl;
 	}
 
 }
@@ -54,14 +54,14 @@ int main(int argc, const char **argv) {
 	auto it_cmd = CommandTable.find(argv[1]);
 
 	if (it_cmd == CommandTable.end()) {
-		fprintf(stderr, "ydotool: Unknown command: %s\n"
-			"Run 'ydotool help' if you want a command list\n", argv[1]);
+		std::cerr <<  "ydotool: Unknown command: " << argv[0] << "\n"
+			<< "Run 'ydotool help' if you want a command list" << std::endl;
 		exit(1);
 	}
 
 	auto command = (int (*)(int, const char *[]))it_cmd->second;
 
-	fprintf(stderr, "ydotool: Executing `%s' at %p\n", argv[1], command);
+	std::cerr <<  "ydotool: Executing `" << argv[1] << "' at " << std::hex << &command << std::endl;
 
 	int rc = command(argc-1, &argv[1]);
 
