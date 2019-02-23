@@ -16,19 +16,19 @@ using namespace uInputPlus;
 
 
 static void ShowHelp(){
-	fprintf(stderr, "Usage: click [--delay <ms>] <button>\n"
-		"  --help                Show this help.\n"
-		"  --delay ms            Delay time before start clicking. Default 100ms.\n"
-		"  button                1: left 2: right 3: middle\n");
+	std::cerr << "Usage: click [--delay <ms>] <button>\n"
+		<< "  --help                Show this help.\n"
+		<< "  --delay ms            Delay time before start clicking. Default 100ms.\n"
+		<< "  button                1: left 2: right 3: middle" << std::endl;
 }
 
 
 int Command_Click(int argc, const char *argv[]) {
 
-	printf("argc = %d\n", argc);
+	std::cout << "argc = " << argc << "\n";
 
 	for (int i=1; i<argc; i++) {
-		printf("argv[%d] = %s \n", i, argv[i]);
+		std::cout << "argv[" << i << "] = " << argv[i] << "\n";
 	}
 
 	int time_delay = 100;
@@ -75,7 +75,7 @@ int Command_Click(int argc, const char *argv[]) {
 		}
 
 	} catch (std::exception &e) {
-		fprintf(stderr, "ydotool: click: error: %s\n", e.what());
+		std::cerr << "ydotool: click: error: " << e.what() << std::endl;
 		return 2;
 	}
 

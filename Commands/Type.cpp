@@ -19,11 +19,13 @@ using namespace evdevPlus;
 static int time_keydelay = 12;
 
 static void ShowHelp(){
-	fprintf(stderr, "Usage: type [--delay milliseconds] [--key-delay milliseconds] [--args N] [--file <filepath>] <things to type>\n"
-		"  --help                    Show this help.\n"
-		"  --delay milliseconds      Delay time before start typing.\n"
-		"  --key-delay milliseconds  Delay time between keystrokes. Default 12ms.\n"
-		"  --file filepath           Specify a file, the contents of which will be be typed as if passed as an argument. The filepath may also be '-' to read from stdin.\n");
+	std::cerr <<  "Usage: type [--delay milliseconds] [--key-delay milliseconds] [--args N]"
+		"[--file <filepath>] <things to type>\n"
+		<< "  --help                    Show this help.\n"
+		<< "  --delay milliseconds      Delay time before start typing.\n"
+		<< "  --key-delay milliseconds  Delay time between keystrokes. Default 12ms.\n"
+		<< "  --file filepath           Specify a file, the contents of which will be be typed as if passed as"
+				"an argument. The filepath may also be '-' to read from stdin." << std::endl;
 
 }
 
@@ -78,10 +80,10 @@ static int TypeText(const std::string &text) {
 
 int Command_Type(int argc, const char *argv[]) {
 
-	printf("argc = %d\n", argc);
+	std::cout << "argc = " << argc << "\n";
 
 	for (int i=1; i<argc; i++) {
-		printf("argv[%d] = %s \n", i, argv[i]);
+		std::cout << "argv["<<i<<"] = " << argv[i] << "\n";
 	}
 
 	int time_delay = 100;
