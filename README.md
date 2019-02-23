@@ -41,6 +41,11 @@ Mouse right click:
 
     ydotool click 2
 
+## Packages
+Arch Linux: [AUR](https://aur.archlinux.org/packages/ydotool-git/) (Thanks @[Depau](https://github.com/Depau))
+
+(Currently I don't have time to make a PPA for Debian-like distros, if anyone wants to help, feel free to contact me.)
+
 ## Build
 ### Dependencies
 - [uInputPlus](https://github.com/YukiWorkshop/libuInputPlus)
