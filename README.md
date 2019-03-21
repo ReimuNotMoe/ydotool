@@ -12,9 +12,17 @@ Currently implemented command(s):
 - `click` - Click on mouse buttons
 
 ## Compatibility
-This program requires access to `/dev/uinput`.
+This program requires access to `/dev/uinput`. This usually requires root permissions.
 
 You can use it on anything as long as it accepts keyboard/mouse/whatever input. For example, wayland, text console, etc.
+
+ydotool works differently from xdotool. xdotool sends X events directly to X server, while ydotool uses the uinput framework of Linux kernel to emulate an input device.
+
+When ydotool runs and creates an virtual input device, it will take some time for your graphical environment (X11/Wayland) to recognize and enable the virtual input device.
+
+So, if the delay was too short, the virtual input device may not got recognized & enabled by your graphical environment in time.
+
+Currently there's no way to solve this problem since ydotool is a generic input automation tool and not tied to any particular graphical environment.
 
 ## Examples
 Type some words:
