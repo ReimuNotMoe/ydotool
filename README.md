@@ -1,6 +1,13 @@
 # ydotool
 Generic Linux command-line automation tool (no X!)
 
+#### Contents
+- [Usage](#usage)
+- [Examples](#examples)
+- [Compatibility](#compatibility)
+- [Packages](#packages)
+- [Build](bBuild)
+
 ## Usage
 Replace `x` with `y`. :P
 
@@ -10,19 +17,6 @@ Currently implemented command(s):
 - `mousemove` - Move mouse pointer to absolute position
 - `mousemove_relative` - Move mouse pointer to relative position
 - `click` - Click on mouse buttons
-
-## Compatibility
-This program requires access to `/dev/uinput`. This usually requires root permissions.
-
-You can use it on anything as long as it accepts keyboard/mouse/whatever input. For example, wayland, text console, etc.
-
-ydotool works differently from xdotool. xdotool sends X events directly to X server, while ydotool uses the uinput framework of Linux kernel to emulate an input device.
-
-When ydotool runs and creates an virtual input device, it will take some time for your graphical environment (X11/Wayland) to recognize and enable the virtual input device.
-
-So, if the delay was too short, the virtual input device may not got recognized & enabled by your graphical environment in time.
-
-Currently there's no way to solve this problem since ydotool is a generic input automation tool and not tied to any particular graphical environment.
 
 ## Examples
 Type some words:
@@ -48,6 +42,22 @@ Relatively move mouse pointer to -100,100:
 Mouse right click:
 
     ydotool click 2
+    
+
+## Compatibility
+#### Runtime
+This program requires access to `/dev/uinput`. This usually requires root permissions.
+
+You can use it on anything as long as it accepts keyboard/mouse/whatever input. For example, wayland, text console, etc.
+
+#### About the --delay option
+ydotool works differently from xdotool. xdotool sends X events directly to X server, while ydotool uses the uinput framework of Linux kernel to emulate an input device.
+
+When ydotool runs and creates an virtual input device, it will take some time for your graphical environment (X11/Wayland) to recognize and enable the virtual input device. (Usually done by udev)
+
+So, if the delay was too short, the virtual input device may not got recognized & enabled by your graphical environment in time.
+
+Currently there's no way to solve this problem since ydotool is a generic input automation tool and not tied to any particular graphical environment.
 
 ## Packages
 Arch Linux: [AUR](https://aur.archlinux.org/packages/ydotool-git/) (Thanks @[Depau](https://github.com/Depau))
