@@ -1,6 +1,6 @@
 /*
     This file is part of ydotool.
-    Copyright (C) 2018 ReimuNotMoe
+    Copyright (C) 2018-2019 ReimuNotMoe
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the MIT License.
@@ -10,10 +10,18 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-#include "../Commands.hpp"
+#include "MouseMove.hpp"
 
+extern "C" {
 
-using namespace uInputPlus;
+const char ydotool_tool_name[] = "mousemove";
+
+void *ydotool_tool_construct() {
+	return (void *) (new MouseMove());
+}
+
+}
+
 
 static int time_keydelay = 12;
 
@@ -23,9 +31,7 @@ static void ShowHelp(const char *argv_0){
 			<< "  --delay ms            Delay time before start moving. Default 100ms." << std::endl;
 }
 
-
-int Command_MouseMove(int argc, const char *argv[]) {
-
+int MouseMove::Exec(int argc, char **argv) {
 	std::cout << "argc = " << argc << "\n";
 
 	for (int i=1; i<argc; i++) {
@@ -70,7 +76,7 @@ int Command_MouseMove(int argc, const char *argv[]) {
 
 		if (extra_args.size() != 2) {
 			std::cerr << "Which coordinate do you want to move to?\n"
-				"Use `ydotool " << argv[0] << " --help' for help.\n";
+				     "Use `ydotool " << argv[0] << " --help' for help.\n";
 
 			return 1;
 		}
@@ -80,8 +86,6 @@ int Command_MouseMove(int argc, const char *argv[]) {
 		return 2;
 	}
 
-	InituInput();
-
 	if (time_delay)
 		usleep(time_delay * 1000);
 
@@ -89,10 +93,10 @@ int Command_MouseMove(int argc, const char *argv[]) {
 	auto y = (int32_t)strtol(extra_args[1].c_str(), nullptr, 10);
 
 	if (!strchr(argv[0], '_')) {
-		myuInput->RelativeMove({-INT32_MAX, -INT32_MAX});
+		uInputContext->RelativeMove({-INT32_MAX, -INT32_MAX});
 	}
 
-	myuInput->RelativeMove({x, y});
+	uInputContext->RelativeMove({x, y});
 
 	return argc;
 }

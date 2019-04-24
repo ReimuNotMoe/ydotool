@@ -1,6 +1,6 @@
 /*
     This file is part of ydotool.
-    Copyright (C) 2018 ReimuNotMoe
+    Copyright (C) 2018-2019 ReimuNotMoe
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the MIT License.
@@ -10,10 +10,17 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-#include "../Commands.hpp"
+#include "Click.hpp"
 
-using namespace uInputPlus;
+extern "C" {
 
+const char ydotool_tool_name[] = "click";
+
+void *ydotool_tool_construct() {
+	return (void *) (new Click());
+}
+
+}
 
 static void ShowHelp(){
 	std::cerr << "Usage: click [--delay <ms>] <button>\n"
@@ -22,9 +29,7 @@ static void ShowHelp(){
 		<< "  button                1: left 2: right 3: middle" << std::endl;
 }
 
-
-int Command_Click(int argc, const char *argv[]) {
-
+int Click::Exec(int argc, char **argv) {
 	std::cout << "argc = " << argc << "\n";
 
 	for (int i=1; i<argc; i++) {
@@ -69,7 +74,7 @@ int Command_Click(int argc, const char *argv[]) {
 
 		if (extra_args.size() != 1) {
 			std::cerr << "Which mouse button do you want to click?\n"
-				"Use `ydotool " << argv[0] << " --help' for help.\n";
+				     "Use `ydotool " << argv[0] << " --help' for help.\n";
 
 			return 1;
 		}
@@ -78,8 +83,6 @@ int Command_Click(int argc, const char *argv[]) {
 		std::cerr << "ydotool: click: error: " << e.what() << std::endl;
 		return 2;
 	}
-
-	InituInput();
 
 	if (time_delay)
 		usleep(time_delay * 1000);
@@ -97,9 +100,8 @@ int Command_Click(int argc, const char *argv[]) {
 			break;
 	}
 
-	myuInput->SendKey(keycode, 1);
-	myuInput->SendKey(keycode, 0);
-
+	uInputContext->SendKey(keycode, 1);
+	uInputContext->SendKey(keycode, 0);
 
 	return argc;
 }

@@ -1,6 +1,6 @@
 /*
     This file is part of ydotool.
-    Copyright (C) 2018 ReimuNotMoe
+    Copyright (C) 2018-2019 ReimuNotMoe
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the MIT License.
@@ -24,6 +24,12 @@
 #include <cerrno>
 
 #include <fcntl.h>
+#include <dirent.h>
+#include <dlfcn.h>
+
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/un.h>
 
 #include <uInputPlus/uInput.hpp>
 #include <evdevPlus/evdevPlus.hpp>

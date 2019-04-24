@@ -1,6 +1,6 @@
 /*
     This file is part of ydotool.
-    Copyright (C) 2018 ReimuNotMoe
+    Copyright (C) 2018-2019 ReimuNotMoe
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the MIT License.
@@ -10,11 +10,19 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-#include "../Commands.hpp"
+#include "Key.hpp"
 
-
-using namespace uInputPlus;
 using namespace evdevPlus;
+
+extern "C" {
+
+const char ydotool_tool_name[] = "key";
+
+void *ydotool_tool_construct() {
+	return (void *) (new Key());
+}
+
+}
 
 static int time_keydelay = 12;
 
@@ -86,17 +94,17 @@ static std::vector<int> KeyStroke2Code(const std::string &ks) {
 }
 
 
-static int EmitKeyCodes(long key_delay, const std::vector<std::vector<int>> &list_keycodes) {
+int Key::EmitKeyCodes(long key_delay, const std::vector<std::vector<int>> &list_keycodes) {
 	auto sleep_time = (uint)(key_delay * 1000 / (list_keycodes.size() * 2));
 
 	for (auto &it : list_keycodes) {
 		for (auto &it_m : it) {
-			myuInput->SendKey(it_m, 1);
+			uInputContext->SendKey(it_m, 1);
 			usleep(sleep_time);
 		}
 
 		for (auto i = it.size(); i-- > 0;) {
-			myuInput->SendKey(it[i], 0);
+			uInputContext->SendKey(it[i], 0);
 			usleep(sleep_time);
 		}
 	}
@@ -104,8 +112,8 @@ static int EmitKeyCodes(long key_delay, const std::vector<std::vector<int>> &lis
 	return 0;
 }
 
-int Command_Key(int argc, const char *argv[]) {
 
+int Key::Exec(int argc, char **argv) {
 	std::cout << "argc = " << argc << "\n";
 
 	for (int i=1; i<argc; i++) {
@@ -178,7 +186,7 @@ int Command_Key(int argc, const char *argv[]) {
 
 		if (extra_args.empty()) {
 			std::cerr << "Which keys do you want to press?\n"
-				"Use `ydotool key --help' for help.\n";
+				     "Use `ydotool key --help' for help.\n";
 
 			return 1;
 		}
@@ -187,8 +195,6 @@ int Command_Key(int argc, const char *argv[]) {
 		std::cerr << "ydotool: key: error: " << e.what() << std::endl;;
 		return 2;
 	}
-
-	InituInput();
 
 	if (time_delay)
 		usleep(time_delay * 1000);

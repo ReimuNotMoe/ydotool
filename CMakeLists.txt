@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.0)
 project(ydotool)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(PROJECT_VERSION "0.1.5")
 set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
 set(CPACK_PACKAGE_VERSION_MAJOR "0")
@@ -21,12 +21,41 @@ include(CPack)
 
 include(GNUInstallDirs)
 
-set(SOURCE_FILES
-        ydotool.cpp CommonIncludes.hpp Commands.hpp Commands.cpp
-        Commands/Type.cpp Commands/Key.cpp Commands/MouseMove.cpp Commands/Click.cpp)
+set(SOURCE_FILES_LIBRARY
+        CommonIncludes.hpp
+        Library/libydotool.cpp Library/libydotool.hpp
+        Library/Tool.hpp Library/Tool.cpp
+        Library/Transport.cpp Library/Transport.hpp
+        Library/Instance.cpp Library/Instance.hpp
+        Library/Transports/UnixSocket.cpp Library/Transports/UnixSocket.hpp )
+
+set(SOURCE_FILES_DAEMON
+        CommonIncludes.hpp
+        Daemon/ydotoold.cpp Daemon/ydotoold.hpp)
 
 
-add_executable(ydotool ${SOURCE_FILES})
-target_link_libraries(ydotool boost_program_options uInputPlus evdevPlus)
+set(SOURCE_FILES_CLIENT
+        CommonIncludes.hpp
+        Client/ydotool.cpp)
 
-install(TARGETS ydotool DESTINATION bin)
+add_library(mousemove SHARED Tools/MouseMove/MouseMove.hpp Tools/MouseMove/MouseMove.cpp)
+add_library(key SHARED Tools/Key/Key.hpp Tools/Key/Key.cpp)
+add_library(click SHARED Tools/Click/Click.hpp Tools/Click/Click.cpp)
+add_library(type SHARED Tools/Type/Type.hpp Tools/Type/Type.cpp)
+
+add_library(ydotool_library SHARED ${SOURCE_FILES_LIBRARY})
+set_target_properties(ydotool_library PROPERTIES OUTPUT_NAME ydotool)
+add_library(ydotool_library_static STATIC ${SOURCE_FILES_LIBRARY})
+set_target_properties(ydotool_library_static PROPERTIES OUTPUT_NAME ydotool)
+target_link_libraries(ydotool_library boost_program_options uInputPlus evdevPlus)
+target_link_libraries(ydotool_library_static boost_program_options uInputPlus evdevPlus)
+
+link_libraries(-L.)
+add_executable(ydotoold ${SOURCE_FILES_DAEMON})
+target_link_libraries(ydotoold ydotool)
+
+add_executable(ydotool_client ${SOURCE_FILES_CLIENT})
+target_link_libraries(ydotool_client ydotool)
+
+install(TARGETS ydotool_library ydotool_library_static DESTINATION lib)
+install(TARGETS ydotoold ydotool_client DESTINATION bin)
