@@ -161,18 +161,24 @@ int Type::Exec(int argc, const char **argv) {
 	int fd = -1;
 
 	if (!file_path.empty()) {
-		fd = open(file_path.c_str(), O_RDONLY);
+		if (file_path == "-") {
+			fd = STDIN_FILENO;
+			fprintf(stderr, "ydotool: type: reading from stdin\n");
+		} else {
+			fd = open(file_path.c_str(), O_RDONLY);
 
-		if (fd == -1) {
-			fprintf(stderr, "ydotool: type: error: failed to open %s: %s\n", file_path.c_str(), strerror(errno));
-			return 2;
+			if (fd == -1) {
+				fprintf(stderr, "ydotool: type: error: failed to open %s: %s\n", file_path.c_str(),
+					strerror(errno));
+				return 2;
+			}
 		}
 	}
 
 	if (time_delay)
 		usleep(time_delay * 1000);
 
-	if (fd > 0) {
+	if (fd >= 0) {
 		std::string buf;
 		buf.resize(128);
 
