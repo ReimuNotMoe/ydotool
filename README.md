@@ -4,12 +4,12 @@ Generic Linux command-line automation tool (no X!)
 #### Contents
 - [Usage](#usage)
 - [Examples](#examples)
-- [Compatibility](#compatibility)
+- [Techincal Notes](#techincal-notes)
 - [Packages](#packages)
-- [Build](bBuild)
+- [Build](#build)
 
 ## Usage
-Replace `x` with `y`. :P
+In most times, replace `x` with `y`. :P
 
 Currently implemented command(s):
 - `type` - Type a string
@@ -44,7 +44,7 @@ Mouse right click:
     ydotool click 2
     
 
-## Compatibility
+## Techincal Notes
 #### Runtime
 This program requires access to `/dev/uinput`. This usually requires root permissions.
 
@@ -57,7 +57,12 @@ When ydotool runs and creates an virtual input device, it will take some time fo
 
 So, if the delay was too short, the virtual input device may not got recognized & enabled by your graphical environment in time.
 
-Currently there's no way to solve this problem since ydotool is a generic input automation tool and not tied to any particular graphical environment.
+In order to solve this problem, I made a persistent background service, ydotoold, to hold a persistent virtual device, and accept input from ydotool. When ydotoold is unavailable, ydotool will work without it.
+
+#### New modular design
+Now everyone can write their own tool to use with ydotool. Have a look at the `Tool` folder.
+
+I will write some documents for this when I have time.
 
 ## Packages
 Arch Linux: [AUR](https://aur.archlinux.org/packages/ydotool-git/) (Thanks @[Depau](https://github.com/Depau))
