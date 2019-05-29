@@ -28,7 +28,7 @@ namespace ydotool {
 
 			void Init(std::shared_ptr<ydotool::Instance>& __ydotool_instance);
 			virtual const std::string& Name() = 0;
-			virtual int Exec(int argc, char **argv) = 0;
+			virtual int Exec(int argc, const char **argv) = 0;
 		};
 
 		class ToolManager {

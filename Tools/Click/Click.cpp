@@ -29,7 +29,7 @@ static void ShowHelp(){
 		<< "  button                1: left 2: right 3: middle" << std::endl;
 }
 
-int Click::Exec(int argc, char **argv) {
+int Click::Exec(int argc, const char **argv) {
 	std::cout << "argc = " << argc << "\n";
 
 	for (int i=1; i<argc; i++) {

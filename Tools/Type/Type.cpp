@@ -86,7 +86,7 @@ int Type::TypeText(const std::string &text) {
 	return pos;
 }
 
-int Type::Exec(int argc, char **argv) {
+int Type::Exec(int argc, const char **argv) {
 	std::cout << "argc = " << argc << "\n";
 
 	for (int i=1; i<argc; i++) {

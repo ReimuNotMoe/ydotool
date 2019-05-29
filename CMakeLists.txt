@@ -25,9 +25,10 @@ set(SOURCE_FILES_LIBRARY
         CommonIncludes.hpp
         Library/libydotool.cpp Library/libydotool.hpp
         Library/Tool.hpp Library/Tool.cpp
-        Library/Transport.cpp Library/Transport.hpp
+#        Library/Transport.cpp Library/Transport.hpp
         Library/Instance.cpp Library/Instance.hpp
-        Library/Transports/UnixSocket.cpp Library/Transports/UnixSocket.hpp )
+)
+#        Library/Transports/UnixSocket.cpp Library/Transports/UnixSocket.hpp )
 
 set(SOURCE_FILES_DAEMON
         CommonIncludes.hpp
@@ -36,26 +37,36 @@ set(SOURCE_FILES_DAEMON
 
 set(SOURCE_FILES_CLIENT
         CommonIncludes.hpp
-        Client/ydotool.cpp)
-
-add_library(mousemove SHARED Tools/MouseMove/MouseMove.hpp Tools/MouseMove/MouseMove.cpp)
-add_library(key SHARED Tools/Key/Key.hpp Tools/Key/Key.cpp)
-add_library(click SHARED Tools/Click/Click.hpp Tools/Click/Click.cpp)
-add_library(type SHARED Tools/Type/Type.hpp Tools/Type/Type.cpp)
+        Client/ydotool.cpp Client/ydotool.hpp)
 
 add_library(ydotool_library SHARED ${SOURCE_FILES_LIBRARY})
 set_target_properties(ydotool_library PROPERTIES OUTPUT_NAME ydotool)
 add_library(ydotool_library_static STATIC ${SOURCE_FILES_LIBRARY})
 set_target_properties(ydotool_library_static PROPERTIES OUTPUT_NAME ydotool)
-target_link_libraries(ydotool_library boost_program_options uInputPlus evdevPlus)
-target_link_libraries(ydotool_library_static boost_program_options uInputPlus evdevPlus)
+target_link_libraries(ydotool_library dl boost_program_options uInputPlus evdevPlus)
+target_link_libraries(ydotool_library_static dl boost_program_options uInputPlus evdevPlus)
 
 link_libraries(-L.)
 add_executable(ydotoold ${SOURCE_FILES_DAEMON})
-target_link_libraries(ydotoold ydotool)
+target_link_libraries(ydotoold ydotool_library dl pthread boost_program_options uInputPlus evdevPlus)
 
 add_executable(ydotool_client ${SOURCE_FILES_CLIENT})
-target_link_libraries(ydotool_client ydotool)
+target_link_libraries(ydotool_client ydotool_library boost_program_options uInputPlus evdevPlus)
+set_target_properties(ydotool_client PROPERTIES OUTPUT_NAME ydotool)
+
+add_library(mousemove SHARED Tools/MouseMove/MouseMove.hpp Tools/MouseMove/MouseMove.cpp)
+target_link_libraries(mousemove ydotool_library boost_program_options uInputPlus evdevPlus)
+
+add_library(key SHARED Tools/Key/Key.hpp Tools/Key/Key.cpp)
+target_link_libraries(key ydotool_library boost_program_options uInputPlus evdevPlus)
+
+add_library(click SHARED Tools/Click/Click.hpp Tools/Click/Click.cpp)
+target_link_libraries(click ydotool_library boost_program_options uInputPlus evdevPlus)
+
+add_library(type SHARED Tools/Type/Type.hpp Tools/Type/Type.cpp)
+target_link_libraries(type ydotool_library boost_program_options uInputPlus evdevPlus)
+
 
 install(TARGETS ydotool_library ydotool_library_static DESTINATION lib)
+install(TARGETS mousemove key click type DESTINATION lib/ydotool)
 install(TARGETS ydotoold ydotool_client DESTINATION bin)

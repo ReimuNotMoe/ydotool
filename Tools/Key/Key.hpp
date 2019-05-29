@@ -31,7 +31,7 @@ public:
 		return myName;
 	}
 
-	int Exec(int argc, char **argv) override;
+	int Exec(int argc, const char **argv) override;
 
 	int EmitKeyCodes(long key_delay, const std::vector<std::vector<int>> &list_keycodes);
 };

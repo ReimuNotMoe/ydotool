@@ -31,7 +31,7 @@ static void ShowHelp(const char *argv_0){
 			<< "  --delay ms            Delay time before start moving. Default 100ms." << std::endl;
 }
 
-int MouseMove::Exec(int argc, char **argv) {
+int MouseMove::Exec(int argc, const char **argv) {
 	std::cout << "argc = " << argc << "\n";
 
 	for (int i=1; i<argc; i++) {

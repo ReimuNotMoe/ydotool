@@ -24,9 +24,22 @@ void ToolManager::ScanPath(const std::string &__path) {
 	struct dirent *ent;
 	if ((dir = opendir(__path.c_str()))) {
 		/* print all the files and directories within directory */
+
+		int dotdot_flag = 0;
+
 		while ((ent = readdir(dir))) {
 
-			printf("%s\n", ent->d_name);
+			if (dotdot_flag != 2) {
+				if (strcmp(ent->d_name, ".") == 0) {
+					dotdot_flag++;
+					continue;
+				}
+				if (strcmp(ent->d_name, "..") == 0) {
+					dotdot_flag++;
+					continue;
+				}
+			}
+
 			std::string fullpath = __path + "/" + std::string(ent->d_name);
 			TryDlOpen(fullpath);
 		}
@@ -41,8 +54,10 @@ void ToolManager::ScanPath(const std::string &__path) {
 void ToolManager::TryDlOpen(const std::string &__path) {
 	void *handle = dlopen(__path.c_str(), RTLD_LAZY);
 
-	if (!handle)
+	if (!handle) {
+		std::cerr <<  "ydotool: dlopen failed: " << dlerror() << "\n";
 		return;
+	}
 
 	auto tool_name = (const char *)dlsym(handle, "ydotool_tool_name");
 	auto tool_fptr = dlsym(handle, "ydotool_tool_construct");
@@ -52,7 +67,7 @@ void ToolManager::TryDlOpen(const std::string &__path) {
 		return;
 	}
 
-	std::cerr << "tool found: " << tool_name << " at " << __path << "\n";
+//	std::cerr << "ToolManager: debug: tool found: " << tool_name << " at " << __path << "\n";
 
 	dl_handles[tool_name] = handle;
 	init_funcs[tool_name] = tool_fptr;

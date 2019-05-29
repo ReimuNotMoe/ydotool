@@ -113,7 +113,7 @@ int Key::EmitKeyCodes(long key_delay, const std::vector<std::vector<int>> &list_
 }
 
 
-int Key::Exec(int argc, char **argv) {
+int Key::Exec(int argc, const char **argv) {
 	std::cout << "argc = " << argc << "\n";
 
 	for (int i=1; i<argc; i++) {

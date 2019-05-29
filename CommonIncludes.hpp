@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <sstream>
 #include <stdexcept>
+#include <thread>
 
 //#include <cstdio>
 #include <cstdlib>
@@ -28,6 +29,7 @@
 #include <dlfcn.h>
 
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/un.h>
 

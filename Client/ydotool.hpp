@@ -10,15 +10,11 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-#ifndef YDOTOOL_LIBYDOTOOL_HPP
-#define YDOTOOL_LIBYDOTOOL_HPP
+
+#ifndef YDOTOOL_YDOTOOL_HPP
+#define YDOTOOL_YDOTOOL_HPP
 
 #include "../CommonIncludes.hpp"
-#include "Instance.hpp"
-#include "Tool.hpp"
+#include "../Library/libydotool.hpp"
 
-namespace ydotool {
-
-}
-
-#endif //YDOTOOL_LIBYDOTOOL_HPP
+#endif //YDOTOOL_YDOTOOL_HPP
