@@ -77,3 +77,8 @@ Nearly all my projects use CMake. It's very simple:
     cd build
     cmake ..
     make -j `nproc`
+
+## Note
+As of May, 2019, searching `wayland xdotool replacement` online won't get much useful results.
+
+If you find this project useful, please consider to spread it.

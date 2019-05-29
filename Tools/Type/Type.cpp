@@ -1,6 +1,6 @@
 /*
     This file is part of ydotool.
-    Copyright (C) 2018 ReimuNotMoe
+    Copyright (C) 2018-2019 ReimuNotMoe
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the MIT License.
@@ -10,11 +10,19 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-#include "../Commands.hpp"
+#include "Type.hpp"
 
-
-using namespace uInputPlus;
 using namespace evdevPlus;
+
+extern "C" {
+
+const char ydotool_tool_name[] = "type";
+
+void *ydotool_tool_construct() {
+	return (void *) (new Type());
+}
+
+}
 
 static int time_keydelay = 12;
 
@@ -29,7 +37,7 @@ static void ShowHelp(){
 
 }
 
-static int TypeText(const std::string &text) {
+int Type::TypeText(const std::string &text) {
 	int pos = 0;
 
 	for (auto &c : text) {
@@ -56,20 +64,20 @@ static int TypeText(const std::string &text) {
 
 		if (isUpper) {
 			sleep_time = 250 * time_keydelay;
-			myuInput->SendKey(KEY_LEFTSHIFT, 1);
+			uInputContext->SendKey(KEY_LEFTSHIFT, 1);
 			usleep(sleep_time);
 		} else {
 			sleep_time = 500 * time_keydelay;
 		}
 
-		myuInput->SendKey(key_code, 1);
+		uInputContext->SendKey(key_code, 1);
 		usleep(sleep_time);
-		myuInput->SendKey(key_code, 0);
+		uInputContext->SendKey(key_code, 0);
 		usleep(sleep_time);
 
 
 		if (isUpper) {
-			myuInput->SendKey(KEY_LEFTSHIFT, 0);
+			uInputContext->SendKey(KEY_LEFTSHIFT, 0);
 			usleep(sleep_time);
 		}
 
@@ -78,8 +86,7 @@ static int TypeText(const std::string &text) {
 	return pos;
 }
 
-int Command_Type(int argc, const char *argv[]) {
-
+int Type::Exec(int argc, const char **argv) {
 	std::cout << "argc = " << argc << "\n";
 
 	for (int i=1; i<argc; i++) {
@@ -139,7 +146,7 @@ int Command_Type(int argc, const char *argv[]) {
 		} else {
 			if (extra_args.empty()) {
 				std::cerr << "What do you want to type?\n"
-					"Use `ydotool type --help' for help.\n";
+					     "Use `ydotool type --help' for help.\n";
 
 				return 1;
 			}
@@ -154,20 +161,24 @@ int Command_Type(int argc, const char *argv[]) {
 	int fd = -1;
 
 	if (!file_path.empty()) {
-		fd = open(file_path.c_str(), O_RDONLY);
+		if (file_path == "-") {
+			fd = STDIN_FILENO;
+			fprintf(stderr, "ydotool: type: reading from stdin\n");
+		} else {
+			fd = open(file_path.c_str(), O_RDONLY);
 
-		if (fd == -1) {
-			fprintf(stderr, "ydotool: type: error: failed to open %s: %s\n", file_path.c_str(), strerror(errno));
-			return 2;
+			if (fd == -1) {
+				fprintf(stderr, "ydotool: type: error: failed to open %s: %s\n", file_path.c_str(),
+					strerror(errno));
+				return 2;
+			}
 		}
 	}
-
-	InituInput();
 
 	if (time_delay)
 		usleep(time_delay * 1000);
 
-	if (fd > 0) {
+	if (fd >= 0) {
 		std::string buf;
 		buf.resize(128);
 
@@ -191,5 +202,4 @@ int Command_Type(int argc, const char *argv[]) {
 	}
 
 	return argc;
-
 }

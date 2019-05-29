@@ -1,6 +1,6 @@
 /*
     This file is part of ydotool.
-    Copyright (C) 2018 ReimuNotMoe
+    Copyright (C) 2018-2019 ReimuNotMoe
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the MIT License.
@@ -10,26 +10,30 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-#include "../Commands.hpp"
+#include "Click.hpp"
 
+extern "C" {
 
-using namespace uInputPlus;
+const char ydotool_tool_name[] = "click";
 
-static int time_keydelay = 12;
-
-static void ShowHelp(const char *argv_0){
-	std::cerr << "Usage: " << argv_0 << " [--delay <ms>] <x> <y>\n"
-			<< "  --help                Show this help.\n"
-			<< "  --delay ms            Delay time before start moving. Default 100ms." << std::endl;
+void *ydotool_tool_construct() {
+	return (void *) (new Click());
 }
 
+}
 
-int Command_MouseMove(int argc, const char *argv[]) {
+static void ShowHelp(){
+	std::cerr << "Usage: click [--delay <ms>] <button>\n"
+		<< "  --help                Show this help.\n"
+		<< "  --delay ms            Delay time before start clicking. Default 100ms.\n"
+		<< "  button                1: left 2: right 3: middle" << std::endl;
+}
 
+int Click::Exec(int argc, const char **argv) {
 	std::cout << "argc = " << argc << "\n";
 
 	for (int i=1; i<argc; i++) {
-		std::cout << "argv["<<i<<"] = " << argv[i] << "\n";
+		std::cout << "argv[" << i << "] = " << argv[i] << "\n";
 	}
 
 	int time_delay = 100;
@@ -58,7 +62,7 @@ int Command_MouseMove(int argc, const char *argv[]) {
 
 
 		if (vm.count("help")) {
-			ShowHelp(argv[0]);
+			ShowHelp();
 			return -1;
 		}
 
@@ -68,31 +72,36 @@ int Command_MouseMove(int argc, const char *argv[]) {
 				  << time_delay << " milliseconds.\n";
 		}
 
-		if (extra_args.size() != 2) {
-			std::cerr << "Which coordinate do you want to move to?\n"
-				"Use `ydotool " << argv[0] << " --help' for help.\n";
+		if (extra_args.size() != 1) {
+			std::cerr << "Which mouse button do you want to click?\n"
+				     "Use `ydotool " << argv[0] << " --help' for help.\n";
 
 			return 1;
 		}
 
 	} catch (std::exception &e) {
-		std::cerr <<  "ydotool: " << argv[0] << ": error: " << e.what() << std::endl;
+		std::cerr << "ydotool: click: error: " << e.what() << std::endl;
 		return 2;
 	}
-
-	InituInput();
 
 	if (time_delay)
 		usleep(time_delay * 1000);
 
-	auto x = (int32_t)strtol(extra_args[0].c_str(), nullptr, 10);
-	auto y = (int32_t)strtol(extra_args[1].c_str(), nullptr, 10);
+	int keycode = BTN_LEFT;
 
-	if (!strchr(argv[0], '_')) {
-		myuInput->RelativeMove({-INT32_MAX, -INT32_MAX});
+	switch (strtol(extra_args[0].c_str(), NULL, 10)) {
+		case 2:
+			keycode = BTN_RIGHT;
+			break;
+		case 3:
+			keycode = BTN_MIDDLE;
+			break;
+		default:
+			break;
 	}
 
-	myuInput->RelativeMove({x, y});
+	uInputContext->SendKey(keycode, 1);
+	uInputContext->SendKey(keycode, 0);
 
 	return argc;
 }
