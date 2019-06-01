@@ -4,7 +4,7 @@ Generic Linux command-line automation tool (no X!)
 #### Contents
 - [Usage](#usage)
 - [Examples](#examples)
-- [Techincal Notes](#techincal-notes)
+- [Technical Notes](#technical-notes)
 - [Packages](#packages)
 - [Build](#build)
 
@@ -44,7 +44,7 @@ Mouse right click:
     ydotool click 2
     
 
-## Techincal Notes
+## Technical Notes
 #### Runtime
 This program requires access to `/dev/uinput`. This usually requires root permissions.
 
