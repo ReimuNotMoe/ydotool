@@ -119,7 +119,7 @@ int main(int argc, const char **argv) {
 	if (fd_client > 0) {
 		std::cerr << "ydotool: notice: Using ydotoold backend\n";
 		instance->uInputContext = std::make_unique<uInput>();
-		instance->uInputContext->Init(&socket_callback, (void *)fd_client);
+		instance->uInputContext->Init(&socket_callback, (void *)(intptr_t)fd_client);
 	} else {
 		std::cerr << "ydotool: notice: ydotoold backend unavailable, using direct method (has latency+delay issues!)\n";
 		instance->Init();
