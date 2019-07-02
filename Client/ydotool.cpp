@@ -80,6 +80,8 @@ int socket_callback(uint16_t type, uint16_t code, int32_t val, void *userp) {
 	int fd = (intptr_t)userp;
 
 	send(fd, &buf, sizeof(buf), 0);
+
+	return 0;
 }
 
 const char default_library_path[] = "/usr/local/lib/ydotool:/usr/lib/ydotool:/usr/lib/x86_64-linux-gnu/ydotool:/usr/lib/i386-linux-gnu/ydotool";
