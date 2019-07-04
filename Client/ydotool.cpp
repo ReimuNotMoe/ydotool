@@ -80,6 +80,8 @@ int socket_callback(uint16_t type, uint16_t code, int32_t val, void *userp) {
 	int fd = (intptr_t)userp;
 
 	send(fd, &buf, sizeof(buf), 0);
+
+	return 0;
 }
 
 const char default_library_path[] = "/usr/local/lib/ydotool:/usr/lib/ydotool:/usr/lib/x86_64-linux-gnu/ydotool:/usr/lib/i386-linux-gnu/ydotool";
@@ -119,7 +121,7 @@ int main(int argc, const char **argv) {
 	if (fd_client > 0) {
 		std::cerr << "ydotool: notice: Using ydotoold backend\n";
 		instance->uInputContext = std::make_unique<uInput>();
-		instance->uInputContext->Init(&socket_callback, (void *)fd_client);
+		instance->uInputContext->Init(&socket_callback, (void *)(intptr_t)fd_client);
 	} else {
 		std::cerr << "ydotool: notice: ydotoold backend unavailable, using direct method (has latency+delay issues!)\n";
 		instance->Init();
