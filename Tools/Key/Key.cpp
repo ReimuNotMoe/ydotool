@@ -113,12 +113,6 @@ int Key::EmitKeyCodes(long key_delay, const std::vector<std::vector<int>> &list_
 
 
 int Key::Exec(int argc, const char **argv) {
-	std::cout << "argc = " << argc << "\n";
-
-	for (int i=1; i<argc; i++) {
-		std::cout << "argv["<<i<<"] = " << argv[i] << "\n";
-	}
-
 	int time_delay = 100;
 	int time_keydelay = 12;
 	int time_repdelay = 0;

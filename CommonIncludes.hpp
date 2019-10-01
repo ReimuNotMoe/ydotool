@@ -30,9 +30,11 @@
 #include <fcntl.h>
 #include <dirent.h>
 #include <dlfcn.h>
+#include <signal.h>
 
 #include <sys/socket.h>
 #include <sys/stat.h>
+#include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/un.h>
 
@@ -42,5 +44,6 @@
 #include <evdevPlus/evdevPlus.hpp>
 
 #include <boost/program_options.hpp>
+#include <boost/crc.hpp>
 
 #endif //YDOTOOL_COMMONINCLUDES_HPP

@@ -128,7 +128,9 @@ int main(int argc, const char **argv) {
 
 	auto tool_constructor = (void *(*)())it_cmd->second;
 	auto *this_tool = static_cast<Tool::ToolTemplate *>(tool_constructor());
-	std::cerr <<  "ydotool: debug: tool `" << this_tool->Name() << "' constructed at " << std::hex << this_tool << std::dec << std::endl;
+
+//	std::cerr <<  "ydotool: debug: tool `" << this_tool->Name() << "' constructed at " << std::hex << this_tool << std::dec << std::endl;
+
 	this_tool->Init(instance);
 
 	int rc = this_tool->Exec(argc-1, &argv[1]);

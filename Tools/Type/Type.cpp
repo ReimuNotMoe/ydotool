@@ -87,12 +87,6 @@ const char *Type::Name() {
 }
 
 int Type::Exec(int argc, const char **argv) {
-	std::cout << "argc = " << argc << "\n";
-
-	for (int i=1; i<argc; i++) {
-		std::cout << "argv["<<i<<"] = " << argv[i] << "\n";
-	}
-
 	int time_delay = 100;
 	int text_start = -1;
 
