@@ -57,11 +57,11 @@ add_executable(ydotoold ${SOURCE_FILES_DAEMON})
 target_link_libraries(ydotoold ydotool_library dl pthread boost_program_options uInputPlus evdevPlus)
 
 add_executable(ydotool_client ${SOURCE_FILES_CLIENT})
-target_link_libraries(ydotool_client ydotool_library boost_program_options uInputPlus evdevPlus)
+target_link_libraries(ydotool_client ydotool_library boost_program_options pthread uInputPlus evdevPlus)
 set_target_properties(ydotool_client PROPERTIES OUTPUT_NAME ydotool)
 
 add_executable(ydotool_client_static ${SOURCE_FILES_CLIENT})
-target_link_libraries(ydotool_client_static ydotool_library_static boost_program_options uInputPlus evdevPlus -static)
+target_link_libraries(ydotool_client_static ydotool_library_static boost_program_options pthread uInputPlus evdevPlus -static)
 set_target_properties(ydotool_client_static PROPERTIES OUTPUT_NAME ydotool_static)
 
 #add_library(mousemove SHARED Tools/MouseMove/MouseMove.hpp Tools/MouseMove/MouseMove.cpp)
