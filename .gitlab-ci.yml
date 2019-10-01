@@ -10,6 +10,9 @@ build:debian:9:
   script:
     - mkdir build
     - cd build
+    - wget -O libuInputPlus.deb 'https://gitlab.com/ReimuNotMoe/libuInputPlus/-/jobs/artifacts/master/raw/build/libuInputPlus_0.1.3_.deb?job=package:debian:9'
+    - wget -O libevdevPlus.deb 'https://gitlab.com/ReimuNotMoe/libevdevPlus/-/jobs/artifacts/master/raw/build/libevdevPlus_0.1.0_.deb?job=package:debian:9'
+    - dpkg -i libuInputPlus.deb && dpkg -i libevdevPlus.deb
     - cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS='-O1 -g' ..
     - make
 
@@ -33,6 +36,9 @@ build:ubuntu:18.04:
   script:
     - mkdir build
     - cd build
+    - wget -O libuInputPlus.deb 'https://gitlab.com/ReimuNotMoe/libuInputPlus/-/jobs/artifacts/master/raw/build/libuInputPlus_0.1.3_.deb?job=package:ubuntu:18.04'
+    - wget -O libevdevPlus.deb 'https://gitlab.com/ReimuNotMoe/libevdevPlus/-/jobs/artifacts/master/raw/build/libevdevPlus_0.1.0_.deb?job=package:ubuntu:18.04'
+    - dpkg -i libuInputPlus.deb && dpkg -i libevdevPlus.deb
     - cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS='-O1 -g' ..
     - make
 
@@ -56,6 +62,9 @@ build:ubuntu:19.04:
   script:
     - mkdir build
     - cd build
+    - wget -O libuInputPlus.deb 'https://gitlab.com/ReimuNotMoe/libuInputPlus/-/jobs/artifacts/master/raw/build/libuInputPlus_0.1.3_.deb?job=package:ubuntu:19.04'
+    - wget -O libevdevPlus.deb 'https://gitlab.com/ReimuNotMoe/libevdevPlus/-/jobs/artifacts/master/raw/build/libevdevPlus_0.1.0_.deb?job=package:ubuntu:19.04'
+    - dpkg -i libuInputPlus.deb && dpkg -i libevdevPlus.deb
     - cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS='-O1 -g' ..
     - make
 
