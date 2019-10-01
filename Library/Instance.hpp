@@ -10,8 +10,8 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-#ifndef YDOTOOL_INSTANCE_HPP
-#define YDOTOOL_INSTANCE_HPP
+#ifndef YDOTOOL_LIB_INSTANCE_HPP
+#define YDOTOOL_LIB_INSTANCE_HPP
 
 #include "../CommonIncludes.hpp"
 
@@ -28,4 +28,4 @@ namespace ydotool {
 		void Init(const std::string& device_name);
 	};
 }
-#endif //YDOTOOL_INSTANCE_HPP
+#endif //YDOTOOL_LIB_INSTANCE_HPP

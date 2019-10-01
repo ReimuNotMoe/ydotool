@@ -10,8 +10,8 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-#ifndef YDOTOOL_COMMANDS_HPP
-#define YDOTOOL_COMMANDS_HPP
+#ifndef YDOTOOL_LIB_COMMANDS_HPP
+#define YDOTOOL_LIB_COMMANDS_HPP
 
 #include "../CommonIncludes.hpp"
 #include "Instance.hpp"
@@ -25,9 +25,10 @@ namespace ydotool {
 			uInput* uInputContext = nullptr;
 
 			ToolTemplate() = default;
+			~ToolTemplate() = default;
 
 			void Init(std::shared_ptr<ydotool::Instance>& __ydotool_instance);
-			virtual const std::string& Name() = 0;
+			virtual const char *Name() = 0;
 			virtual int Exec(int argc, const char **argv) = 0;
 		};
 
@@ -45,4 +46,4 @@ namespace ydotool {
 	}
 }
 
-#endif //YDOTOOL_COMMANDS_HPP
+#endif //YDOTOOL_LIB_COMMANDS_HPP

@@ -29,7 +29,6 @@ static void ShowHelp() {
 
 }
 
-
 int InituInput() {
 	if (!myuInput) {
 		uInputSetup us({"ydotool virtual device"});
@@ -89,7 +88,7 @@ const char default_library_path[] = "/usr/local/lib/ydotool:/usr/lib/ydotool:/us
 int main(int argc, const char **argv) {
 	const char *library_path = default_library_path;
 
-	std::cerr << "ydotool: library search path: " << library_path << "\n\n";
+	std::cerr << "ydotool: library search path: " << library_path << "\n";
 
 	for (auto &it : explode(library_path, ':')) {
 		tool_mgr.ScanPath(it);
@@ -108,8 +107,8 @@ int main(int argc, const char **argv) {
 	auto it_cmd = tool_mgr.init_funcs.find(argv[1]);
 
 	if (it_cmd == tool_mgr.init_funcs.end()) {
-		std::cerr <<  "ydotool: Unknown command: " << argv[0] << "\n"
-			<< "Run 'ydotool help' if you want a command list" << std::endl;
+		std::cerr <<  "ydotool: Unknown tool: " << argv[1] << "\n"
+			<< "Run 'ydotool help' if you want a tools list" << std::endl;
 		exit(1);
 	}
 
@@ -123,7 +122,7 @@ int main(int argc, const char **argv) {
 		instance->uInputContext = std::make_unique<uInput>();
 		instance->uInputContext->Init(&socket_callback, (void *)(intptr_t)fd_client);
 	} else {
-		std::cerr << "ydotool: notice: ydotoold backend unavailable, using direct method (has latency+delay issues!)\n";
+		std::cerr << "ydotool: notice: ydotoold backend unavailable (may have latency+delay issues)\n";
 		instance->Init();
 	}
 

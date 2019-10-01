@@ -27,7 +27,7 @@ set(SOURCE_FILES_LIBRARY
         Library/Tool.hpp Library/Tool.cpp
 #        Library/Transport.cpp Library/Transport.hpp
         Library/Instance.cpp Library/Instance.hpp
-)
+        Library/Utils.cpp Library/Utils.hpp)
 #        Library/Transports/UnixSocket.cpp Library/Transports/UnixSocket.hpp )
 
 set(SOURCE_FILES_DAEMON
@@ -66,7 +66,10 @@ target_link_libraries(click ydotool_library boost_program_options uInputPlus evd
 add_library(type SHARED Tools/Type/Type.hpp Tools/Type/Type.cpp)
 target_link_libraries(type ydotool_library boost_program_options uInputPlus evdevPlus)
 
+add_library(recorder SHARED Tools/Recorder/Recorder.cpp Tools/Recorder/Recorder.hpp)
+target_link_libraries(recorder ydotool_library boost_program_options uInputPlus evdevPlus)
+
 
 install(TARGETS ydotool_library ydotool_library_static DESTINATION lib)
-install(TARGETS mousemove key click type DESTINATION lib/ydotool)
+install(TARGETS mousemove key click type recorder DESTINATION lib/ydotool)
 install(TARGETS ydotoold ydotool_client DESTINATION bin)

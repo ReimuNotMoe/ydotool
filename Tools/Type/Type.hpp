@@ -25,10 +25,10 @@ extern const char ydotool_tool_name[];
 
 class Type : public Tool::ToolTemplate {
 private:
-	const std::string myName = ydotool_tool_name;
+
 public:
-	const std::string& Name() override {
-		return myName;
+	const char *Name() override {
+		return ydotool_tool_name;
 	}
 
 	int Exec(int argc, const char **argv) override;

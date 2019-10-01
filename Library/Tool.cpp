@@ -11,6 +11,7 @@
 */
 
 #include "Tool.hpp"
+#include "Utils.hpp"
 
 using namespace ydotool::Tool;
 
@@ -20,34 +21,17 @@ void ToolTemplate::Init(std::shared_ptr<ydotool::Instance> &__ydotool_instance) 
 }
 
 void ToolManager::ScanPath(const std::string &__path) {
-	DIR *dir;
-	struct dirent *ent;
-	if ((dir = opendir(__path.c_str()))) {
-		/* print all the files and directories within directory */
+	try {
+		Utils::dir_foreach(__path, [this](const std::string &path_base, struct dirent *ent) {
+			if (ent->d_type != DT_REG && ent->d_type != DT_LNK)
+				return 1;
 
-		int dotdot_flag = 0;
-
-		while ((ent = readdir(dir))) {
-
-			if (dotdot_flag != 2) {
-				if (strcmp(ent->d_name, ".") == 0) {
-					dotdot_flag++;
-					continue;
-				}
-				if (strcmp(ent->d_name, "..") == 0) {
-					dotdot_flag++;
-					continue;
-				}
-			}
-
-			std::string fullpath = __path + "/" + std::string(ent->d_name);
+			std::string fullpath = path_base + "/" + std::string(ent->d_name);
 			TryDlOpen(fullpath);
-		}
-		closedir(dir);
-	} else {
-		/* could not open directory */
-//		perror("");
-//		return 2;
+			return 0;
+		});
+	} catch (...) {
+
 	}
 }
 

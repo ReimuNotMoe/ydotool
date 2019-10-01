@@ -16,13 +16,16 @@
 
 #include <iostream>
 #include <algorithm>
+#include <functional>
 #include <sstream>
 #include <stdexcept>
 #include <thread>
+#include <deque>
 
-//#include <cstdio>
+#include <cstdio>
 #include <cstdlib>
 #include <cerrno>
+#include <ctime>
 
 #include <fcntl.h>
 #include <dirent.h>
@@ -32,6 +35,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/un.h>
+
+#include <sys/epoll.h>
 
 #include <uInputPlus/uInput.hpp>
 #include <evdevPlus/evdevPlus.hpp>
