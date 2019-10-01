@@ -4,21 +4,21 @@
 
 #include "Recorder.hpp"
 
-extern "C" {
+using namespace ydotool::Tools;
 
-const char ydotool_tool_name[] = "record";
+const char ydotool_tool_name[] = "recorder";
 
-void *ydotool_tool_construct() {
-	return (void *) (new Recorder());
-}
-
-}
 
 static void ShowHelp(const char *argv_0){
 	std::cerr << "Usage: " << argv_0 << " <output file> [devices]\n"
 		  << "  --help                Show this help.\n"
 		  << "  devices               Devices to record from. Default is all." << std::endl;
 }
+
+const char *Recorder::Name() {
+	return ydotool_tool_name;
+}
+
 
 int Recorder::Exec(int argc, const char **argv) {
 	std::cout << "argc = " << argc << "\n";
@@ -166,3 +166,4 @@ std::vector<std::string> Recorder::find_all_devices() {
 
 	return ret;
 }
+

@@ -12,15 +12,15 @@
 
 #include "Click.hpp"
 
-extern "C" {
 
-const char ydotool_tool_name[] = "click";
+static const char ydotool_tool_name[] = "click";
 
-void *ydotool_tool_construct() {
-	return (void *) (new Click());
+using namespace ydotool::Tools;
+
+const char *Click::Name() {
+	return ydotool_tool_name;
 }
 
-}
 
 static void ShowHelp(){
 	std::cerr << "Usage: click [--delay <ms>] <button>\n"
@@ -105,3 +105,4 @@ int Click::Exec(int argc, const char **argv) {
 
 	return argc;
 }
+

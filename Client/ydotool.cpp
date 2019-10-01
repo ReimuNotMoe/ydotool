@@ -23,7 +23,7 @@ static void ShowHelp() {
 	std::cerr << "Usage: ydotool <cmd> <args>\n"
 		"Available commands:\n";
 
-	for (auto &it : tool_mgr.dl_handles) {
+	for (auto &it : tool_mgr.init_funcs) {
 		std::cerr << "  " << it.first << std::endl;
 	}
 
@@ -88,11 +88,11 @@ const char default_library_path[] = "/usr/local/lib/ydotool:/usr/lib/ydotool:/us
 int main(int argc, const char **argv) {
 	const char *library_path = default_library_path;
 
-	std::cerr << "ydotool: library search path: " << library_path << "\n";
+//	std::cerr << "ydotool: library search path: " << library_path << "\n";
 
-	for (auto &it : explode(library_path, ':')) {
-		tool_mgr.ScanPath(it);
-	}
+//	for (auto &it : explode(library_path, ':')) {
+//		tool_mgr.ScanPath(it);
+//	}
 
 	if (argc < 2) {
 		ShowHelp();

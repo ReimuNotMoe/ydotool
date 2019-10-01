@@ -19,20 +19,23 @@ using namespace ydotool;
 using namespace uInputPlus;
 namespace po = boost::program_options;
 
-extern "C" {
-extern const char ydotool_tool_name[];
-}
+namespace ydotool {
+	namespace Tools {
+		class Type : public Tool::ToolTemplate {
+		private:
 
-class Type : public Tool::ToolTemplate {
-private:
+		public:
+			const char *Name() override;
 
-public:
-	const char *Name() override {
-		return ydotool_tool_name;
+			int Exec(int argc, const char **argv) override;
+
+			int TypeText(const std::string &text);
+
+			static void *construct() {
+				return (void *)(new Type());
+			}
+		};
 	}
-
-	int Exec(int argc, const char **argv) override;
-	int TypeText(const std::string &text);
-};
+}
 
 #endif //YDOTOOL_TOOL_TYPE_HPP

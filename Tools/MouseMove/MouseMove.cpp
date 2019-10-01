@@ -12,15 +12,9 @@
 
 #include "MouseMove.hpp"
 
-extern "C" {
+using namespace ydotool::Tools;
 
 const char ydotool_tool_name[] = "mousemove";
-
-void *ydotool_tool_construct() {
-	return (void *) (new MouseMove());
-}
-
-}
 
 
 static int time_keydelay = 12;
@@ -30,6 +24,11 @@ static void ShowHelp(const char *argv_0){
 			<< "  --help                Show this help.\n"
 			<< "  --delay ms            Delay time before start moving. Default 100ms." << std::endl;
 }
+
+const char *MouseMove::Name() {
+	return ydotool_tool_name;
+}
+
 
 int MouseMove::Exec(int argc, const char **argv) {
 	std::cout << "argc = " << argc << "\n";
@@ -100,3 +99,4 @@ int MouseMove::Exec(int argc, const char **argv) {
 
 	return argc;
 }
+

@@ -8,36 +8,38 @@
 #include "../../Library/Tool.hpp"
 #include "../../Library/Utils.hpp"
 
-using namespace ydotool;
-using namespace uInputPlus;
+
 namespace po = boost::program_options;
 
-extern "C" {
-extern const char ydotool_tool_name[];
-}
 
-class Recorder : public Tool::ToolTemplate {
-public:
-	struct file_header {
-		char magic[4];
-		uint32_t crc32;
-		uint64_t feature_mask;
-	} __attribute__((__packed__));
+namespace ydotool {
+	namespace Tools {
+		class Recorder : public Tool::ToolTemplate {
+		public:
+			struct file_header {
+				char magic[4];
+				uint32_t crc32;
+				uint64_t feature_mask;
+			} __attribute__((__packed__));
 
-private:
-	int fd_epoll = -1;
-	int fd_file = -1;
+		private:
+			int fd_epoll = -1;
+			int fd_file = -1;
 
-public:
-	const char *Name() override {
-		return ydotool_tool_name;
+		public:
+			const char *Name() override;
+
+			void do_record(const std::vector<std::string> &__devices);
+
+			std::vector<std::string> find_all_devices();
+
+			int Exec(int argc, const char **argv) override;
+
+			static void *construct() {
+				return (void *)(new Recorder());
+			}
+		};
 	}
-
-	void do_record(const std::vector<std::string>& __devices);
-
-	std::vector<std::string> find_all_devices();
-
-	int Exec(int argc, const char **argv) override;
-};
+}
 
 #endif //YDOTOOL_TOOL_RECORD_HPP

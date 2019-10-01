@@ -13,16 +13,12 @@
 #include "Key.hpp"
 
 using namespace evdevPlus;
+using namespace ydotool::Tools;
 
-extern "C" {
 
 const char ydotool_tool_name[] = "key";
 
-void *ydotool_tool_construct() {
-	return (void *) (new Key());
-}
 
-}
 
 static int time_keydelay = 12;
 
@@ -93,6 +89,9 @@ static std::vector<int> KeyStroke2Code(const std::string &ks) {
 	return list_keycodes;
 }
 
+const char *Key::Name() {
+	return ydotool_tool_name;
+}
 
 int Key::EmitKeyCodes(long key_delay, const std::vector<std::vector<int>> &list_keycodes) {
 	auto sleep_time = (uint)(key_delay * 1000 / (list_keycodes.size() * 2));
@@ -213,3 +212,5 @@ int Key::Exec(int argc, const char **argv) {
 
 	return argc;
 }
+
+

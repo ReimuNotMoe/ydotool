@@ -27,7 +27,13 @@ set(SOURCE_FILES_LIBRARY
         Library/Tool.hpp Library/Tool.cpp
 #        Library/Transport.cpp Library/Transport.hpp
         Library/Instance.cpp Library/Instance.hpp
-        Library/Utils.cpp Library/Utils.hpp)
+        Library/Utils.cpp Library/Utils.hpp Tools/Tools.hpp
+        Tools/MouseMove/MouseMove.hpp Tools/MouseMove/MouseMove.cpp
+        Tools/Key/Key.hpp Tools/Key/Key.cpp
+        Tools/Click/Click.hpp Tools/Click/Click.cpp
+        Tools/Type/Type.hpp Tools/Type/Type.cpp
+        Tools/Recorder/Recorder.cpp Tools/Recorder/Recorder.hpp
+        )
 #        Library/Transports/UnixSocket.cpp Library/Transports/UnixSocket.hpp )
 
 set(SOURCE_FILES_DAEMON
@@ -54,22 +60,26 @@ add_executable(ydotool_client ${SOURCE_FILES_CLIENT})
 target_link_libraries(ydotool_client ydotool_library boost_program_options uInputPlus evdevPlus)
 set_target_properties(ydotool_client PROPERTIES OUTPUT_NAME ydotool)
 
-add_library(mousemove SHARED Tools/MouseMove/MouseMove.hpp Tools/MouseMove/MouseMove.cpp)
-target_link_libraries(mousemove ydotool_library boost_program_options uInputPlus evdevPlus)
+add_executable(ydotool_client_static ${SOURCE_FILES_CLIENT})
+target_link_libraries(ydotool_client_static ydotool_library_static boost_program_options uInputPlus evdevPlus -static)
+set_target_properties(ydotool_client_static PROPERTIES OUTPUT_NAME ydotool_static)
 
-add_library(key SHARED Tools/Key/Key.hpp Tools/Key/Key.cpp)
-target_link_libraries(key ydotool_library boost_program_options uInputPlus evdevPlus)
-
-add_library(click SHARED Tools/Click/Click.hpp Tools/Click/Click.cpp)
-target_link_libraries(click ydotool_library boost_program_options uInputPlus evdevPlus)
-
-add_library(type SHARED Tools/Type/Type.hpp Tools/Type/Type.cpp)
-target_link_libraries(type ydotool_library boost_program_options uInputPlus evdevPlus)
-
-add_library(recorder SHARED Tools/Recorder/Recorder.cpp Tools/Recorder/Recorder.hpp)
-target_link_libraries(recorder ydotool_library boost_program_options uInputPlus evdevPlus)
+#add_library(mousemove SHARED Tools/MouseMove/MouseMove.hpp Tools/MouseMove/MouseMove.cpp)
+#target_link_libraries(mousemove ydotool_library boost_program_options uInputPlus evdevPlus)
+#
+#add_library(key SHARED Tools/Key/Key.hpp Tools/Key/Key.cpp)
+#target_link_libraries(key ydotool_library boost_program_options uInputPlus evdevPlus)
+#
+#add_library(click SHARED Tools/Click/Click.hpp Tools/Click/Click.cpp)
+#target_link_libraries(click ydotool_library boost_program_options uInputPlus evdevPlus)
+#
+#add_library(type SHARED Tools/Type/Type.hpp Tools/Type/Type.cpp)
+#target_link_libraries(type ydotool_library boost_program_options uInputPlus evdevPlus)
+#
+#add_library(recorder SHARED Tools/Recorder/Recorder.cpp Tools/Recorder/Recorder.hpp)
+#target_link_libraries(recorder ydotool_library boost_program_options uInputPlus evdevPlus)
 
 
 install(TARGETS ydotool_library ydotool_library_static DESTINATION lib)
-install(TARGETS mousemove key click type recorder DESTINATION lib/ydotool)
+#install(TARGETS mousemove key click type recorder DESTINATION lib/ydotool)
 install(TARGETS ydotoold ydotool_client DESTINATION bin)

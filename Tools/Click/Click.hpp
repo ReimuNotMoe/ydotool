@@ -15,23 +15,23 @@
 
 #include "../../Library/Tool.hpp"
 
-using namespace ydotool;
-using namespace uInputPlus;
 namespace po = boost::program_options;
 
-extern "C" {
-extern const char ydotool_tool_name[];
-}
+namespace ydotool {
+	namespace Tools {
+		class Click : public Tool::ToolTemplate {
+		private:
 
-class Click : public Tool::ToolTemplate {
-private:
+		public:
+			const char *Name() override;
 
-public:
-	const char *Name() override {
-		return ydotool_tool_name;
+			int Exec(int argc, const char **argv) override;
+
+			static void *construct() {
+				return (void *)(new Click());
+			}
+		};
 	}
-
-	int Exec(int argc, const char **argv) override;
-};
+}
 
 #endif //YDOTOOL_TOOL_CLICK_HPP

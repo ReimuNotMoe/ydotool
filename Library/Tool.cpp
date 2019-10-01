@@ -13,6 +13,8 @@
 #include "Tool.hpp"
 #include "Utils.hpp"
 
+#include "../Tools/Tools.hpp"
+
 using namespace ydotool::Tool;
 
 void ToolTemplate::Init(std::shared_ptr<ydotool::Instance> &__ydotool_instance) {
@@ -55,4 +57,15 @@ void ToolManager::TryDlOpen(const std::string &__path) {
 
 	dl_handles[tool_name] = handle;
 	init_funcs[tool_name] = tool_fptr;
+}
+
+ToolManager::ToolManager() {
+	auto &i = init_funcs;
+
+
+	i["click"] = (void *)&Tools::Click::construct;
+	i["key"] = (void *)&Tools::Key::construct;
+	i["mousemove"] = (void *)&Tools::MouseMove::construct;
+	i["recorder"] = (void *)&Tools::Recorder::construct;
+	i["type"] = (void *)&Tools::Type::construct;
 }

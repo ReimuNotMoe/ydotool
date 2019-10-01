@@ -14,15 +14,11 @@
 
 using namespace evdevPlus;
 
-extern "C" {
+using namespace ydotool::Tools;
 
 const char ydotool_tool_name[] = "type";
 
-void *ydotool_tool_construct() {
-	return (void *) (new Type());
-}
 
-}
 
 static int time_keydelay = 12;
 
@@ -84,6 +80,10 @@ int Type::TypeText(const std::string &text) {
 	}
 
 	return pos;
+}
+
+const char *Type::Name() {
+	return ydotool_tool_name;
 }
 
 int Type::Exec(int argc, const char **argv) {
@@ -203,3 +203,5 @@ int Type::Exec(int argc, const char **argv) {
 
 	return argc;
 }
+
+

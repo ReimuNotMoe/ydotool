@@ -34,7 +34,7 @@ namespace ydotool {
 
 		class ToolManager {
 		public:
-			ToolManager() = default;
+			ToolManager();
 
 			std::unordered_map<std::string, void *> dl_handles;
 			std::unordered_map<std::string, void *> init_funcs;
