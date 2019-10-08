@@ -28,7 +28,7 @@ static void ShowHelp(){
 		<< "  --help                    Show this help.\n"
 		<< "  --delay milliseconds      Delay time before start typing.\n"
 		<< "  --key-delay milliseconds  Delay time between keystrokes. Default 12ms.\n"
-		<< "  --file filepath           Specify a file, the contents of which will be be typed as if passed as"
+		<< "  --file filepath           Specify a file, the contents of which will be be typed as if passed as "
 				"an argument. The filepath may also be '-' to read from stdin." << std::endl;
 
 }
