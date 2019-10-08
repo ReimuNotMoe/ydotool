@@ -1,12 +1,19 @@
 # ydotool
 Generic Linux command-line automation tool (no X!)
 
+[![pipeline status](https://gitlab.com/ReimuNotMoe/ydotool/badges/master/pipeline.svg)](https://gitlab.com/ReimuNotMoe/ydotool/pipelines)
+
 #### Contents
 - [Usage](#usage)
 - [Examples](#examples)
-- [Technical Notes](#technical-notes)
+- [Notes](#notes)
 - [Packages](#packages)
 - [Build](#build)
+
+## Releases
+- [Ubuntu 18.04](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=package:ubuntu:18.04)
+- [Ubuntu 19.04](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=package:ubuntu:19.04)
+- [Debian 9](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=package:debian:9)
 
 ## Usage
 In most times, replace `x` with `y`. :P
@@ -15,8 +22,8 @@ Currently implemented command(s):
 - `type` - Type a string
 - `key` - Press keys
 - `mousemove` - Move mouse pointer to absolute position
-- `mousemove_relative` - Move mouse pointer to relative position
 - `click` - Click on mouse buttons
+- `recorder` - Record/replay input events
 
 ## Examples
 Type some words:
@@ -44,7 +51,14 @@ Mouse right click:
     ydotool click 2
     
 
-## Technical Notes
+## Notes
+#### About the project
+As of May, 2019, searching `wayland xdotool replacement` online won't get much useful results.
+
+If you find this project useful, please consider to spread it.
+
+I have little time to maintain this project because I'm striving to start an undertaking (instead of working [996](https://en.wikipedia.org/wiki/996_working_hour_system)). You could donate to help this project.
+
 #### Runtime
 This program requires access to `/dev/uinput`. This usually requires root permissions.
 
@@ -83,7 +97,3 @@ Nearly all my projects use CMake. It's very simple:
     cmake ..
     make -j `nproc`
 
-## Note
-As of May, 2019, searching `wayland xdotool replacement` online won't get much useful results.
-
-If you find this project useful, please consider to spread it.
