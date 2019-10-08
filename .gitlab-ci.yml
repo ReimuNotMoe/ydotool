@@ -24,7 +24,7 @@ package:debian:9:
     - wget -O libuInputPlus.deb 'https://gitlab.com/ReimuNotMoe/libuInputPlus/-/jobs/artifacts/master/raw/build/libuInputPlus_0.1.3_.deb?job=package:debian:9'
     - wget -O libevdevPlus.deb 'https://gitlab.com/ReimuNotMoe/libevdevPlus/-/jobs/artifacts/master/raw/build/libevdevPlus_0.1.0_.deb?job=package:debian:9'
     - dpkg -i libuInputPlus.deb && dpkg -i libevdevPlus.deb
-    - cd build && make package
+    - cd build && make package && make ydotool_library_static
   artifacts:
     paths:
       - "build/*.deb"
@@ -53,7 +53,7 @@ package:ubuntu:18.04:
     - wget -O libuInputPlus.deb 'https://gitlab.com/ReimuNotMoe/libuInputPlus/-/jobs/artifacts/master/raw/build/libuInputPlus_0.1.3_.deb?job=package:ubuntu:18.04'
     - wget -O libevdevPlus.deb 'https://gitlab.com/ReimuNotMoe/libevdevPlus/-/jobs/artifacts/master/raw/build/libevdevPlus_0.1.0_.deb?job=package:ubuntu:18.04'
     - dpkg -i libuInputPlus.deb && dpkg -i libevdevPlus.deb
-    - cd build && make package
+    - cd build && make package && make ydotool_library_static
   artifacts:
     paths:
       - "build/*.deb"
@@ -82,7 +82,7 @@ package:ubuntu:19.04:
     - wget -O libuInputPlus.deb 'https://gitlab.com/ReimuNotMoe/libuInputPlus/-/jobs/artifacts/master/raw/build/libuInputPlus_0.1.3_.deb?job=package:ubuntu:19.04'
     - wget -O libevdevPlus.deb 'https://gitlab.com/ReimuNotMoe/libevdevPlus/-/jobs/artifacts/master/raw/build/libevdevPlus_0.1.0_.deb?job=package:ubuntu:19.04'
     - dpkg -i libuInputPlus.deb && dpkg -i libevdevPlus.deb
-    - cd build && make package
+    - cd build && make package && make ydotool_library_static
   artifacts:
     paths:
       - "build/*.deb"

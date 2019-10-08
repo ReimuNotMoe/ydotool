@@ -63,6 +63,7 @@ set_target_properties(ydotool_client PROPERTIES OUTPUT_NAME ydotool)
 add_executable(ydotool_client_static ${SOURCE_FILES_CLIENT})
 target_link_libraries(ydotool_client_static ydotool_library_static boost_program_options pthread uInputPlus evdevPlus -static)
 set_target_properties(ydotool_client_static PROPERTIES OUTPUT_NAME ydotool_static)
+set_target_properties(ydotool_client_static PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 #add_library(mousemove SHARED Tools/MouseMove/MouseMove.hpp Tools/MouseMove/MouseMove.cpp)
 #target_link_libraries(mousemove ydotool_library boost_program_options uInputPlus evdevPlus)
