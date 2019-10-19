@@ -1,0 +1,11 @@
+CMakeCache.txt
+CMakeFiles/
+CPackConfig.cmake
+CPackSourceConfig.cmake
+Makefile
+cmake_install.cmake
+libydotool.a
+libydotool.so
+ydotool
+ydotoold
+
