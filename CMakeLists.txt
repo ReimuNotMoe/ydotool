@@ -28,6 +28,9 @@ set(SOURCE_FILES_LIBRARY
 #        Library/Transport.cpp Library/Transport.hpp
         Library/Instance.cpp Library/Instance.hpp
         Library/Utils.cpp Library/Utils.hpp Tools/Tools.hpp
+        Tools/MouseMoveRelative/MouseMoveRelative.hpp Tools/MouseMoveRelative/MouseMoveRelative.cpp
+        Tools/MouseUp/MouseUp.hpp Tools/MouseUp/MouseUp.cpp
+        Tools/MouseDown/MouseDown.hpp Tools/MouseDown/MouseDown.cpp
         Tools/MouseMove/MouseMove.hpp Tools/MouseMove/MouseMove.cpp
         Tools/Key/Key.hpp Tools/Key/Key.cpp
         Tools/Click/Click.hpp Tools/Click/Click.cpp

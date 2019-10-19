@@ -10,6 +10,9 @@
 #include "Click/Click.hpp"
 #include "Key/Key.hpp"
 #include "MouseMove/MouseMove.hpp"
+#include "MouseMoveRelative/MouseMoveRelative.hpp"
+#include "MouseUp/MouseUp.hpp"
+#include "MouseDown/MouseDown.hpp"
 #include "Recorder/Recorder.hpp"
 #include "Type/Type.hpp"
 
