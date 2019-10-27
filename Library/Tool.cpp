@@ -66,6 +66,9 @@ ToolManager::ToolManager() {
 	i["click"] = (void *)&Tools::Click::construct;
 	i["key"] = (void *)&Tools::Key::construct;
 	i["mousemove"] = (void *)&Tools::MouseMove::construct;
+	i["mousemove_relative"] = (void *)&Tools::MouseMove::construct;
+	i["mousedown"] = (void *)&Tools::MouseDown::construct;
+	i["mouseup"] = (void *)&Tools::MouseUp::construct;
 	i["recorder"] = (void *)&Tools::Recorder::construct;
 	i["type"] = (void *)&Tools::Type::construct;
 }
