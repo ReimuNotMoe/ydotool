@@ -24,17 +24,20 @@ static int time_keydelay = 12;
 
 static void ShowHelp(){
 	std::cerr << "Usage: key [--delay <ms>] [--key-delay <ms>] [--repeat <times>] [--repeat-delay <ms>] <key sequence> ...\n"
-		<< "  --help                Show this help.\n"
-		<< "  --delay ms            Delay time before start pressing keys. Default 100ms.\n"
-		<< "  --key-delay ms        Delay time between keystrokes. Default 12ms.\n"
-		<< "  --repeat times        Times to repeat the key sequence.\n"
-		<< "  --repeat-delay ms     Delay time between repetitions. Default 0ms.\n"
-		<< "\n"
-		<< "Each key sequence can be any number of modifiers and keys, separated by plus (+)\n"
-		<< "For example: alt+r Alt+F4 CTRL+alt+f3 aLT+1+2+3 ctrl+Backspace \n"
-		<< "\n"
-		<< "Since we are emulating keyboard input, combination like Shift+# is invalid.\n"
-		<< "Because typing a `#' involves pressing Shift and 3." << std::endl;
+		  << "  --help                Show this help.\n"
+		  << "  --down                Only keydown\n"
+		  << "  --up                  Only keyup\n"
+		  << "  --delay ms            Delay time before start pressing keys. Default 100ms.\n"
+		  << "  --key-delay ms        Delay time between keystrokes. Default 12ms.\n"
+		  << "  --repeat times        Times to repeat the key sequence.\n"
+		  << "  --repeat-delay ms     Delay time between repetitions. Default 0ms.\n"
+		  << "  --persist-delay ms    Keep virtual device alive for <ms> ms. Should be used in conjunction with --down or --up\n"
+		  << "\n"
+		  << "Each key sequence can be any number of modifiers and keys, separated by plus (+)\n"
+		  << "For example: alt+r Alt+F4 CTRL+alt+f3 aLT+1+2+3 ctrl+Backspace \n"
+		  << "\n"
+		  << "Since we are emulating keyboard input, combination like Shift+# is invalid.\n"
+		  << "Because typing a `#' involves pressing Shift and 3." << std::endl;
 }
 
 std::vector<std::string> ExplodeString(const std::string &str, char delim) {
@@ -93,18 +96,32 @@ const char *Key::Name() {
 	return ydotool_tool_name;
 }
 
+int mode = 0;
+
+
 int Key::EmitKeyCodes(long key_delay, const std::vector<std::vector<int>> &list_keycodes) {
 	auto sleep_time = (uint)(key_delay * 1000 / (list_keycodes.size() * 2));
 
 	for (auto &it : list_keycodes) {
-		for (auto &it_m : it) {
-			uInputContext->SendKey(it_m, 1);
-			usleep(sleep_time);
+		if (mode == 0 || mode == 1) {
+			for (auto &it_m : it) {
+				uInputContext->SendKey(it_m, 1);
+				usleep(sleep_time);
+			}
 		}
 
-		for (auto i = it.size(); i-- > 0;) {
-			uInputContext->SendKey(it[i], 0);
-			usleep(sleep_time);
+		if (mode == 0) {
+			for (auto i = it.size(); i-- > 0;) {
+				uInputContext->SendKey(it[i], 0);
+				usleep(sleep_time);
+			}
+		}
+
+		if (mode == 2) {
+			for (auto &it_m : it) {
+				uInputContext->SendKey(it_m, 0);
+				usleep(sleep_time);
+			}
 		}
 	}
 
@@ -119,6 +136,8 @@ int Key::Exec(int argc, const char **argv) {
 
 	int repeats = 1;
 
+	int persist_delay = 0;
+
 
 	std::string file_path;
 	std::vector<std::string> extra_args;
@@ -128,10 +147,13 @@ int Key::Exec(int argc, const char **argv) {
 		po::options_description desc("");
 		desc.add_options()
 			("help", "Show this help")
+			("down", "Keydown")
+			("up", "Keyup")
 			("delay", po::value<int>())
 			("key-delay", po::value<int>())
 			("repeat", po::value<int>())
 			("repeat-delay", po::value<int>())
+			("persist-delay", po::value<int>())
 			("extra-args", po::value(&extra_args));
 
 
@@ -152,10 +174,24 @@ int Key::Exec(int argc, const char **argv) {
 			return -1;
 		}
 
+		if (vm.count("up")) {
+			mode = 2;
+		}
+
+		if (vm.count("down")) {
+			mode = 1;
+		}
+
 		if (vm.count("delay")) {
 			time_delay = vm["delay"].as<int>();
 			std::cerr << "Delay was set to "
 				  << time_delay << " milliseconds.\n";
+		}
+
+		if (vm.count("persist-delay")) {
+			persist_delay = vm["persist-delay"].as<int>();
+			std::cerr << "Persist delay was set to "
+				  << persist_delay << " milliseconds.\n";
 		}
 
 		if (vm.count("key-delay")) {
@@ -203,6 +239,9 @@ int Key::Exec(int argc, const char **argv) {
 	while (repeats--) {
 		EmitKeyCodes(time_delay, keycodes);
 	}
+
+	if (persist_delay)
+		usleep(persist_delay * 1000);
 
 	return argc;
 }

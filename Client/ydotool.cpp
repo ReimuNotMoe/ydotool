@@ -21,7 +21,7 @@ Tool::ToolManager tool_mgr;
 
 static void ShowHelp() {
 	std::cerr << "Usage: ydotool <cmd> <args>\n"
-		"Available commands:\n";
+		     "Available commands:\n";
 
 	for (auto &it : tool_mgr.init_funcs) {
 		std::cerr << "  " << it.first << std::endl;
@@ -104,11 +104,21 @@ int main(int argc, const char **argv) {
 		exit(1);
 	}
 
+	int fd_test = open("/dev/uinput", O_RDWR);
+
+	if (fd_test == -1) {
+		std::cerr <<  "ydotool: Error: unable to open /dev/uinput: " << strerror(errno) << ". Are you root?\n";
+		std::cerr << "See https://github.com/ReimuNotMoe/ydotool/issues/25#issuecomment-535842993 if you don't want to be root.\n\n";
+		abort();
+	}
+
+	close(fd_test);
+
 	auto it_cmd = tool_mgr.init_funcs.find(argv[1]);
 
 	if (it_cmd == tool_mgr.init_funcs.end()) {
 		std::cerr <<  "ydotool: Unknown tool: " << argv[1] << "\n"
-			<< "Run 'ydotool help' if you want a tools list" << std::endl;
+			  << "Run 'ydotool help' if you want a tools list" << std::endl;
 		exit(1);
 	}
 
