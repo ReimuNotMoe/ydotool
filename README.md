@@ -14,6 +14,7 @@ Generic Linux command-line automation tool (no X!)
 - [Ubuntu 18.04](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=package:ubuntu:18.04)
 - [Ubuntu 19.04](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=package:ubuntu:19.04)
 - [Debian 9](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=package:debian:9)
+- [openSUSE Tumbleweed / Leap 15.1](https://software.opensuse.org/package/ydotool)
 
 
 ## Important Notes
