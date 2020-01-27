@@ -84,6 +84,6 @@ set_target_properties(ydotool_client_static PROPERTIES EXCLUDE_FROM_ALL TRUE)
 #target_link_libraries(recorder ydotool_library boost_program_options uInputPlus evdevPlus)
 
 
-install(TARGETS ydotool_library ydotool_library_static DESTINATION lib)
-#install(TARGETS mousemove key click type recorder DESTINATION lib/ydotool)
-install(TARGETS ydotoold ydotool_client DESTINATION bin)
+install(TARGETS ydotool_library ydotool_library_static DESTINATION ${CMAKE_INSTALL_LIBDIR})
+#install(TARGETS mousemove key click type recorder DESTINATION ${CMAKE_INSTALL_LIBDIR}/ydotool)
+install(TARGETS ydotoold ydotool_client DESTINATION ${CMAKE_INSTALL_BINDIR})
