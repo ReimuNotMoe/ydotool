@@ -1,0 +1,220 @@
+.\" derived from xdotool.1 ... and manually hacked!
+.\"
+.de Sp \" Vertical space (when we can't use .PP)
+.if t .sp .5v
+.if n .sp
+..
+.\" ========================================================================
+.\"
+.TH YDOTOOL 1 "2020-02-12" "ydtool" "User Commands"
+.\" For nroff, turn off justification.  Always turn off hyphenation; it makes
+.\" way too many mistakes in technical documents.
+.if n .ad l
+.nh
+.SH "NAME"
+ydotool \- command\-line \fI/dev/uinput\fR automation tool
+.SH "SYNOPSIS"
+\&\fBydotool\fR \fBcmd\fR \fIargs...\fR
+.Sp
+\&\fBydotool\fR \fBcmd\fR --help\fR
+.SH "DESCRIPTION"
+\&\fBydotool\fR lets you programatically (or manually) simulate
+keyboard input and mouse activity, etc. It does this by writing
+directly to \fI/dev/uinput\fR so it generally needs to run as root.
+.Sp
+Currently implemented command(s):
+.IP "\fBtype\fR" 4
+Type a string
+.PD 0
+.IP "\fBkey\fR      \ " 4
+Press keys
+.PD 0
+.IP "\fBmousemove\fR" 4
+Move mouse pointer to absolute position
+.PD 0
+.IP "\fBclick\fR" 4
+Click on mouse buttons
+.PD 0
+.IP "\fBrecorder\fR" 4
+Record/replay input events
+.PD 0
+.\" ======================================================================
+.RE
+.RS 4
+.PD
+.Sp
+.SH "KEYBOARD COMMANDS"
+.IP "\fBkey\fR [\fB\-\-up\fR] [\fB\-\-down\fR] [\fB\-\-delay\fR \fI<ms>\fR] [\fB\-\-key\-delay\fR \fI<ms>\fR] [\fB\-\-repeat\fR \fI<times>\fR] [\fB\-\-repeat\-delay\fR \fI<ms>\fR] [\fB\-\-persist\-delay \fI<ms>\fR] \fI<key sequence>\fR" 4
+.Sp
+Type a given keystroke. Examples being \*(L"alt+r\*(R", \*(L"ctrl+J\*(R",
+\&\*(L"ctrl+alt+n\*(R", \*(L"backspace\*(R".
+.Sp
+Options:
+.RS 4
+.IP "\fB\-\-up\fR" 4
+Only keyup
+.IP "\fB\-\-down\fR" 4
+Only keydown
+.IP "\fB\-\-delay\fR \fI<ms>\fR" 4
+Delay before starting to output keystrokes. Default 100ms.
+.IP "\fB\-\-key\-delay\fR \fI<ms>\fR" 4
+Delay time between keystrokes. Default 12ms.
+.IP "\fB\-\-repeat\fR \fI<times>\fR" 4
+Times to repeat the key sequence.
+.IP "\fB\-\-repeat\-delay\fR \fI<ms>\fR" 4
+Delay time between repetitions. Default 0ms.
+.IP "\fB\-\-persist\-delay\fR \fI<ms>\fR" 4
+Keep virtual device alive for <ms> ms. Should be used in conjunction with\-\-down or \-\-up
+.RE
+.RS 4
+.Sp
+Generally, any valid name from \fI/usr/include/linux/input\-event\-codes.h\fR will work. Multiple keys are
+separated by '+'.
+.Sp
+Each key sequence can be any number of modifiers and keys, separated by plus (+)
+For example: alt+r Alt+F4 CTRL+alt+f3 aLT+1+2+3 ctrl+Backspace 
+.Sp
+Since we are emulating keyboard input, combination like Shift+# is invalid.
+Because typing a `#' involves pressing Shift and 3.
+.Sp
+Example: Switch to tty1:
+ ydotool key ctrl+alt+f1
+.Sp
+Example: Close a window in graphical environment:
+ ydotool key Alt+F4
+.\" ======================================================================
+.RE
+.RS 4
+.RE
+.IP "\fBtype\fR [\fB\-\-delay\fR \fI<ms>\fR] [\fB\-\-key\-delay\fR \fI<ms>\fR] [\fB[\-\-file\fR \fI<filepath>\fR] \fIsomething to type\fR"
+.Sp
+Types text as if you had typed it on the keyboard.
+.Sp
+Options:
+.RS 4
+.IP "\fB\-\-delay\fR \fI<ms>\fR" 4
+Delay before starting typing. Default 100ms.
+.IP "\fB\-\-key\-delay\fR \fI<ms>\fR" 4
+Delay time between keystrokes. Default 12ms.
+.IP "\fB\-\-file\fR \fI<filepath>\fR" 4
+Specify a file, the contents of which will be be typed as if passed as an argument. The filepath may also be '\-' to read from stdin.
+.Sp
+Example: to type 'Hello world!' you would do:
+ ydotool type 'Hello world!'
+.RE
+.SH "MOUSE COMMANDS"
+.IP "\fBmousemove\fR [\fB\-\-delay\fR \fI<ms>\fR] \fI<x> <y>\fR" 4
+Move the mouse to the specific X and Y coordinates on the screen.
+.Sp
+Options:
+.RS 4
+.IP "\fB\-\-delay\fR \fI<ms>\fR" 4
+Delay before starting move. Default 100ms.
+.RE
+.RS 4
+.Sp
+Example: to move the cursor to absolute coordinates (100,100):
+ ydotool mousemove 100 100
+.Sp
+.\" ======================================================================
+.RE
+.RS 4
+.RE
+.IP "\fBmousemove_relative\fR [\fB\-\-delay\fR \fI<ms>\fR] \fI<x>\fR \fI<y>\fR" 4
+Move the mouse x,y pixels relative to the current position of the mouse cursor.
+.Sp
+Options:
+.RS 4
+.IP "\fB\-\-delay\fR \fI<ms>\fR" 4
+Delay before starting move. Default 100ms.
+.Sp
+.RE
+.RS 4
+Example: Relatively move mouse pointer to \-100,100:
+ ydotool mousemove_relative \-\- \-100 100
+.\" ======================================================================
+.RE
+.RS 4
+.RE
+.IP "\fBclick\fR  [\fB\-\-delay\fR \fI<ms>\fR] \fIbutton\fR" 4
+Send a click.
+Buttons are: 1: left 2: right 3: middle
+.Sp
+Options:
+.RS 4
+.IP "\fB\-\-delay\fR \fI<ms>\fR" 4
+Delay before click. Default 100ms.
+.Sp
+.RE
+.RS 4
+Example: Mouse right click:
+ ydotool click 2
+.\" ======================================================================
+.RE
+.RS 4
+.RE
+.IP "\fBrecorder\fR [\fB\-\-delay\fR \fI<ms>\fR] [\fB\-\-record\fR \fI<devices>\fR] [\fB\-\-replay\fR \fI<input files>\fR] [\fB\-\-display\fR] [\fB\-\-duration\fR \fI<ms>\fR]" 4
+.Sp
+Options:
+.RS 4
+.IP "\fB\-\-delay\fR \fI<ms>\fR" 4
+Delay time before start recording/replaying. Default 5000ms.
+.IP "\fB\-\-record\fR \fI<devices>\fR" 4
+Devices to record from. Default is all, including non-keyboard devices.
+.IP "\fB\-\-replay\fR \fI<input files>\fR" 4
+The record file can't be replayed on an architecture with different endianness.
+.IP "\fB\-\-display\fR" 4
+????
+.IP "\fB\-\-duration\fR \fI<ms>\fR" 4
+Record duration. Otherwise use SIGINT to stop recording.
+.\" ======================================================================
+.RE
+.RS 4
+.RE
+.IP "\fBmouseup\fR  [\fB\-\-delay\fR \fI<ms>\fR] \fIbutton\fR" 4
+Send a mouse up event.
+Buttons are: 1: left 2: right 3: middle
+.Sp
+Options:
+.RS 4
+.IP "\fB\-\-delay\fR \fI<ms>\fR" 4
+Delay before click. Default 100ms.
+.Sp
+.RE
+.RS 4
+Example: Mouse right click:
+ ydotool click 2
+.RE
+.RS 4
+.RE
+.\" ======================================================================
+.IP "\fBmousedown\fR  [\fB\-\-delay\fR \fI<ms>\fR] \fIbutton\fR" 4
+Send a mouse down event.
+Buttons are: 1: left 2: right 3: middle
+.Sp
+Options:
+.RS 4
+.IP "\fB\-\-delay\fR \fI<ms>\fR" 4
+Delay before click. Default 100ms.
+.Sp
+.RE
+.RS 4
+Example: Mouse right click:
+ ydotool click 2
+.PP
+.SH "AUTHOR"
+\fBydotool\fR(1) and \fBydotoold\fR(8) were written by ReimuNotMoe. This man page by bob.hepple@gmail.com
+.PP
+.SH "BUGS"
+When \fBydotool\fR(1) runs and creates a virtual input device, it will take some time for your graphical environment (eg X11/Wayland) to recognize and enable the virtual input device. (Usually done by udev)
+.Sp
+If the delay is too short, the virtual input device may not be recognized & enabled by the graphical environment in time.
+.Sp
+In order to solve this problem, there is a persistent background service, \fBydotoold\fR(1), to hold a persistent virtual device, and accept input from \fBydotool\fR(1). When \fBydotoold\fR(1) is unavailable, \fBydotool\fR(1) will work without it.
+.SH COPYRIGHT
+MIT License
+.SH "SEE ALSO"
+\fBydotoold\fR(1)
+.PP
+Project site: <https://github.com/ReimuNotMoe/ydotool>
+.PP
