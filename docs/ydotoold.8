@@ -1,0 +1,35 @@
+.de Sp \" Vertical space (when we can't use .PP)
+.if t .sp .5v
+.if n .sp
+..
+.\" ========================================================================
+.\"
+.TH YDOTOOLD 8 "2020-02-12" "ydtool" "System Management Commands"
+.\" For nroff, turn off justification.  Always turn off hyphenation; it makes
+.\" way too many mistakes in technical documents.
+.if n .ad l
+.nh
+.SH "NAME"
+ydotoold \- daemon for \fbydotool\fR(1)
+.SH "SYNOPSIS"
+\&\fBydotoold\fR
+.SH "DESCRIPTION"
+\&\fBydotool\fR lets you programatically (or manually) simulate
+keyboard input and mouse activity, etc. It does this by writing
+directly to \fI/dev/uinput\fR so it generally needs to run as root.
+.Sp
+When \fBydotool\fR(1) runs and creates a virtual input device, it will take some time for your graphical environment (eg X11/Wayland) to recognize and enable the virtual input device. (Usually done by udev)
+.Sp
+If the delay is too short, the virtual input device may not be recognized & enabled by the graphical environment in time.
+.Sp
+In order to solve this problem, the \fBydotoold\fR background service holds a persistent virtual device, and accepts input from \fBydotool\fR(1). When \fBydotoold\fR(1) is unavailable, \fBydotool\fR(1) will work without it.
+.SH "AUTHOR"
+\fBydotool\fR(1) and \fBydotoold\fR(8) were written by ReimuNotMoe. This man page by bob.hepple@gmail.com
+.PP
+.SH COPYRIGHT
+MIT License
+.SH "SEE ALSO"
+\fBydotool\fR(1)
+.PP
+Project site: <https://github.com/ReimuNotMoe/ydotool>
+.PP
