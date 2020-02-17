@@ -14,15 +14,16 @@ Generic Linux command-line automation tool (no X!)
 - [Ubuntu 18.04](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=package:ubuntu:18.04)
 - [Ubuntu 19.04](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=package:ubuntu:19.04)
 - [Debian 9](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=package:debian:9)
-- [openSUSE Tumbleweed / Leap 15.1](https://software.opensuse.org/package/ydotool)
-
+- [Arch AUR](https://aur.archlinux.org/packages/ydotool-git/) (Thanks [@Depau](https://github.com/Depau))
+- [openSUSE Tumbleweed / Leap 15.1](https://software.opensuse.org/package/ydotool) (Thanks [@cubesky](https://github.com/cubesky))
+- [Static binary for Kernel 3.2+](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=package:static)
 
 ## Important Notes
 Since Jun, 2019, I have little time to maintain this project because I'm striving to start an undertaking (instead of working [996](https://en.wikipedia.org/wiki/996_working_hour_system)). 
 
 If you would like to have features you want implemented quickly, you could consider [donating](https://www.patreon.com/classicoldsong) to this project. This will allow me to allocate more time on this project.
 
-Also, pull requests are always welcomed. Thanks before hand for your generous help.
+Also, pull requests are always welcomed. Thanks in advance for your generous help.
 
 ## Usage
 In most times, replace `x` with `y`. :P
@@ -88,12 +89,6 @@ In order to solve this problem, I made a persistent background service, ydotoold
 Now everyone can write their own tool to use with ydotool. Have a look at the `Tool` folder.
 
 I will write some documents for this when I have time.
-
-
-## Packages
-Arch Linux: [AUR](https://aur.archlinux.org/packages/ydotool-git/) (Thanks @[Depau](https://github.com/Depau))
-
-(Currently I don't have time to make a PPA for Debian-like distros, if anyone wants to help, feel free to contact me.)
 
 ## Build
 ### Dependencies

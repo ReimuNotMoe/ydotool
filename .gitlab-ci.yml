@@ -107,7 +107,7 @@ package:static:
     - wget -O libuInputPlus.deb 'https://gitlab.com/ReimuNotMoe/libuInputPlus/-/jobs/artifacts/master/raw/build/libuInputPlus_0.1.4_.deb?job=package:ubuntu:18.04'
     - wget -O libevdevPlus.deb 'https://gitlab.com/ReimuNotMoe/libevdevPlus/-/jobs/artifacts/master/raw/build/libevdevPlus_0.1.1_.deb?job=package:ubuntu:18.04'
     - dpkg -i libuInputPlus.deb && dpkg -i libevdevPlus.deb
-    - cd build && make
+    - cd build && ls -hl && make
   artifacts:
     paths:
       - "build/ydotool_static"
