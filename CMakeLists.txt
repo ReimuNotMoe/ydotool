@@ -48,42 +48,35 @@ set(SOURCE_FILES_CLIENT
         CommonIncludes.hpp
         Client/ydotool.cpp Client/ydotool.hpp)
 
-add_library(ydotool_library SHARED ${SOURCE_FILES_LIBRARY})
-set_target_properties(ydotool_library PROPERTIES OUTPUT_NAME ydotool)
-add_library(ydotool_library_static STATIC ${SOURCE_FILES_LIBRARY})
-set_target_properties(ydotool_library_static PROPERTIES OUTPUT_NAME ydotool)
-target_link_libraries(ydotool_library dl boost_program_options uInputPlus evdevPlus)
-target_link_libraries(ydotool_library_static dl boost_program_options uInputPlus evdevPlus)
-
 link_libraries(-L.)
-add_executable(ydotoold ${SOURCE_FILES_DAEMON})
-target_link_libraries(ydotoold ydotool_library dl pthread boost_program_options uInputPlus evdevPlus)
 
-add_executable(ydotool_client ${SOURCE_FILES_CLIENT})
-target_link_libraries(ydotool_client ydotool_library boost_program_options pthread uInputPlus evdevPlus)
-set_target_properties(ydotool_client PROPERTIES OUTPUT_NAME ydotool)
+if (NOT DEFINED DYNAMIC_BUILD OR (${DYNAMIC_BUILD}))
+    add_library(ydotool_library SHARED ${SOURCE_FILES_LIBRARY})
+    set_target_properties(ydotool_library PROPERTIES OUTPUT_NAME ydotool)
+    target_link_libraries(ydotool_library dl boost_program_options uInputPlus evdevPlus)
 
-add_executable(ydotool_client_static ${SOURCE_FILES_CLIENT})
-target_link_libraries(ydotool_client_static ydotool_library_static boost_program_options pthread uInputPlus evdevPlus -static)
-set_target_properties(ydotool_client_static PROPERTIES OUTPUT_NAME ydotool_static)
-set_target_properties(ydotool_client_static PROPERTIES EXCLUDE_FROM_ALL TRUE)
+    add_executable(ydotoold ${SOURCE_FILES_DAEMON})
+    target_link_libraries(ydotoold ydotool_library dl pthread boost_program_options uInputPlus evdevPlus)
 
-#add_library(mousemove SHARED Tools/MouseMove/MouseMove.hpp Tools/MouseMove/MouseMove.cpp)
-#target_link_libraries(mousemove ydotool_library boost_program_options uInputPlus evdevPlus)
-#
-#add_library(key SHARED Tools/Key/Key.hpp Tools/Key/Key.cpp)
-#target_link_libraries(key ydotool_library boost_program_options uInputPlus evdevPlus)
-#
-#add_library(click SHARED Tools/Click/Click.hpp Tools/Click/Click.cpp)
-#target_link_libraries(click ydotool_library boost_program_options uInputPlus evdevPlus)
-#
-#add_library(type SHARED Tools/Type/Type.hpp Tools/Type/Type.cpp)
-#target_link_libraries(type ydotool_library boost_program_options uInputPlus evdevPlus)
-#
-#add_library(recorder SHARED Tools/Recorder/Recorder.cpp Tools/Recorder/Recorder.hpp)
-#target_link_libraries(recorder ydotool_library boost_program_options uInputPlus evdevPlus)
+    add_executable(ydotool ${SOURCE_FILES_CLIENT})
+    target_link_libraries(ydotool ydotool_library boost_program_options pthread uInputPlus evdevPlus)
+    set_target_properties(ydotool PROPERTIES OUTPUT_NAME ydotool)
 
+    install(TARGETS ydotoold ydotool ydotool_library DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif()
 
-install(TARGETS ydotool_library ydotool_library_static DESTINATION ${CMAKE_INSTALL_LIBDIR})
-#install(TARGETS mousemove key click type recorder DESTINATION ${CMAKE_INSTALL_LIBDIR}/ydotool)
-install(TARGETS ydotoold ydotool_client DESTINATION ${CMAKE_INSTALL_BINDIR})
+if (NOT DEFINED STATIC_BUILD OR (${STATIC_BUILD}))
+    add_library(ydotool_library_static STATIC ${SOURCE_FILES_LIBRARY})
+    set_target_properties(ydotool_library_static PROPERTIES OUTPUT_NAME ydotool)
+    target_link_libraries(ydotool_library_static dl boost_program_options uInputPlus evdevPlus)
+
+    add_executable(ydotoold_static ${SOURCE_FILES_DAEMON})
+    target_link_libraries(ydotoold_static ydotool_library_static dl pthread boost_program_options uInputPlus evdevPlus -static)
+    set_target_properties(ydotoold_static PROPERTIES OUTPUT_NAME ydotoold_static)
+
+    add_executable(ydotool_static ${SOURCE_FILES_CLIENT})
+    target_link_libraries(ydotool_static ydotool_library_static boost_program_options pthread uInputPlus evdevPlus -static)
+    set_target_properties(ydotool_static PROPERTIES OUTPUT_NAME ydotool_static)
+
+    install(TARGETS ydotoold_static ydotool_static ydotool_library_static DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif()
