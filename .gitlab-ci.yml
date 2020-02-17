@@ -18,6 +18,7 @@ build:debian:9:
 
 package:debian:9:
   stage: deploy
+  image: debian:9
   dependencies:
     - build:debian:9
   script:
@@ -46,6 +47,7 @@ build:ubuntu:18.04:
 
 package:ubuntu:18.04:
   stage: deploy
+  image: ubuntu:18.04
   dependencies:
     - build:ubuntu:18.04
   script:
@@ -74,6 +76,7 @@ build:ubuntu:19.04:
 
 package:ubuntu:19.04:
   stage: deploy
+  image: ubuntu:19.04
   dependencies:
     - build:ubuntu:19.04
   script:
@@ -101,6 +104,7 @@ build:static:
 
 package:static:
   stage: deploy
+  image: ubuntu:18.04
   dependencies:
     - build:static
   script:
