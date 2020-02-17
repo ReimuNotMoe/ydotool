@@ -1,0 +1,14 @@
+[Unit]
+Description=Starts ydotoold service
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/usr/bin/ydotoold
+ExecReload=/usr/bin/kill -HUP $MAINPID
+KillMode=process
+TimeoutSec=180
+
+[Install]
+WantedBy=multi-user.target
