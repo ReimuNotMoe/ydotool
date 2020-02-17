@@ -1,6 +1,6 @@
 before_script:
   - apt update
-  - apt install -y build-essential cmake wget rpm libboost-program-options-dev
+  - apt install -y build-essential cmake file wget rpm libboost-program-options-dev
 
 build:debian:9:
   stage: build
