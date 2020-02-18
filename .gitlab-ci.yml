@@ -88,6 +88,35 @@ package:ubuntu:19.04:
     paths:
       - "build/*.deb"
 
+build:ubuntu:19.10:
+  stage: build
+  image: ubuntu:19.10
+  artifacts:
+    untracked: true
+  script:
+    - mkdir build
+    - cd build
+    - wget -O libuInputPlus.deb 'https://gitlab.com/ReimuNotMoe/libuInputPlus/-/jobs/artifacts/master/raw/build/libuInputPlus_0.1.4_.deb?job=package:ubuntu:19.10'
+    - wget -O libevdevPlus.deb 'https://gitlab.com/ReimuNotMoe/libevdevPlus/-/jobs/artifacts/master/raw/build/libevdevPlus_0.1.1_.deb?job=package:ubuntu:19.10'
+    - dpkg -i libuInputPlus.deb && dpkg -i libevdevPlus.deb
+    - cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS='-O1 -g' -DDYNAMIC_BUILD=0 ..
+    - make
+
+package:ubuntu:19.10:
+  stage: deploy
+  image: ubuntu:19.10
+  dependencies:
+    - build:ubuntu:19.10
+  script:
+    - wget -O libuInputPlus.deb 'https://gitlab.com/ReimuNotMoe/libuInputPlus/-/jobs/artifacts/master/raw/build/libuInputPlus_0.1.4_.deb?job=package:ubuntu:19.10'
+    - wget -O libevdevPlus.deb 'https://gitlab.com/ReimuNotMoe/libevdevPlus/-/jobs/artifacts/master/raw/build/libevdevPlus_0.1.1_.deb?job=package:ubuntu:19.10'
+    - dpkg -i libuInputPlus.deb && dpkg -i libevdevPlus.deb
+    - cd build && ls -hl && make
+  artifacts:
+    paths:
+      - "build/*.deb"
+
+
 build:static:
   stage: build
   image: ubuntu:18.04

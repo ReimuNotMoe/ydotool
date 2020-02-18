@@ -3,19 +3,14 @@ Generic Linux command-line automation tool (no X!)
 
 [![pipeline status](https://gitlab.com/ReimuNotMoe/ydotool/badges/master/pipeline.svg)](https://gitlab.com/ReimuNotMoe/ydotool/pipelines)
 
-#### Contents
-- [Usage](#usage)
-- [Examples](#examples)
-- [Notes](#notes)
-- [Packages](#packages)
-- [Build](#build)
-
 ## Releases
 - [Ubuntu 18.04](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=package:ubuntu:18.04)
 - [Ubuntu 19.04](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=package:ubuntu:19.04)
 - [Debian 9](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=package:debian:9)
 - [Arch AUR](https://aur.archlinux.org/packages/ydotool-git/) (Thanks [@Depau](https://github.com/Depau))
 - [openSUSE Tumbleweed / Leap 15.1](https://software.opensuse.org/package/ydotool) (Thanks [@cubesky](https://github.com/cubesky))
+- [Fedora 30/31](https://copr.fedorainfracloud.org/coprs/wef/ydotool/) (Thanks [@
+bhepple](https://github.com/bhepple))
 - [Static binary for Kernel 3.2+](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=package:static)
 
 ## Important Notes
