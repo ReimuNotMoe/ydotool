@@ -99,3 +99,16 @@ Nearly all my projects use CMake. It's very simple:
     cmake ..
     make -j `nproc`
 
+## Troubleshooting
+### Custom keyboard layouts
+Currently, ydotool does not recognize if the user is using a custom keyboard layout. In order to comfortably use ydotool alongside a custom keyboard layout, the user should consider attempting to only change the layout per-device.
+
+In [sway](https://github.com/swaywm/sway), the process is [fairly easy](https://github.com/swaywm/sway/wiki#keyboard-layout). Following the instructions there, you would end up with something like:
+```
+input "16700:8197:DELL_DELL_USB_Keyboard" {
+	xkb_layout "us,us"
+	xkb_variant "dvorak,"
+	xkb_options "grp:shifts_toggle, caps:swapescape"
+}
+```
+The identifier for your keyboard can be obtained from the output of `swaymsg -t get_inputs`.
