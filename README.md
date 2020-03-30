@@ -98,7 +98,7 @@ Nearly all my projects use CMake. It's very simple:
     cd build
     cmake ..
     make -j `nproc`
-
+    
 ### Packages
 RPM packages are available at [COPR](https://copr.fedorainfracloud.org/coprs/wef/ydotool/). fedora-30 and fedora-31 are built. Contact bob.hepple@gmail.com if you need other RPM builds.
 
@@ -108,3 +108,21 @@ Install with:
     sudo dnf copr enable wef/libuInputPlus
     sudo dnf copr enable wef/libevdevPlus
     sudo dnf install ydotool
+
+## Troubleshooting
+### Custom keyboard layouts
+Currently, ydotool does not recognize if the user is using a custom keyboard layout. In order to comfortably use ydotool alongside a custom keyboard layout, the user could use one of the following fixes/workarounds:
+
+#### Sway
+In [sway](https://github.com/swaywm/sway), the process is [fairly easy](https://github.com/swaywm/sway/wiki#keyboard-layout). Following the instructions there, you would end up with something like:
+```
+input "16700:8197:DELL_DELL_USB_Keyboard" {
+	xkb_layout "us,us"
+	xkb_variant "dvorak,"
+	xkb_options "grp:shifts_toggle, caps:swapescape"
+}
+```
+The identifier for your keyboard can be obtained from the output of `swaymsg -t get_inputs`.
+
+#### Use a hardware-configurable keyboard
+[As mentioned here](https://github.com/ReimuNotMoe/ydotool/issues/43#issuecomment-605921288), consider using a hardware-based configuration that supports using a custom layout without configuring it in software.
