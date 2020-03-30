@@ -99,3 +99,12 @@ Nearly all my projects use CMake. It's very simple:
     cmake ..
     make -j `nproc`
 
+### Packages
+RPM packages are available at [COPR](https://copr.fedorainfracloud.org/coprs/wef/ydotool/). fedora-30 and fedora-31 are built. Contact bob.hepple@gmail.com if you need other RPM builds.
+
+Install with:
+
+    sudo dnf copr enable wef/ydotool 
+    sudo dnf copr enable wef/libuInputPlus
+    sudo dnf copr enable wef/libevdevPlus
+    sudo dnf install ydotool
