@@ -10,7 +10,7 @@ Generic Linux command-line automation tool (no X!)
 - [Debian 9](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=package:debian:9)
 - [Arch AUR](https://aur.archlinux.org/packages/ydotool-git/) (Thanks [@Depau](https://github.com/Depau))
 - [openSUSE Tumbleweed / Leap 15.1](https://software.opensuse.org/package/ydotool) (Thanks [@cubesky](https://github.com/cubesky))
-- [Fedora 30/31](https://copr.fedorainfracloud.org/coprs/wef/ydotool/) (Thanks [@bhepple](https://github.com/bhepple))
+- **Fedora** 31 and later - **ydotool** is in the standard repositories
 - [Static binary for Kernel 3.2+](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=package:static)
 
 ## Important Notes
@@ -100,7 +100,7 @@ Nearly all my projects use CMake. It's very simple:
     make -j `nproc`
     
 ### Packages
-RPM packages are available for fedora-31
+RPM packages are available for **fedora**-31 and later
 
 Install with:
 
