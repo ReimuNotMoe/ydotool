@@ -10,7 +10,7 @@ ydotoold \- daemon for *ydotool*(1)
 
 # DESCRIPTION
 
-*ydotool* lets you programatically (or manually) simulate
+*ydotool* lets you programmatically (or manually) simulate
 keyboard input and mouse activity, etc. It does this by writing
 directly to */dev/uinput* so it generally needs to run as root.
 

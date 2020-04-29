@@ -12,7 +12,7 @@ ydotool - command-line _/dev/uinput_ automation tool
 
 # DESCRIPTION
 
-*ydotool* lets you programatically (or manually) simulate keyboard input and mouse activity, etc. It does this by writing directly to _/dev/uinput_ so it generally needs to run as root.
+*ydotool* lets you programmatically (or manually) simulate keyboard input and mouse activity, etc. It does this by writing directly to _/dev/uinput_ so it generally needs to run as root.
 
 Currently implemented command(s):
 
@@ -91,7 +91,7 @@ Currently implemented command(s):
 		????
 
 	*--file* _<filepath>_
-		Specify a file, the contents of which will be be typed as if passed as an argument. The filepath may also be '-' to read from stdin.
+		Specify a file, the contents of which will be typed as if passed as an argument. The filepath may also be '-' to read from stdin.
 
 	Example: to type 'Hello world!' you would do:
 		ydotool type 'Hello world!'
