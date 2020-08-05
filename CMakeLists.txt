@@ -63,7 +63,7 @@ if (NOT DEFINED DYNAMIC_BUILD OR (${DYNAMIC_BUILD}))
     set_target_properties(ydotool PROPERTIES OUTPUT_NAME ydotool)
     
     install(TARGETS ydotool_library DESTINATION ${CMAKE_INSTALL_LIBDIR})
-    install(TARGETS ydotoold ydotool ydotool_library DESTINATION ${CMAKE_INSTALL_BINDIR})
+    install(TARGETS ydotoold ydotool DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
 
 if (NOT DEFINED STATIC_BUILD OR (${STATIC_BUILD}))
