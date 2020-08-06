@@ -61,8 +61,9 @@ if (NOT DEFINED DYNAMIC_BUILD OR (${DYNAMIC_BUILD}))
     add_executable(ydotool ${SOURCE_FILES_CLIENT})
     target_link_libraries(ydotool ydotool_library boost_program_options pthread uInputPlus evdevPlus)
     set_target_properties(ydotool PROPERTIES OUTPUT_NAME ydotool)
-
-    install(TARGETS ydotoold ydotool ydotool_library DESTINATION ${CMAKE_INSTALL_BINDIR})
+    
+    install(TARGETS ydotool_library DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    install(TARGETS ydotoold ydotool DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
 
 if (NOT DEFINED STATIC_BUILD OR (${STATIC_BUILD}))
@@ -77,6 +78,7 @@ if (NOT DEFINED STATIC_BUILD OR (${STATIC_BUILD}))
     add_executable(ydotool_static ${SOURCE_FILES_CLIENT})
     target_link_libraries(ydotool_static ydotool_library_static boost_program_options pthread uInputPlus evdevPlus -static)
     set_target_properties(ydotool_static PROPERTIES OUTPUT_NAME ydotool_static)
-
-    install(TARGETS ydotoold_static ydotool_static ydotool_library_static DESTINATION ${CMAKE_INSTALL_BINDIR})
+    
+    install(TARGETS ydotool_library_static DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    install(TARGETS ydotoold_static ydotool_static DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
