@@ -53,6 +53,9 @@ link_libraries(-L.)
 if (NOT DEFINED DYNAMIC_BUILD OR (${DYNAMIC_BUILD}))
     add_library(ydotool_library SHARED ${SOURCE_FILES_LIBRARY})
     set_target_properties(ydotool_library PROPERTIES OUTPUT_NAME ydotool)
+    set_target_properties(ydotool_library PROPERTIES VERSION ${PROJECT_VERSION})
+    set_target_properties(ydotool_library PROPERTIES SOVERSION ${CPACK_PACKAGE_VERSION_MAJOR})
+
     target_link_libraries(ydotool_library dl boost_program_options uInputPlus evdevPlus)
 
     add_executable(ydotoold ${SOURCE_FILES_DAEMON})
