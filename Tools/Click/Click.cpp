@@ -23,9 +23,11 @@ const char *Click::Name() {
 
 
 static void ShowHelp(){
-	std::cerr << "Usage: click [--delay <ms>] <button>\n"
+	std::cerr << "Usage: click [--delay <ms>] [--repeat <times>] [--repeat-delay <ms>] <button>\n"
 		<< "  --help                Show this help.\n"
 		<< "  --delay ms            Delay time before start clicking. Default 100ms.\n"
+		<< "  --repeat times        Times to repeat the key sequence.\n"
+		<< "  --repeat-delay ms     Delay time between repetitions. Default 20ms.\n"
 		<< "  button                1: left 2: right 3: middle" << std::endl;
 }
 
@@ -37,6 +39,8 @@ int Click::Exec(int argc, const char **argv) {
 //	}
 
 	int time_delay = 100;
+	int time_repdelay = 20;
+	int repeats = 1;
 
 	std::vector<std::string> extra_args;
 
@@ -46,6 +50,8 @@ int Click::Exec(int argc, const char **argv) {
 		desc.add_options()
 			("help", "Show this help")
 			("delay", po::value<int>())
+			("repeat", po::value<int>())
+			("repeat-delay", po::value<int>())
 			("extra-args", po::value(&extra_args));
 
 
@@ -70,6 +76,18 @@ int Click::Exec(int argc, const char **argv) {
 			time_delay = vm["delay"].as<int>();
 			std::cerr << "Delay was set to "
 				  << time_delay << " milliseconds.\n";
+		}
+
+		if (vm.count("repeat")) {
+			repeats = vm["repeat"].as<int>();
+			std::cerr << "Repeat was set to "
+				  << repeats << " times.\n";
+		}
+
+		if (vm.count("repeat-delay")) {
+			time_repdelay = vm["repeat-delay"].as<int>();
+			std::cerr << "Repeat delay was set to "
+				  << time_repdelay << " milliseconds.\n";
 		}
 
 		if (extra_args.size() != 1) {
@@ -100,8 +118,12 @@ int Click::Exec(int argc, const char **argv) {
 			break;
 	}
 
-	uInputContext->SendKey(keycode, 1);
-	uInputContext->SendKey(keycode, 0);
+	while (repeats--) {
+		uInputContext->SendKey(keycode, 1);
+		uInputContext->SendKey(keycode, 0);
+		if (time_repdelay)
+			usleep(time_repdelay * 1000);
+	}
 
 	return argc;
 }
