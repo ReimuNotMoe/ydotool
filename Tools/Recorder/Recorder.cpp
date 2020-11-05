@@ -184,6 +184,8 @@ int Recorder::Exec(int argc, const char **argv) {
 	} else if (mode == 3) {
 		do_display();
 	}
+	
+	return argc;
 }
 
 
