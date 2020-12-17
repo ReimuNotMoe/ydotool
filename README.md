@@ -74,7 +74,7 @@ See `/usr/include/linux/input-event-codes.h`
 #### About the --delay option
 ydotool works differently from xdotool. xdotool sends X events directly to X server, while ydotool uses the uinput framework of Linux kernel to emulate an input device.
 
-When ydotool runs and creates an virtual input device, it will take some time for your graphical environment (X11/Wayland) to recognize and enable the virtual input device. (Usually done by udev)
+When ydotool runs and creates a virtual input device, it will take some time for your graphical environment (X11/Wayland) to recognize and enable the virtual input device. (Usually done by udev)
 
 So, if the delay was too short, the virtual input device may not got recognized & enabled by your graphical environment in time.
 
