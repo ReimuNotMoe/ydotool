@@ -12,5 +12,5 @@ build:ubuntu:20.04:
   script:
     - mkdir build
     - cd build
-    - cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS='-O1 -g' ..
-    - make
+    - cmake -DCMAKE_CXX_FLAGS='-O2' ..
+    - make -j2

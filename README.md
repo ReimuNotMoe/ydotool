@@ -4,7 +4,9 @@ Generic Linux command-line automation tool (no X!)
 [![pipeline status](https://gitlab.com/ReimuNotMoe/ydotool/badges/master/pipeline.svg)](https://gitlab.com/ReimuNotMoe/ydotool/pipelines)
 
 ## Packages & Releases
-Currently there are none for this new version. You may select an older tag to view the previous version.
+You may select an older tag to view the previous version.
+
+- [Static build for Ubuntu 20.04](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=build:ubuntu:20.04)
 
 ## Important Notes
 The project is now refactored, some redundant stuff are removed, and it no longer depends on boost. Since it's in a hurry, some new bugs may be introduced. You're welcome to find them out.

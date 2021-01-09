@@ -29,16 +29,7 @@ int main(int argc, char **argv) {
 		("h,help", "Show help")
 		("socket-path", "Socket path", cxxopts::value<std::string>()->default_value("/tmp/.ydotool_socket"))
 		("socket-perm", "Socket permission", cxxopts::value<std::string>()->default_value("0600"))
-		("positional",
-		 "Positional arguments: these are the arguments that are entered "
-		 "without an option", cxxopts::value<std::string>())
 		;
-//	options.allow_unrecognised_options();
-	options.parse_positional({"positional"});
-	options.positional_help("<buttons>");
-
-	options.show_positional_help();
-
 
 	std::string cfg_socket_path, cfg_socket_perm;
 
@@ -48,18 +39,6 @@ int main(int argc, char **argv) {
 		if (cmd.count("help")) {
 			std::cout << options.help();
 			return 0;
-		}
-
-		if (cmd.count("positional"))
-		{
-			std::cout << "Positional = {";
-			auto& v = cmd["positional"].as<std::string>();
-
-			std::cout << v;
-			for (const auto& s : cmd.unmatched()) {
-				std::cout << s << ", ";
-			}
-			std::cout << "}" << std::endl;
 		}
 
 		cfg_socket_path = cmd["socket-path"].as<std::string>();
