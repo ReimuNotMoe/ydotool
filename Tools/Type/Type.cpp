@@ -1,13 +1,19 @@
 /*
     This file is part of ydotool.
-    Copyright (C) 2018-2019 ReimuNotMoe
+    Copyright (C) 2018-2021 Reimu NotMoe <reimu@sudomaker.com>
 
     This program is free software: you can redistribute it and/or modify
-    it under the terms of the MIT License.
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "Type.hpp"
@@ -18,20 +24,7 @@ using namespace ydotool::Tools;
 
 const char ydotool_tool_name[] = "type";
 
-
-
 static int time_keydelay = 12;
-
-static void ShowHelp(){
-	std::cerr <<  "Usage: type [--delay milliseconds] [--key-delay milliseconds] [--args N]"
-		"[--file <filepath>] <things to type>\n"
-		<< "  --help                    Show this help.\n"
-		<< "  --delay milliseconds      Delay time before start typing.\n"
-		<< "  --key-delay milliseconds  Delay time between keystrokes. Default 12ms.\n"
-		<< "  --file filepath           Specify a file, the contents of which will be be typed as if passed as "
-				"an argument. The filepath may also be '-' to read from stdin." << std::endl;
-
-}
 
 int Type::TypeText(const std::string &text) {
 	int pos = 0;
@@ -60,20 +53,20 @@ int Type::TypeText(const std::string &text) {
 
 		if (isUpper) {
 			sleep_time = 250 * time_keydelay;
-			uInputContext->SendKey(KEY_LEFTSHIFT, 1);
+			uInputContext->send_key(KEY_LEFTSHIFT, 1);
 			usleep(sleep_time);
 		} else {
 			sleep_time = 500 * time_keydelay;
 		}
 
-		uInputContext->SendKey(key_code, 1);
+		uInputContext->send_key(key_code, 1);
 		usleep(sleep_time);
-		uInputContext->SendKey(key_code, 0);
+		uInputContext->send_key(key_code, 0);
 		usleep(sleep_time);
 
 
 		if (isUpper) {
-			uInputContext->SendKey(KEY_LEFTSHIFT, 0);
+			uInputContext->send_key(KEY_LEFTSHIFT, 0);
 			usleep(sleep_time);
 		}
 
@@ -82,74 +75,53 @@ int Type::TypeText(const std::string &text) {
 	return pos;
 }
 
-const char *Type::Name() {
+const char *Type::name() {
 	return ydotool_tool_name;
 }
 
-int Type::Exec(int argc, const char **argv) {
-	int time_delay = 100;
-	int text_start = -1;
+int Type::run(int argc, char **argv) {
+	cxxopts::Options options("type", "type");
 
+	options.add_options()
+		("h,help", "Show this help")
+		("key-delay", "Delay time between keystrokes", cxxopts::value<int>()->default_value("12"), "ms")
+		("next-delay", "Delay time before typing next string on cmdline", cxxopts::value<int>()->default_value("50"), "ms")
+		("file", "Specify a file, the contents of which will be be typed as if passed as an argument. The filepath may also be '-' to read from stdin", cxxopts::value<std::string>()->default_value(""), "path")
+
+		("texts", "[Positional] Texts to type", cxxopts::value<std::string>())
+		;
+
+	options.parse_positional({"texts"});
+	options.positional_help("<texts...>");
+	options.show_positional_help();
+
+	int next_delay;
 	std::string file_path;
-	std::vector<std::string> extra_args;
+	std::vector<std::string> texts;
 
 	try {
+		auto cmd = options.parse(argc, argv);
 
-		po::options_description desc("");
-		desc.add_options()
-			("help", "Show this help")
-			("delay", po::value<int>())
-			("key-delay", po::value<int>())
-			("file", po::value<std::string>())
-			("extra-args", po::value(&extra_args));
+		file_path = cmd["file"].as<std::string>();
 
-
-		po::positional_options_description p;
-		p.add("extra-args", -1);
-
-
-		po::variables_map vm;
-		po::store(po::command_line_parser(argc, argv).
-			options(desc).
-			positional(p).
-			run(), vm);
-		po::notify(vm);
-
-
-		if (vm.count("help")) {
-			ShowHelp();
-			return -1;
+		if (cmd.count("help") || (!cmd.count("texts") && file_path.empty())) {
+			std::cout << options.help();
+			return 0;
 		}
 
-		if (vm.count("delay")) {
-			time_delay = vm["delay"].as<int>();
-			std::cerr << "Delay was set to "
-				  << time_delay << " milliseconds.\n";
+		time_keydelay = cmd["key-delay"].as<int>();
+		next_delay = cmd["next-delay"].as<int>();
+
+
+		if (cmd.count("texts")) {
+			texts.push_back(cmd["texts"].as<std::string>());
+			texts.insert(texts.end(), cmd.unmatched().begin(), cmd.unmatched().end());
 		}
-
-		if (vm.count("key-delay")) {
-			time_keydelay = vm["key-delay"].as<int>();
-			std::cerr << "Key delay was set to "
-				  << time_keydelay << " milliseconds.\n";
-		}
-
-		if (vm.count("file")) {
-			file_path = vm["file"].as<std::string>();
-			std::cerr << "File path was set to "
-				  << file_path << ".\n";
-		} else {
-			if (extra_args.empty()) {
-				std::cerr << "What do you want to type?\n"
-					     "Use `ydotool type --help' for help.\n";
-
-				return 1;
-			}
-		}
-
 
 	} catch (std::exception &e) {
-		fprintf(stderr, "ydotool: type: error: %s\n", e.what());
-		return 2;
+		std::cout << "Ooooops! " << e.what() << "\n";
+		std::cout << options.help();
+		return 0;
 	}
 
 	int fd = -1;
@@ -169,9 +141,6 @@ int Type::Exec(int argc, const char **argv) {
 		}
 	}
 
-	if (time_delay)
-		usleep(time_delay * 1000);
-
 	if (fd >= 0) {
 		std::string buf;
 		buf.resize(128);
@@ -190,12 +159,15 @@ int Type::Exec(int argc, const char **argv) {
 
 		close(fd);
 	} else {
-		for (auto &txt : extra_args) {
+		for (int i=0; i<texts.size(); i++) {
+			auto &txt = texts[i];
 			TypeText(txt);
+			if (next_delay && i<(texts.size()-1))
+				usleep(next_delay * 1000);
 		}
 	}
 
-	return argc;
+	return 0;
 }
 
 

@@ -1,86 +1,88 @@
 /*
     This file is part of ydotool.
-    Copyright (C) 2018-2019 ReimuNotMoe
+    Copyright (C) 2018-2021 Reimu NotMoe <reimu@sudomaker.com>
 
     This program is free software: you can redistribute it and/or modify
-    it under the terms of the MIT License.
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "ydotoold.hpp"
 
+using namespace IODash;
+using namespace uInputPlus;
 using namespace ydotool;
 
+int main(int argc, char **argv) {
+	cxxopts::Options options("ydotoold", "ydotool daemon");
 
-//struct ep_ctx {
-//	size_t bufpos_read = 0;
-//	uint8_t buf_read[8];
-//};
-//
-//void fd_set_nonblocking(int fd) {
-//	int flag = fcntl(fd, F_GETFL) | O_NONBLOCK;
-//	fcntl(fd, F_SETFL, flag);
-//}
+	options.add_options()
+		("h,help", "Show help")
+		("socket-path", "Socket path", cxxopts::value<std::string>()->default_value("/tmp/.ydotool_socket"))
+		("socket-perm", "Socket permission", cxxopts::value<std::string>()->default_value("0600"))
+		;
 
-Instance instance;
+	std::string cfg_socket_path, cfg_socket_perm;
 
-static int client_handler(int fd) {
-	uInputRawData buf{0};
+	try {
+		auto cmd = options.parse(argc, argv);
 
-	while (true) {
-		int rc = recv(fd, &buf, sizeof(buf), MSG_WAITALL);
-
-		if (rc == sizeof(buf)) {
-			instance.uInputContext->Emit(buf.type, buf.code, buf.value);
-		} else {
+		if (cmd.count("help")) {
+			std::cout << options.help();
 			return 0;
 		}
+
+		cfg_socket_path = cmd["socket-path"].as<std::string>();
+		cfg_socket_perm = cmd["socket-perm"].as<std::string>();
+
+	} catch (std::exception &e) {
+		std::cout << "Ooooops! " << e.what() << "\n";
+		std::cout << options.help();
+		return 0;
 	}
 
-}
+	Utils::uinput_availability_test();
 
-int main(int argc, char **argv) {
+	uInputSetup uinput_setup({"ydotoold virtual device"});
+	uInputPlus::uInput uinput(uinput_setup);
 
-	const char path_socket[] = "/tmp/.ydotool_socket";
+	unlink(cfg_socket_path.c_str());
 
-	unlink(path_socket);
+	Socket<AddressFamily::Unix, SocketType::Datagram> socket_;
+	socket_.create();
+	socket_.bind(SocketAddress<AddressFamily::Unix>(cfg_socket_path));
 
-	int fd_listener = socket(AF_UNIX, SOCK_STREAM, 0);
-	if (fd_listener == -1) {
-		std::cerr << "ydotoold: " << "failed to create socket: " << strerror(errno) << "\n";
-		abort();
-	}
+	chmod(cfg_socket_path.c_str(), strtoul(cfg_socket_perm.c_str(), nullptr, 8));
 
-	sockaddr_un addr{0};
-	memset(&addr, 0, sizeof(addr));
-	addr.sun_family = AF_UNIX;
-	strncpy(addr.sun_path, path_socket, sizeof(addr.sun_path)-1);
+	std::cerr << "ydotoold: " << "listening on socket " << cfg_socket_path << "\n";
 
-	if (bind(fd_listener, (struct sockaddr *)&addr, sizeof(addr))) {
-		std::cerr << "ydotoold: " << "failed to bind to socket [" << path_socket << "]: " << strerror(errno) << "\n";
-		abort();
-	}
+	EventLoop<EventBackend::EPoll> event_loop;
 
-	if (listen(fd_listener, 16)) {
-		std::cerr << "ydotoold: " << "failed to listen on socket [" << path_socket << "]: " << strerror(errno) << "\n";
-		abort();
-	}
+	event_loop.add(socket_, EventType::In);
 
-	chmod(path_socket, 0600);
+	std::vector<uint8_t> recv_buf(1536);
 
-	std::cerr << "ydotoold: " << "listening on socket " << path_socket << "\n";
+	event_loop.on_events([&](auto& evloop_ctx, File& file, EventType ev_type, auto& userdata){
+		auto rc_recv = socket_cast<AddressFamily::Unix, SocketType::Datagram>(file).recv(recv_buf.data(), recv_buf.size());
 
-	instance.Init("ydotoold virtual device");
+		if (rc_recv > 0) {
+			for (int i=0; i<rc_recv; i+=sizeof(uInputRawData)) {
+				auto *buf = reinterpret_cast<uInputRawData *>(recv_buf.data() + i);
+				uinput.emit(buf->type, buf->code, buf->value);
+			}
+		}
+	});
 
-	while (int fd_client = accept(fd_listener, nullptr, nullptr)) {
-		std::cerr << "ydotoold: accepted client\n";
+	event_loop.run();
 
-		std::thread thd(client_handler, fd_client);
-		thd.detach();
-
-	}
-
+	return 0;
 }

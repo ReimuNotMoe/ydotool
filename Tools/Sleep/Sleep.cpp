@@ -16,23 +16,29 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#pragma once
+#include "Sleep.hpp"
 
-#include "../../Library/Tool.hpp"
 
-namespace ydotool {
-	namespace Tools {
-		class MouseMove : public Tool::ToolTemplate {
-		private:
+static const char ydotool_tool_name[] = "sleep";
 
-		public:
-			const char *name() override;
+using namespace ydotool::Tools;
 
-			int run(int argc, char **argv) override;
-
-			static void *construct() {
-				return (void *)(new MouseMove());
-			}
-		};
-	}
+const char *Sleep::name() {
+	return ydotool_tool_name;
 }
+
+
+static void ShowHelp(){
+	std::cerr << "Usage: sleep <ms>\n";
+}
+
+int Sleep::run(int argc, char **argv) {
+	if (argc != 2) {
+		ShowHelp();
+	}
+
+	usleep(1000 * strtoul(argv[1], nullptr, 10));
+
+	return 0;
+}
+

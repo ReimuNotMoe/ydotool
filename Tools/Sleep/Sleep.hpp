@@ -22,7 +22,7 @@
 
 namespace ydotool {
 	namespace Tools {
-		class MouseMove : public Tool::ToolTemplate {
+		class Sleep : public Tool::ToolTemplate {
 		private:
 
 		public:
@@ -31,7 +31,7 @@ namespace ydotool {
 			int run(int argc, char **argv) override;
 
 			static void *construct() {
-				return (void *)(new MouseMove());
+				return (void *)(new Sleep());
 			}
 		};
 	}

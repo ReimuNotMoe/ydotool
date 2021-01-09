@@ -1,36 +1,49 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.14)
 project(ydotool)
 
-set(CMAKE_CXX_STANDARD 14)
-set(PROJECT_VERSION "0.1.5")
-set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
-set(CPACK_PACKAGE_VERSION_MAJOR "0")
-set(CPACK_PACKAGE_VERSION_MINOR "1")
-set(CPACK_PACKAGE_VERSION_PATCH "5")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Generic Linux command-line automation tool (no X!)")
-set(CPACK_PACKAGE_CONTACT "Reimu NotMoe <https://github.com/ReimuNotMoe>")
-set(CMAKE_PROJECT_HOMEPAGE_URL "https://github.com/ReimuNotMoe/ydotool")
-set(CPACK_DEBIAN_PACKAGE_HOMEPAGE ${CMAKE_PROJECT_HOMEPAGE_URL})
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.14), libstdc++6 (>= 5.2), libuinputplus (>= 0.1.3), libevdevplus (>= 0.1.0)")
-set(CPACK_PACKAGE_FILE_NAME ${PROJECT_NAME}_${PROJECT_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE})
-set(CPACK_DEBIAN_DEBUGINFO_PACKAGE yes)
-set(CPACK_DEBIAN_COMPRESSION_TYPE "xz")
-set(CPACK_GENERATOR "DEB;RPM;TXZ")
-set(CPACK_SOURCE_GENERATOR "DEB;RPM;TXZ")
-include(CPack)
+set(CMAKE_CXX_STANDARD 17)
 
-include(GNUInstallDirs)
+set(CPM_DOWNLOAD_VERSION 0.27.5)
+set(CPM_DOWNLOAD_LOCATION "${CMAKE_BINARY_DIR}/cmake/CPM_${CPM_DOWNLOAD_VERSION}.cmake")
+
+if(NOT (EXISTS ${CPM_DOWNLOAD_LOCATION}))
+    message(STATUS "Downloading CPM.cmake")
+    file(DOWNLOAD https://github.com/TheLartians/CPM.cmake/releases/download/v${CPM_DOWNLOAD_VERSION}/CPM.cmake ${CPM_DOWNLOAD_LOCATION})
+endif()
+
+include(${CPM_DOWNLOAD_LOCATION})
+
+CPMAddPackage(
+        NAME IODash
+        GITHUB_REPOSITORY YukiWorkshop/IODash
+        VERSION 0.1.0
+)
+
+CPMAddPackage(
+        NAME libevdevPlus
+        GITHUB_REPOSITORY YukiWorkshop/libevdevPlus
+        VERSION 0.2.1
+)
+
+CPMAddPackage(
+        NAME libuInputPlus
+        GITHUB_REPOSITORY YukiWorkshop/libuInputPlus
+        VERSION 0.2.1
+)
+
+CPMAddPackage(
+        NAME cxxopts
+        GITHUB_REPOSITORY jarro2783/cxxopts
+        VERSION 3.0.0
+        GIT_TAG 2d8e17c4f88efce80e274cb03eeb902e055a91d3
+)
 
 set(SOURCE_FILES_LIBRARY
         CommonIncludes.hpp
-        Library/libydotool.cpp Library/libydotool.hpp
         Library/Tool.hpp Library/Tool.cpp
-#        Library/Transport.cpp Library/Transport.hpp
-        Library/Instance.cpp Library/Instance.hpp
-        Library/Utils.cpp Library/Utils.hpp Tools/Tools.hpp
-        Tools/MouseMoveRelative/MouseMoveRelative.hpp Tools/MouseMoveRelative/MouseMoveRelative.cpp
-        Tools/MouseUp/MouseUp.hpp Tools/MouseUp/MouseUp.cpp
-        Tools/MouseDown/MouseDown.hpp Tools/MouseDown/MouseDown.cpp
+        Library/Utils.cpp Library/Utils.hpp
+        Tools/Tools.hpp
+        Tools/Sleep/Sleep.hpp Tools/Sleep/Sleep.cpp
         Tools/MouseMove/MouseMove.hpp Tools/MouseMove/MouseMove.cpp
         Tools/Key/Key.hpp Tools/Key/Key.cpp
         Tools/Click/Click.hpp Tools/Click/Click.cpp
@@ -39,49 +52,22 @@ set(SOURCE_FILES_LIBRARY
         )
 #        Library/Transports/UnixSocket.cpp Library/Transports/UnixSocket.hpp )
 
-set(SOURCE_FILES_DAEMON
-        CommonIncludes.hpp
-        Daemon/ydotoold.cpp Daemon/ydotoold.hpp)
+set(SOURCE_FILES_DAEMON CommonIncludes.hpp Daemon/ydotoold.cpp Daemon/ydotoold.hpp Library/Utils.hpp Library/Utils.cpp)
 
 
 set(SOURCE_FILES_CLIENT
         CommonIncludes.hpp
         Client/ydotool.cpp Client/ydotool.hpp)
 
-link_libraries(-L.)
+include_directories(${libevdevPlus_SOURCE_DIR})
+include_directories(${libuInputPlus_SOURCE_DIR})
+include_directories(${IODash_SOURCE_DIR})
+include_directories(${IODash_SOURCE_DIR}/cpp_modules/portable-endian) # FIXME
+include_directories(${cxxopts_SOURCE_DIR}/include)
 
-if (NOT DEFINED DYNAMIC_BUILD OR (${DYNAMIC_BUILD}))
-    add_library(ydotool_library SHARED ${SOURCE_FILES_LIBRARY})
-    set_target_properties(ydotool_library PROPERTIES OUTPUT_NAME ydotool)
-    set_target_properties(ydotool_library PROPERTIES VERSION ${PROJECT_VERSION})
-    set_target_properties(ydotool_library PROPERTIES SOVERSION ${CPACK_PACKAGE_VERSION_MAJOR})
+add_executable(ydotoold ${SOURCE_FILES_DAEMON})
+target_link_libraries(ydotoold PUBLIC cxxopts uInputPlus evdevPlus)
 
-    target_link_libraries(ydotool_library dl boost_program_options uInputPlus evdevPlus)
-
-    add_executable(ydotoold ${SOURCE_FILES_DAEMON})
-    target_link_libraries(ydotoold ydotool_library dl pthread boost_program_options uInputPlus evdevPlus)
-
-    add_executable(ydotool ${SOURCE_FILES_CLIENT})
-    target_link_libraries(ydotool ydotool_library boost_program_options pthread uInputPlus evdevPlus)
-    set_target_properties(ydotool PROPERTIES OUTPUT_NAME ydotool)
-    
-    install(TARGETS ydotool_library DESTINATION ${CMAKE_INSTALL_LIBDIR})
-    install(TARGETS ydotoold ydotool DESTINATION ${CMAKE_INSTALL_BINDIR})
-endif()
-
-if (NOT DEFINED STATIC_BUILD OR (${STATIC_BUILD}))
-    add_library(ydotool_library_static STATIC ${SOURCE_FILES_LIBRARY})
-    set_target_properties(ydotool_library_static PROPERTIES OUTPUT_NAME ydotool)
-    target_link_libraries(ydotool_library_static dl boost_program_options uInputPlus evdevPlus)
-
-    add_executable(ydotoold_static ${SOURCE_FILES_DAEMON})
-    target_link_libraries(ydotoold_static ydotool_library_static dl pthread boost_program_options uInputPlus evdevPlus -static)
-    set_target_properties(ydotoold_static PROPERTIES OUTPUT_NAME ydotoold_static)
-
-    add_executable(ydotool_static ${SOURCE_FILES_CLIENT})
-    target_link_libraries(ydotool_static ydotool_library_static boost_program_options pthread uInputPlus evdevPlus -static)
-    set_target_properties(ydotool_static PROPERTIES OUTPUT_NAME ydotool_static)
-    
-    install(TARGETS ydotool_library_static DESTINATION ${CMAKE_INSTALL_LIBDIR})
-    install(TARGETS ydotoold_static ydotool_static DESTINATION ${CMAKE_INSTALL_BINDIR})
-endif()
+add_library(ydotool_library STATIC ${SOURCE_FILES_LIBRARY})
+add_executable(ydotool ${SOURCE_FILES_CLIENT})
+target_link_libraries(ydotool ydotool_library dl pthread uInputPlus evdevPlus)

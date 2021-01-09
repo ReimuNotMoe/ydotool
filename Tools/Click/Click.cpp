@@ -1,13 +1,19 @@
 /*
     This file is part of ydotool.
-    Copyright (C) 2018-2019 ReimuNotMoe
+    Copyright (C) 2018-2021 Reimu NotMoe <reimu@sudomaker.com>
 
     This program is free software: you can redistribute it and/or modify
-    it under the terms of the MIT License.
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "Click.hpp"
@@ -17,114 +23,80 @@ static const char ydotool_tool_name[] = "click";
 
 using namespace ydotool::Tools;
 
-const char *Click::Name() {
+const char *Click::name() {
 	return ydotool_tool_name;
 }
 
+int Click::run(int argc, char **argv) {
+	cxxopts::Options options("click", "click");
 
-static void ShowHelp(){
-	std::cerr << "Usage: click [--delay <ms>] [--repeat <times>] [--repeat-delay <ms>] <button>\n"
-		<< "  --help                Show this help.\n"
-		<< "  --delay ms            Delay time before start clicking. Default 100ms.\n"
-		<< "  --repeat times        Times to repeat the key sequence.\n"
-		<< "  --repeat-delay ms     Delay time between repetitions. Default 20ms.\n"
-		<< "  button                1: left 2: right 3: middle" << std::endl;
-}
+	options.add_options()
+		("h,help", "Show this help")
+		("down", "Only mousedown", cxxopts::value<bool>())
+		("up", "Only mouseup", cxxopts::value<bool>())
+		("next-delay", "Delay time before clicking next button", cxxopts::value<int>()->default_value("50"), "ms")
+		("buttons", "[Positional] Buttons to press (left, right, middle)", cxxopts::value<std::vector<std::string>>())
+		;
 
-int Click::Exec(int argc, const char **argv) {
-//	std::cout << "argc = " << argc << "\n";
-//
-//	for (int i=1; i<argc; i++) {
-//		std::cout << "argv[" << i << "] = " << argv[i] << "\n";
-//	}
 
-	int time_delay = 100;
-	int time_repdelay = 20;
-	int repeats = 1;
+	options.parse_positional({"buttons"});
+	options.positional_help("<buttons...>");
+	options.show_positional_help();
 
-	std::vector<std::string> extra_args;
+	int mode = 0, next_delay;
+
+	std::vector<std::string> btns;
 
 	try {
+		auto cmd = options.parse(argc, argv);
 
-		po::options_description desc("");
-		desc.add_options()
-			("help", "Show this help")
-			("delay", po::value<int>())
-			("repeat", po::value<int>())
-			("repeat-delay", po::value<int>())
-			("extra-args", po::value(&extra_args));
-
-
-		po::positional_options_description p;
-		p.add("extra-args", -1);
-
-
-		po::variables_map vm;
-		po::store(po::command_line_parser(argc, argv).
-			options(desc).
-			positional(p).
-			run(), vm);
-		po::notify(vm);
-
-
-		if (vm.count("help")) {
-			ShowHelp();
-			return -1;
+		if (cmd.count("help") || !cmd.count("buttons")) {
+			std::cout << options.help();
+			return 0;
 		}
 
-		if (vm.count("delay")) {
-			time_delay = vm["delay"].as<int>();
-			std::cerr << "Delay was set to "
-				  << time_delay << " milliseconds.\n";
+		if (cmd.count("up")) {
+			mode = 2;
+		} else if (cmd.count("down")) {
+			mode = 1;
 		}
 
-		if (vm.count("repeat")) {
-			repeats = vm["repeat"].as<int>();
-			std::cerr << "Repeat was set to "
-				  << repeats << " times.\n";
-		}
+		next_delay = cmd["next-delay"].as<int>();
 
-		if (vm.count("repeat-delay")) {
-			time_repdelay = vm["repeat-delay"].as<int>();
-			std::cerr << "Repeat delay was set to "
-				  << time_repdelay << " milliseconds.\n";
-		}
+		btns = cmd["buttons"].as<std::vector<std::string>>();
+		btns.insert(btns.end(), cmd.unmatched().begin(), cmd.unmatched().end());
 
-		if (extra_args.size() != 1) {
-			std::cerr << "Which mouse button do you want to click?\n"
-				     "Use `ydotool " << argv[0] << " --help' for help.\n";
-
-			return 1;
-		}
 
 	} catch (std::exception &e) {
-		std::cerr << "ydotool: click: error: " << e.what() << std::endl;
-		return 2;
+		std::cout << "Ooooops! " << e.what() << "\n";
+		std::cout << options.help();
+		return 0;
 	}
 
-	if (time_delay)
-		usleep(time_delay * 1000);
+	for (size_t i=0; i<btns.size(); i++) {
+		auto &btn = btns[i];
 
-	int keycode = BTN_LEFT;
+		int keycode = BTN_LEFT;
 
-	switch (strtol(extra_args[0].c_str(), NULL, 10)) {
-		case 2:
+		if (btn == "left")
+			keycode = BTN_LEFT;
+		else if (btn == "right")
 			keycode = BTN_RIGHT;
-			break;
-		case 3:
+		else if (btn == "middle")
 			keycode = BTN_MIDDLE;
-			break;
-		default:
-			break;
+
+
+		if (mode != 2)
+			uInputContext->send_key(keycode, 1);
+
+		if (mode != 1)
+			uInputContext->send_key(keycode, 0);
+
+		if (next_delay && i<(btns.size()-1))
+			usleep(next_delay * 1000);
 	}
 
-	while (repeats--) {
-		uInputContext->SendKey(keycode, 1);
-		uInputContext->SendKey(keycode, 0);
-		if (time_repdelay)
-			usleep(time_repdelay * 1000);
-	}
 
-	return argc;
+	return 0;
 }
 
