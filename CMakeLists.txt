@@ -73,3 +73,5 @@ add_library(ydotool_library STATIC ${SOURCE_FILES_LIBRARY})
 add_executable(ydotool ${SOURCE_FILES_CLIENT})
 target_link_libraries(ydotool ydotool_library dl pthread uInputPlus evdevPlus)
 install(TARGETS ydotool DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+add_subdirectory(Daemon)
