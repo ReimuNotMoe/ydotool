@@ -6,17 +6,32 @@ Generic Linux command-line automation tool (no X!)
 ## Packages & Releases
 You may select an older tag to view the previous version.
 
-- [Static build for Ubuntu 20.04](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=build:ubuntu:20.04)
+- [Build for Ubuntu 20.04](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=build:ubuntu:20.04) (Not static, but doesn't require anything more than libc & libstdc++)
 
 ## Important Notes
-The project is now refactored, some redundant stuff are removed, and it no longer depends on boost. Since it's in a hurry, some new bugs may be introduced. You're welcome to find them out.
+### Current situation
+The project is now refactored, had some redundant stuff removed, and no longer depends on boost.
+
+**CMake behaviour is changed. Please review them in the [Build](#build) section.**
+
+Since it's in a hurry, some new bugs may be introduced. You're welcome to find them out.
  
 However my life is still very busy. I may still not have much time to maintain this project.
 
-**The license has been changed to AGPLv3, to stop large tech companies from modifying this project and only use internally.** 
+### Licensing
+The license has been changed to **AGPLv3**, to stop large tech companies from **modifying this project and only use internally.** 
 
-**In order to (hopefully) stop these free software license violations in China, the project is going to apply for a software copyright (软件著作权) in China. This will give me a way to sue them. If you want to contribute to this project from now on, you need to agree that your work will be copyrighted by me (only in China).**
+In order to (hopefully) stop these free software license violations in China, the project is going to apply for a software copyright (软件著作权) in China. **Doing so will give me a way to sue them.**
 
+**If you want to contribute to this project from now on, you need to agree that your work will be copyrighted by me (only in China).**
+
+**If you are a former contributor and you don't want your work to be copyrighted by me in China, please open an issue to let me know. I will then replace your work with a clean room implementation.**
+
+If you know a free software license violation of this project, please don't hesitate to let me know.
+
+ydotool will always be a [free software](https://www.gnu.org/philosophy/free-sw.en.html).
+
+### Misc
 As always, if you would like to have features you want implemented quickly, you could consider [donating](https://www.patreon.com/classicoldsong) to this project. This will allow me to allocate more time on this project.
 
 ## Usage
@@ -72,7 +87,12 @@ In order to solve this problem, I made a persistent background service, ydotoold
 ## Build
 **CMake 3.14+ is required.**
 
-Now all dependencies will be configured by CPM automatically to save you from building & installing them manually. So an Internet connection is required.
+All dependencies will be configured by CPM automatically to save you from building & installing them manually. **So an Internet connection is required.**
+
+The libraries, `libevdevPlus` and `libuInputPlus`, are too small and too troublesome to be complied as shared libraries. So now they are statically linked. As a result, the compiled binaries will only depend on `libc` and `libstdc++`.
+
+CMake will no longer build the packages or install compiled files to system directories. Because it's complicated to build packages for every distro correctly using CPack, and every distribution has its own customs of filesystem hierarchy. I suggest you to copy compiled files to desired destination manually.
+
 
 ### Compile
 
