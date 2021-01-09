@@ -3,66 +3,53 @@ Generic Linux command-line automation tool (no X!)
 
 [![pipeline status](https://gitlab.com/ReimuNotMoe/ydotool/badges/master/pipeline.svg)](https://gitlab.com/ReimuNotMoe/ydotool/pipelines)
 
-## Releases
-- [Ubuntu 18.04](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=package:ubuntu:18.04)
-- [Ubuntu 19.04](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=package:ubuntu:19.04)
-- [Ubuntu 19.10](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=package:ubuntu:19.10)
-- [Debian 9](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=package:debian:9)
-- ArchLinux AUR: [release](https://aur.archlinux.org/packages/ydotool/) / [git](https://aur.archlinux.org/packages/ydotool-git/) (Thanks [@Depau](https://github.com/Depau))
-- [openSUSE Tumbleweed / Leap 15.1](https://software.opensuse.org/package/ydotool) (Thanks [@cubesky](https://github.com/cubesky))
-- **Fedora** 31 and later - **ydotool** is in the standard repositories
-- [Static binary for Kernel 3.2+](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=package:static)
+## Packages & Releases
+Currently there are none for this new version. You may select an older tag to view the previous version.
 
 ## Important Notes
-Since Jun, 2019, I have little time to maintain this project because I'm striving to start an undertaking (instead of working [996](https://en.wikipedia.org/wiki/996_working_hour_system)). 
+The project is now refactored, some redundant stuff are removed, and it no longer depends on boost. Since it's in a hurry, some new bugs may be introduced. You're welcome to find them out.
+ 
+However my life is still very busy. I may still not have much time to maintain this project.
 
-If you would like to have features you want implemented quickly, you could consider [donating](https://www.patreon.com/classicoldsong) to this project. This will allow me to allocate more time on this project.
+**The license has been changed to AGPLv3, to stop large tech companies from modifying this project and only use internally.** 
 
-Also, pull requests are always welcomed. Thanks in advance for your generous help.
+**In order to (hopefully) stop these free software license violations in China, the project is going to apply for a software copyright (软件著作权) in China. This will give me a way to sue them. If you want to contribute to this project from now on, you need to agree that your work will be copyrighted by me (only in China).**
+
+As always, if you would like to have features you want implemented quickly, you could consider [donating](https://www.patreon.com/classicoldsong) to this project. This will allow me to allocate more time on this project.
 
 ## Usage
-In most times, replace `x` with `y`. :P
-
 Currently implemented command(s):
 - `type` - Type a string
+- `sleep` - Sleep some time
 - `key` - Press keys
 - `mousemove` - Move mouse pointer to absolute position
 - `click` - Click on mouse buttons
 - `recorder` - Record/replay input events
 
+Now it's possible to chain multiple commands together, separated by a comma between two spaces.
 
 ## Examples
-Type some words:
+Switch to tty1, wait 2 seconds, and type some words:
 
-    ydotool type 'Hey guys. This is Austin.'
-
-Switch to tty1:
-
-    ydotool key ctrl+alt+f1
+    ydotool key ctrl+alt+f1 , sleep 2000 , type 'Hey guys. This is Austin.'
 
 Close a window in graphical environment:
 
     ydotool key Alt+F4
 
-Move mouse pointer to 100,100:
-
-    ydotool mousemove 100 100
-
 Relatively move mouse pointer to -100,100:
 
-    ydotool mousemove_relative -- -100 100
+    ydotool mousemove -100 100
+
+Move mouse pointer to 100,100:
+
+    ydotool mousemove --absolute 100 100
 
 Mouse right click:
 
-    ydotool click 2
+    ydotool click right
     
-
 ## Notes
-#### About the project
-As of May, 2019, searching `wayland xdotool replacement` online won't get much useful results.
-
-If you find this project useful, please consider to spread it.
-
 #### Runtime
 This program requires access to `/dev/uinput`. **This usually requires root permissions.**
 
@@ -71,40 +58,27 @@ You can use it on anything as long as it accepts keyboard/mouse/whatever input. 
 #### Available key names
 See `/usr/include/linux/input-event-codes.h`
 
-#### About the --delay option
+#### Why a background service is needed
 ydotool works differently from xdotool. xdotool sends X events directly to X server, while ydotool uses the uinput framework of Linux kernel to emulate an input device.
 
 When ydotool runs and creates a virtual input device, it will take some time for your graphical environment (X11/Wayland) to recognize and enable the virtual input device. (Usually done by udev)
 
 So, if the delay was too short, the virtual input device may not got recognized & enabled by your graphical environment in time.
 
-In order to solve this problem, I made a persistent background service, ydotoold, to hold a persistent virtual device, and accept input from ydotool. When ydotoold is unavailable, ydotool will work without it.
-
-#### New modular design
-Now everyone can write their own tool to use with ydotool. Have a look at the `Tool` folder.
-
-I will write some documents for this when I have time.
+In order to solve this problem, I made a persistent background service, ydotoold, to hold a persistent virtual device, and accept input from ydotool. When ydotoold is unavailable, ydotool will try to work without it.
 
 ## Build
-### Dependencies
-- [uInputPlus](https://github.com/YukiWorkshop/libuInputPlus)
-- [libevdevPlus](https://github.com/YukiWorkshop/libevdevPlus)
-- boost::program_options
+**CMake 3.14+ is required.**
+
+Now all dependencies will be configured by CPM automatically to save you from building & installing them manually. So an Internet connection is required.
 
 ### Compile
-Nearly all my projects use CMake. It's very simple:
 
     mkdir build
     cd build
     cmake ..
     make -j `nproc`
-    
-### Packages
-RPM packages are available for **fedora**-31 and later
 
-Install with:
-
-    sudo dnf install ydotool
 
 ## Troubleshooting
 ### Custom keyboard layouts

@@ -1,49 +1,52 @@
 /*
     This file is part of ydotool.
-    Copyright (C) 2018-2019 ReimuNotMoe
+    Copyright (C) 2018-2021 Reimu NotMoe <reimu@sudomaker.com>
 
     This program is free software: you can redistribute it and/or modify
-    it under the terms of the MIT License.
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef YDOTOOL_LIB_COMMANDS_HPP
-#define YDOTOOL_LIB_COMMANDS_HPP
+#pragma once
 
 #include "../CommonIncludes.hpp"
-#include "Instance.hpp"
 
 namespace ydotool {
 	namespace Tool {
-
 		class ToolTemplate {
 		public:
-			std::shared_ptr<ydotool::Instance> ydotool_instance;
-			uInput* uInputContext = nullptr;
+			uInputPlus::uInput* uInputContext = nullptr;
 
 			ToolTemplate() = default;
 			~ToolTemplate() = default;
 
-			void Init(std::shared_ptr<ydotool::Instance>& __ydotool_instance);
-			virtual const char *Name() = 0;
-			virtual int Exec(int argc, const char **argv) = 0;
+			void init(uInputPlus::uInput* ui_ctx);
+			virtual const char *name() = 0;
+			virtual int run(int argc, char **argv) = 0;
 		};
 
 		class ToolManager {
+		private:
+			uInputPlus::uInput* uInputContext = nullptr;
 		public:
-			ToolManager();
+			explicit ToolManager(uInputPlus::uInput* ui_ctx);
 
-			std::unordered_map<std::string, void *> dl_handles;
-			std::unordered_map<std::string, void *> init_funcs;
+			std::unordered_map<std::string, std::tuple<void *, void *, void *>> tools; //dl_handles, init_funcs, constructed
 
-			void TryDlOpen(const std::string& __path);
-			void ScanPath(const std::string& __path);
+			void try_dlopen(const std::string& __path);
+			void scan_path(const std::string& __path);
+
+			int run_tool(int argc, char **argv);
 		};
 
 	}
 }
-
-#endif //YDOTOOL_LIB_COMMANDS_HPP

@@ -1,13 +1,19 @@
 /*
     This file is part of ydotool.
-    Copyright (C) 2018-2019 ReimuNotMoe
+    Copyright (C) 2018-2021 Reimu NotMoe <reimu@sudomaker.com>
 
     This program is free software: you can redistribute it and/or modify
-    it under the terms of the MIT License.
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "MouseMove.hpp"
@@ -17,80 +23,54 @@ using namespace ydotool::Tools;
 const char ydotool_tool_name[] = "mousemove";
 
 
-static int time_keydelay = 12;
-
-static void ShowHelp(const char *argv_0){
-	std::cerr << "Usage: " << argv_0 << " [--delay <ms>] <x> <y>\n"
-			<< "  --help                Show this help.\n"
-			<< "  --delay ms            Delay time before start moving. Default 100ms." << std::endl;
-}
-
-const char *MouseMove::Name() {
+const char *MouseMove::name() {
 	return ydotool_tool_name;
 }
 
+int MouseMove::run(int argc, char **argv) {
+	cxxopts::Options options("mousemove", "mousemove");
 
-int MouseMove::Exec(int argc, const char **argv) {
-	int time_delay = 100;
+	options.add_options()
+		("h,help", "Show this help")
+		("absolute", "Use absolute position", cxxopts::value<bool>())
+		("x", "[Positional] X", cxxopts::value<int>()->default_value("0"))
+		("y", "[Positional] Y", cxxopts::value<int>()->default_value("0"))
+		;
 
-	std::vector<std::string> extra_args;
+	options.parse_positional({"x", "y"});
+	options.positional_help("<x> <y>");
+	options.show_positional_help();
+
+	int x, y;
+	bool absolute = false;
 
 	try {
+		auto cmd = options.parse(argc, argv);
 
-		po::options_description desc("");
-		desc.add_options()
-			("help", "Show this help")
-			("delay", po::value<int>())
-			("extra-args", po::value(&extra_args));
-
-
-		po::positional_options_description p;
-		p.add("extra-args", -1);
-
-
-		po::variables_map vm;
-		po::store(po::command_line_parser(argc, argv).
-			options(desc).
-			positional(p).
-			run(), vm);
-		po::notify(vm);
-
-
-		if (vm.count("help")) {
-			ShowHelp(argv[0]);
-			return -1;
+		if (cmd.count("help") || !cmd.count("x") || !cmd.count("y")) {
+			std::cout << options.help();
+			return 0;
 		}
 
-		if (vm.count("delay")) {
-			time_delay = vm["delay"].as<int>();
-			std::cerr << "Delay was set to "
-				  << time_delay << " milliseconds.\n";
-		}
+		if (cmd.count("absolute"))
+			absolute = true;
 
-		if (extra_args.size() != 2) {
-			std::cerr << "Which coordinate do you want to move to?\n"
-				     "Use `ydotool " << argv[0] << " --help' for help.\n";
-
-			return 1;
-		}
-
+		x = cmd["x"].as<int>();
+		y = cmd["y"].as<int>();
 	} catch (std::exception &e) {
-		std::cerr <<  "ydotool: " << argv[0] << ": error: " << e.what() << std::endl;
-		return 2;
+		std::cout << "Ooooops! " << e.what() << "\n";
+		std::cout << options.help();
+		return 0;
 	}
 
-	if (time_delay)
-		usleep(time_delay * 1000);
 
-	auto x = (int32_t)strtol(extra_args[0].c_str(), nullptr, 10);
-	auto y = (int32_t)strtol(extra_args[1].c_str(), nullptr, 10);
 
-	if (!strchr(argv[0], '_')) {
-		uInputContext->RelativeMove({-INT32_MAX, -INT32_MAX});
+	if (absolute) {
+		uInputContext->send_pos_relative({-INT32_MAX, -INT32_MAX});
 	}
 
-	uInputContext->RelativeMove({x, y});
+	uInputContext->send_pos_relative({x, y});
 
-	return argc;
+	return 0;
 }
 

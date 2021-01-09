@@ -1,13 +1,19 @@
 /*
     This file is part of ydotool.
-    Copyright (C) 2018-2019 ReimuNotMoe
+    Copyright (C) 2018-2021 Reimu NotMoe <reimu@sudomaker.com>
 
     This program is free software: you can redistribute it and/or modify
-    it under the terms of the MIT License.
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "Key.hpp"
@@ -15,30 +21,8 @@
 using namespace evdevPlus;
 using namespace ydotool::Tools;
 
-
 const char ydotool_tool_name[] = "key";
 
-
-
-static int time_keydelay = 12;
-
-static void ShowHelp(){
-	std::cerr << "Usage: key [--delay <ms>] [--key-delay <ms>] [--repeat <times>] [--repeat-delay <ms>] <key sequence> ...\n"
-		  << "  --help                Show this help.\n"
-		  << "  --down                Only keydown\n"
-		  << "  --up                  Only keyup\n"
-		  << "  --delay ms            Delay time before start pressing keys. Default 100ms.\n"
-		  << "  --key-delay ms        Delay time between keystrokes. Default 12ms.\n"
-		  << "  --repeat times        Times to repeat the key sequence.\n"
-		  << "  --repeat-delay ms     Delay time between repetitions. Default 0ms.\n"
-		  << "  --persist-delay ms    Keep virtual device alive for <ms> ms. Should be used in conjunction with --down or --up\n"
-		  << "\n"
-		  << "Each key sequence can be any number of modifiers and keys, separated by plus (+)\n"
-		  << "For example: alt+r Alt+F4 CTRL+alt+f3 aLT+1+2+3 ctrl+Backspace \n"
-		  << "\n"
-		  << "Since we are emulating keyboard input, combination like Shift+# is invalid.\n"
-		  << "Because typing a `#' involves pressing Shift and 3." << std::endl;
-}
 
 std::vector<std::string> ExplodeString(const std::string &str, char delim) {
 	std::vector<std::string> result;
@@ -98,158 +82,153 @@ static std::vector<int> KeyStroke2Code(const std::string &ks) {
 	return list_keycodes;
 }
 
-const char *Key::Name() {
+const char *Key::name() {
 	return ydotool_tool_name;
 }
-
-int mode = 0;
 
 
 int Key::EmitKeyCodes(long key_delay, const std::vector<std::vector<int>> &list_keycodes) {
 	auto sleep_time = (uint)(key_delay * 1000 / (list_keycodes.size() * 2));
 
-	for (auto &it : list_keycodes) {
+	for (int i=0; i<list_keycodes.size(); i++) {
+		auto &it = list_keycodes[i];
+
 		if (mode == 0 || mode == 1) {
 			for (auto &it_m : it) {
-				uInputContext->SendKey(it_m, 1);
+				uInputContext->send_key(it_m, 1);
 				usleep(sleep_time);
 			}
 		}
 
 		if (mode == 0) {
 			for (auto i = it.size(); i-- > 0;) {
-				uInputContext->SendKey(it[i], 0);
+				uInputContext->send_key(it[i], 0);
 				usleep(sleep_time);
 			}
 		}
 
 		if (mode == 2) {
 			for (auto &it_m : it) {
-				uInputContext->SendKey(it_m, 0);
+				uInputContext->send_key(it_m, 0);
 				usleep(sleep_time);
 			}
 		}
+
+		if (next_delay && i<(list_keycodes.size()-1))
+			usleep(next_delay * 1000);
 	}
 
 	return 0;
 }
 
+static void ShowHelp(){
+	std::cerr << "Usage: key [--delay <ms>] [--key-delay <ms>] [--repeat <times>] [--repeat-delay <ms>] <key sequence> ...\n"
+		  << "  --help                Show this help.\n"
+		  << "  --down                Only keydown\n"
+		  << "  --up                  Only keyup\n"
+		  << "  --delay ms            Delay time before start pressing keys. Default 100ms.\n"
+		  << "  --key-delay ms        Delay time between keystrokes. Default 12ms.\n"
+		  << "  --repeat times        Times to repeat the key sequence.\n"
+		  << "  --repeat-delay ms     Delay time between repetitions. Default 0ms.\n"
+		  << "  --persist-delay ms    Keep virtual device alive for <ms> ms. Should be used in conjunction with --down or --up\n"
+		  << "\n"
+		  << "Each key sequence can be any number of modifiers and keys, separated by plus (+)\n"
+		  << "For example: alt+r Alt+F4 CTRL+alt+f3 aLT+1+2+3 ctrl+Backspace \n"
+		  << "\n"
+		  << "Since we are emulating keyboard input, combination like Shift+# is invalid.\n"
+		  << "Because typing a `#' involves pressing Shift and 3." << std::endl;
+}
 
-int Key::Exec(int argc, const char **argv) {
-	int time_delay = 100;
-	int time_keydelay = 12;
-	int time_repdelay = 0;
+static void ShowHelpExtra() {
+	std::cerr << "\n"
+		  << "Each key sequence can be any number of modifiers and keys, separated by plus (+)\n"
+		  << "For example: alt+r Alt+F4 CTRL+alt+f3 aLT+1+2+3 ctrl+Backspace \n"
+		  << "\n"
+		  << "Since we are emulating keyboard input, combination like Shift+# is invalid.\n"
+		  << "Because typing a `#' involves pressing Shift and 3." << std::endl;
+}
 
-	int repeats = 1;
+int Key::run(int argc, char **argv) {
+	cxxopts::Options options("key", "key");
 
-	int persist_delay = 0;
+	options.add_options()
+		("h,help", "Show this help")
+		("down", "Only keydown", cxxopts::value<bool>())
+		("up", "Only keyup", cxxopts::value<bool>())
+		("key-delay", "Delay time between keystrokes", cxxopts::value<int>()->default_value("12"), "ms")
+		("repeat", "Times to repeat the sequence", cxxopts::value<int>()->default_value("1"), "times")
+		("repeat-delay", "Delay time between repetitions", cxxopts::value<int>()->default_value("20"), "ms")
+		("next-delay", "Delay time before pressing next key", cxxopts::value<int>()->default_value("50"), "ms")
+		("keys", "[Positional] Keys to press", cxxopts::value<std::string>())
+		;
 
+	options.parse_positional({"keys"});
+	options.positional_help("<keys...>");
+	options.show_positional_help();
 
-	std::string file_path;
-	std::vector<std::string> extra_args;
+	std::vector<std::string> keys;
 
 	try {
+		auto cmd = options.parse(argc, argv);
 
-		po::options_description desc("");
-		desc.add_options()
-			("help", "Show this help")
-			("down", "Keydown")
-			("up", "Keyup")
-			("delay", po::value<int>())
-			("key-delay", po::value<int>())
-			("repeat", po::value<int>())
-			("repeat-delay", po::value<int>())
-			("persist-delay", po::value<int>())
-			("extra-args", po::value(&extra_args));
-
-
-		po::positional_options_description p;
-		p.add("extra-args", -1);
-
-
-		po::variables_map vm;
-		po::store(po::command_line_parser(argc, argv).
-			options(desc).
-			positional(p).
-			run(), vm);
-		po::notify(vm);
-
-
-		if (vm.count("help")) {
-			ShowHelp();
-			return -1;
+		if (cmd.count("help") || !cmd.count("keys")) {
+			std::cout << options.help();
+			ShowHelpExtra();
+			return 0;
 		}
 
-		if (vm.count("up")) {
+		time_keydelay = cmd["key-delay"].as<int>();
+		repeats = cmd["repeat"].as<int>();
+		time_repdelay = cmd["repeat-delay"].as<int>();
+		next_delay = cmd["next-delay"].as<int>();
+
+		keys.push_back(cmd["keys"].as<std::string>());
+		keys.insert(keys.end(), cmd.unmatched().begin(), cmd.unmatched().end());
+
+
+		if (cmd.count("up")) {
 			mode = 2;
-		}
-
-		if (vm.count("down")) {
+		} else if (cmd.count("down")) {
 			mode = 1;
 		}
 
-		if (vm.count("delay")) {
-			time_delay = vm["delay"].as<int>();
-			std::cerr << "Delay was set to "
-				  << time_delay << " milliseconds.\n";
-		}
-
-		if (vm.count("persist-delay")) {
-			persist_delay = vm["persist-delay"].as<int>();
-			std::cerr << "Persist delay was set to "
-				  << persist_delay << " milliseconds.\n";
-		}
-
-		if (vm.count("key-delay")) {
-			time_keydelay = vm["key-delay"].as<int>();
-			std::cerr << "Key delay was set to "
-				  << time_keydelay << " milliseconds.\n";
-		}
-
-		if (vm.count("repeat")) {
-			repeats = vm["repeat"].as<int>();
-			std::cerr << "Repeat was set to "
-				  << repeats << " times.\n";
-		}
-
-		if (vm.count("repeat-delay")) {
-			time_repdelay = vm["repeat-delay"].as<int>();
-			std::cerr << "Repeat delay was set to "
-				  << time_repdelay << " milliseconds.\n";
-		}
-
-
-		if (extra_args.empty()) {
-			std::cerr << "Which keys do you want to press?\n"
-				     "Use `ydotool key --help' for help.\n";
-
-			return 1;
-		}
-
 	} catch (std::exception &e) {
-		std::cerr << "ydotool: key: error: " << e.what() << std::endl;;
-		return 2;
+		std::cout << "Ooooops! " << e.what() << "\n";
+		std::cout << options.help();
+		ShowHelpExtra();
+		return 0;
 	}
 
-	if (time_delay)
-		usleep(time_delay * 1000);
+
+		std::cerr << "Next delay was set to "
+			  << next_delay << " milliseconds.\n";
+
+		std::cerr << "Key delay was set to "
+			  << time_keydelay << " milliseconds.\n";
+
+		std::cerr << "Repeat was set to "
+			  << repeats << " times.\n";
+
+		std::cerr << "Repeat delay was set to "
+			  << time_repdelay << " milliseconds.\n";
+
 
 	std::vector<std::vector<int>> keycodes;
 
-	for (auto &ks : extra_args) {
+	for (auto &ks : keys) {
 		auto thiskc = KeyStroke2Code(ks);
 
 		keycodes.emplace_back(thiskc);
 	}
 
 	while (repeats--) {
-		EmitKeyCodes(time_delay, keycodes);
+		EmitKeyCodes(time_keydelay, keycodes);
+		if (repeats > 0) {
+			usleep(time_repdelay * 1000);
+		}
 	}
 
-	if (persist_delay)
-		usleep(persist_delay * 1000);
-
-	return argc;
+	return 0;
 }
 
 

@@ -1,6 +1,20 @@
-//
-// Created by root on 9/2/19.
-//
+/*
+    This file is part of ydotool.
+    Copyright (C) 2018-2021 Reimu NotMoe <reimu@sudomaker.com>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 
 #include "Recorder.hpp"
 
@@ -9,21 +23,7 @@ using namespace Tools;
 
 const char ydotool_tool_name[] = "recorder";
 
-
-static void ShowHelp(const char *argv_0){
-	std::cerr << "Usage: " << argv_0 << " [--delay <ms] [--duration <ms>] [--record <output file> [devices]] [--replay <input file>]\n"
-		  << "  --help                Show this help.\n"
-		  << "  --record                \n"
-		  << "  devices               Devices to record from. Default is all, including non-keyboard devices.\n"
-		  << "  --replay                \n"
-		  << "  --display               \n"
-		  << "  --delay ms            Delay time before start recording/replaying. Default 5000ms.\n"
-		  << "  --duration ms         Record duration. Otherwise use SIGINT to stop recording.\n"
-		     "\n"
-		     "The record file can't be replayed on an architecture with different endianness." << std::endl;
-}
-
-const char *Recorder::Name() {
+const char *Recorder::name() {
 	return ydotool_tool_name;
 }
 
@@ -58,78 +58,72 @@ static void stop_handler(int whatever) {
 	exit(0);
 }
 
+static void ShowHelp(char *argv_0){
+	std::cerr << "Usage: " << argv_0 << " [--delay <ms] [--duration <ms>] [--record <output file> [devices]] [--replay <input file>]\n"
+		  << "  --help                Show this help.\n"
+		  << "  --record                \n"
+		  << "  devices               Devices to record from. Default is all, including non-keyboard devices.\n"
+		  << "  --replay                \n"
+		  << "  --display               \n"
+		  << "  --delay ms            Delay time before start recording/replaying. Default 5000ms.\n"
+		  << "  --duration ms         Record duration. Otherwise use SIGINT to stop recording.\n"
+		     "\n"
+		     "The record file can't be replayed on an architecture with different endianness." << std::endl;
+}
 
-int Recorder::Exec(int argc, const char **argv) {
-	std::vector<std::string> extra_args;
+int Recorder::run(int argc, char **argv) {
+	cxxopts::Options options("key", "key");
 
-	int delay = 5000;
+	options.add_options()
+		("h,help", "Show this help")
+		("record", "Record", cxxopts::value<bool>())
+		("replay", "Replay", cxxopts::value<bool>())
+		("display", "Display", cxxopts::value<bool>())
+		("duration", "Record duration. If unspecified, use Ctrl-C to stop recording", cxxopts::value<int>()->default_value("0"), "ms")
+		("devices", "Devices, separated by comma, to record from. Default is all devices", cxxopts::value<std::vector<std::string>>()->default_value(""), "path")
+		("file", "File to record to / replay from", cxxopts::value<std::string>())
+		;
+
 	int duration = 0;
 	int mode = 0;
 
+	std::vector<std::string> device_list;
+	std::string filepath;
+
 	try {
+		auto cmd = options.parse(argc, argv);
 
-		po::options_description desc("");
-		desc.add_options()
-			("help", "Show this help")
-			("record", "")
-			("replay", "")
-			("display", "")
-			("delay", po::value<int>())
-			("duration", po::value<int>())
-			("extra-args", po::value(&extra_args));
-
-
-		po::positional_options_description p;
-		p.add("extra-args", -1);
-
-
-		po::variables_map vm;
-		po::store(po::command_line_parser(argc, argv).
-			options(desc).
-			positional(p).
-			run(), vm);
-		po::notify(vm);
-
-		if (vm.count("delay")) {
-			delay = vm["delay"].as<int>();
+		if (cmd.count("help")) {
+			std::cout << options.help();
+			return 0;
 		}
 
-		if (vm.count("duration")) {
-			duration = vm["duration"].as<int>();
-		}
+		filepath = cmd["file"].as<std::string>();
+		duration = cmd["duration"].as<int>();
+		device_list = cmd["devices"].as<std::vector<std::string>>();
 
-		if (vm.count("help")) {
-			ShowHelp(argv[0]);
-			return -1;
-		}
-
-		if (vm.count("record")) {
+		if (cmd.count("record")) {
 			mode = 1;
 		}
-
-		if (vm.count("replay")) {
+		if (cmd.count("replay")) {
 			mode = 2;
 		}
-
-		if (vm.count("display")) {
+		if (cmd.count("display")) {
 			mode = 3;
 		}
 
 		if (!mode)
 			throw std::invalid_argument("mode not specified");
 
-		if (extra_args.empty())
+		if (filepath.empty())
 			throw std::invalid_argument("file not specified");
 
-
 	} catch (std::exception &e) {
-		std::cerr <<  "ydotool: " << argv[0] << ": error: " << e.what() << std::endl;
-		std::cerr << "Use --help for help.\n";
-
-		return 2;
+		std::cout << "Ooooops! " << e.what() << "\n";
+		std::cout << options.help();
+		return 0;
 	}
 
-	auto& filepath = extra_args.front();
 
 	if (mode == 1)
 		fd_file = open(filepath.c_str(), O_WRONLY|O_CREAT, 0644);
@@ -142,16 +136,7 @@ int Recorder::Exec(int argc, const char **argv) {
 		return 2;
 	}
 
-	std::cerr << "Delay was set to "
-		  << delay << " milliseconds.\n";
-
-
-
 	if (mode == 1) {
-		extra_args.erase(extra_args.begin());
-
-		auto &device_list = extra_args;
-
 		if (device_list.empty()) {
 			device_list = find_all_devices();
 
@@ -172,20 +157,14 @@ int Recorder::Exec(int argc, const char **argv) {
 				kill(getpid(), SIGINT);
 			}).detach();
 
-		if (delay)
-			usleep(delay * 1000);
-
 		do_record(device_list);
 	} else if (mode == 2) {
-		if (delay)
-			usleep(delay * 1000);
-
 		do_replay();
 	} else if (mode == 3) {
 		do_display();
 	}
 	
-	return argc;
+	return 0;
 }
 
 
@@ -233,7 +212,7 @@ void Recorder::do_replay() {
 		auto dat = (data_chunk *)cur_pos;
 		usleep(dat->delay[0] * 1000000 + dat->delay[1] / 1000);
 
-		uInputContext->Emit(dat->ev_type, dat->ev_code, dat->ev_value);
+		uInputContext->emit(dat->ev_type, dat->ev_code, dat->ev_value);
 
 		cur_pos += sizeof(data_chunk);
 	}
@@ -293,7 +272,7 @@ void Recorder::do_record(const std::vector<std::string> &__devices) {
 		eev.data.ptr = evDev;
 		eev.events = EPOLLIN;
 
-		assert(!epoll_ctl(fd_epoll, EPOLL_CTL_ADD, evDev->FD, &eev));
+		assert(!epoll_ctl(fd_epoll, EPOLL_CTL_ADD, evDev->fd(), &eev));
 
 	}
 
@@ -311,7 +290,7 @@ void Recorder::do_record(const std::vector<std::string> &__devices) {
 		for (int i=0; i<rc; i++) {
 			auto &it = events[i];
 			auto eev = (evdevPlus::EventDevice *)it.data.ptr;
-			auto buf = eev->Read();
+			auto buf = eev->read();
 
 			data_chunk dat;
 
