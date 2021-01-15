@@ -8,7 +8,7 @@ ydotool - command-line _/dev/uinput_ automation tool
 
 *ydotool* *cmd* _args..._
 
-*ydotool* *cmd* --help\fR
+*ydotool* *cmd* --help
 
 # DESCRIPTION
 
