@@ -67,7 +67,12 @@ include_directories(${cxxopts_SOURCE_DIR}/include)
 
 add_executable(ydotoold ${SOURCE_FILES_DAEMON})
 target_link_libraries(ydotoold PUBLIC cxxopts uInputPlus evdevPlus)
+install(TARGETS ydotoold DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 add_library(ydotool_library STATIC ${SOURCE_FILES_LIBRARY})
 add_executable(ydotool ${SOURCE_FILES_CLIENT})
 target_link_libraries(ydotool ydotool_library dl pthread uInputPlus evdevPlus)
+install(TARGETS ydotool DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+add_subdirectory(Daemon)
+add_subdirectory(manpage)
