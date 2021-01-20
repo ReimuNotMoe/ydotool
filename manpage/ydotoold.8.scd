@@ -6,7 +6,7 @@ ydotoold \- daemon for *ydotool*(1)
 
 # SYNOPSIS
 
-*ydotoold*
+*ydotoold* _[OPTION...]_
 
 # DESCRIPTION
 
@@ -20,15 +20,23 @@ If the delay is too short, the virtual input device may not be recognized & enab
 
 In order to solve this problem, the *ydotoold* background service holds a persistent virtual device, and accepts input from *ydotool*(1). When *ydotoold*(1) is unavailable, *ydotool*(1) will work without it.
 
+# OPTIONS
+
+	*--socket-path arg*  _<path>_
+		Socket path (default: /tmp/.ydotool_socket)
+
+	*--socket-perm arg* _<perms>_
+		Socket permission (default: 0600)
+
 # AUTHOR
 
 *ydotool*(1) and *ydotoold*(8) were written by ReimuNotMoe.
 
 This man page by bob.hepple@gmail.com
 
-# COPYRIGHT
+# LICENCE
 
-MIT License
+AGPLv3
 
 # SEE ALSO
 
