@@ -66,7 +66,7 @@ include_directories(${IODash_SOURCE_DIR}/cpp_modules/portable-endian) # FIXME
 include_directories(${cxxopts_SOURCE_DIR}/include)
 
 add_executable(ydotoold ${SOURCE_FILES_DAEMON})
-target_link_libraries(ydotoold PUBLIC cxxopts uInputPlus evdevPlus)
+target_link_libraries(ydotoold PUBLIC uInputPlus evdevPlus)
 install(TARGETS ydotoold DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 add_library(ydotool_library STATIC ${SOURCE_FILES_LIBRARY})
