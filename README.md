@@ -9,7 +9,7 @@ It's simple: **Pay for it or fork it.**
 
 This project has received more than 50 issues but $0 of donation.
 
-Recently I've read [the story of faker.js and the poor developer behind it](https://github.com/Marak/faker.js/issues/1046). And independent software developers in China, like us, have 10X more life pressure than the author of faker.js. Since ydotool has the opportunity to benefit large companies, I need to stop this from the beginning. ydotool only has 1% stars of faker.js has, so it's not too late ;)
+Recently we've read [the story of faker.js and the poor developer behind it](https://github.com/Marak/faker.js/issues/1046). And independent software developers in China, like us, have 10X more life pressure than the author of faker.js. Since ydotool has the opportunity to benefit large IT companies (these large IT companies are the main cause of life pressure here, such as the "996" working hours), we need to stop this from the beginning. ydotool only has 1% stars of faker.js has, so it's not too late ;)
 
 This project will not receive any updates from us unless there are supports.
 
