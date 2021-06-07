@@ -3,36 +3,22 @@ Generic Linux command-line automation tool (no X!)
 
 [![pipeline status](https://gitlab.com/ReimuNotMoe/ydotool/badges/master/pipeline.svg)](https://gitlab.com/ReimuNotMoe/ydotool/pipelines)
 
-## Packages & Releases
-You may select an older tag to view the previous version.
-
-- [Build for Ubuntu 20.04](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=build:ubuntu:20.04) (Not static, but doesn't require anything more than libc & libstdc++)
-
 ## Important Notes
 ### Current situation
-The project is now refactored, had some redundant stuff removed, and no longer depends on boost.
+It's simple: **Pay for it or fork it.**
 
-**CMake behaviour is changed. Please review them in the [Build](#build) section.**
+This project has received more than 50 issues but $0 of donation.
 
-Since it's in a hurry, some new bugs may be introduced. You're welcome to find them out.
- 
-However my life is still very busy. I may still not have much time to maintain this project.
+Recently I've read [the story of faker.js and the poor developer behind it](https://github.com/Marak/faker.js/issues/1046). And independent software developers in China, like us, have 10X more life pressure than the author of faker.js. Since ydotool has the opportunity to benefit large companies, I need to stop this from the beginning. ydotool only has 1% stars of faker.js has, so it's not too late ;)
 
-### Licensing
-The license has been changed to **AGPLv3**, to stop large tech companies from **modifying this project and only use internally.** 
+This project will not receive any updates from us unless there are supports.
 
-In order to (hopefully) stop these free software license violations in China, the project is going to apply for a software copyright (软件著作权) in China. **Doing so will give me a way to sue them.**
+If you are uncomfortable with the new refactored version, you can simply `git checkout` an older version.
 
-**If you want to contribute to this project from now on, you need to agree that your work will be copyrighted by me (only in China).**
+### How to support us
+- Donate on [Patreon](https://www.patreon.com/classicoldsong)
+- Buy our products on our [Tindie Store](https://www.tindie.com/stores/sudomaker/), if they are meaningful to you (please leave a message: `ydotool user`, so we can know that this purchase is for supporting ydotool)
 
-**If you are a former contributor and you don't want your work to be copyrighted by me in China, please open an issue to let me know. I will then replace your work with a clean room implementation.**
-
-If you know a free software license violation of this project, please don't hesitate to let me know.
-
-ydotool will always be a [free software](https://www.gnu.org/philosophy/free-sw.en.html).
-
-### Misc
-As always, if you would like to have features you want implemented quickly, you could consider [donating](https://www.patreon.com/classicoldsong) to this project. This will allow me to allocate more time on this project.
 
 ## Usage
 Currently implemented command(s):
