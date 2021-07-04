@@ -4,7 +4,7 @@ Description=Starts ydotoold service
 [Service]
 Type=simple
 Restart=always
-ExecStart=/usr/bin/ydotoold
+ExecStart=@CMAKE_INSTALL_FULL_BINDIR@/ydotoold
 ExecReload=/usr/bin/kill -HUP $MAINPID
 KillMode=process
 TimeoutSec=180
