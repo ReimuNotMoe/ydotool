@@ -13,6 +13,10 @@ endif()
 
 include(${CPM_DOWNLOAD_LOCATION})
 
+# Include GNU install directory module to detect where to install
+# files on Linux/Unix systems (e.g., lib vs lib64)
+include(GNUInstallDirs)
+
 CPMAddPackage(
         NAME IODash
         GITHUB_REPOSITORY YukiWorkshop/IODash
