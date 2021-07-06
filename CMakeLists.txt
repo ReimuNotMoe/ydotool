@@ -16,6 +16,7 @@ include(${CPM_DOWNLOAD_LOCATION})
 # Include GNU install directory module to detect where to install
 # files on Linux/Unix systems (e.g., lib vs lib64)
 include(GNUInstallDirs)
+find_package(PkgConfig)
 
 CPMAddPackage(
         NAME IODash
@@ -41,6 +42,15 @@ CPMAddPackage(
         VERSION 3.0.0
         GIT_TAG 2d8e17c4f88efce80e274cb03eeb902e055a91d3
 )
+
+# Try to get the systemd directory for user units from the package
+# and fall back on upstream default without the '/usr' prefix
+pkg_check_modules(SYSTEMD systemd)
+if (SYSTEMD_FOUND)
+    pkg_get_variable(SD_UNITDIR systemd systemduserunitdir)
+else()
+    set(SD_UNITDIR "lib/systemd/user")
+endif()
 
 set(SOURCE_FILES_LIBRARY
         CommonIncludes.hpp
