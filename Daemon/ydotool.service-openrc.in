@@ -1,0 +1,12 @@
+#!/sbin/openrc-run
+
+name=$RC_SVCNAME
+description="Starts ydotoold service"
+supervisor="supervise-daemon"
+command="/usr/local/bin/ydotoold"
+
+reload() {
+	ebegin "Reloading $RC_SVCNAME"
+	/usr/bin/kill -HUP $MAINPID
+	eend $?
+}
