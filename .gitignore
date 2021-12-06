@@ -8,4 +8,4 @@ libydotool.a
 libydotool.so
 ydotool
 ydotoold
-
+build/*
