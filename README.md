@@ -21,6 +21,7 @@ If you are uncomfortable with the new refactored version, you can simply `git ch
 - Donate on [Patreon](https://www.patreon.com/classicoldsong)
 - Buy our products on our [Tindie Store](https://www.tindie.com/stores/sudomaker/), if they are meaningful to you (please leave a message: `ydotool user`, so we can know that this purchase is for supporting ydotool)
 
+### [READ THIS BEFORE COMPLAINING ANYTING ABOUT THE PRICING](https://christine.website/blog/open-source-broken-2021-12-11)
 
 ## Usage
 Currently implemented command(s):
