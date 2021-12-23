@@ -45,6 +45,7 @@ Close a window in graphical environment:
 Relatively move mouse pointer to -100,100:
 
     ydotool mousemove -100 100    
+
     Warning: implicit mousemove call does not work with negative values, so until https://github.com/ReimuNotMoe/ydotool/issues/119 is fixed, use explicit method:
     ydotool mousemove -x -100 -y 100
 
@@ -55,7 +56,15 @@ Move mouse pointer to 100,100:
 Mouse right click:
 
     ydotool click right
-    
+
+Mouse click queue:
+
+    ydotool click left right left
+
+Mouse repeating left click:
+
+    ydotool click --repeat 5 --next-delay 25 left
+
 ## Notes
 #### Runtime
 This program requires access to `/dev/uinput`. **This usually requires root permissions.**

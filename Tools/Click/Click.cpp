@@ -34,6 +34,7 @@ int Click::run(int argc, char **argv) {
 		("h,help", "Show this help")
 		("down", "Only mousedown", cxxopts::value<bool>())
 		("up", "Only mouseup", cxxopts::value<bool>())
+		("repeat", "times of running/repeating", cxxopts::value<int>()->default_value("1"), "times")
 		("next-delay", "Delay time before clicking next button", cxxopts::value<int>()->default_value("50"), "ms")
 		("buttons", "[Positional] Buttons to press (left, right, middle)", cxxopts::value<std::vector<std::string>>())
 		;
@@ -43,7 +44,7 @@ int Click::run(int argc, char **argv) {
 	options.positional_help("<buttons...>");
 	options.show_positional_help();
 
-	int mode = 0, next_delay;
+	int mode = 0, repeat = 1, next_delay=25;//next_delay min. 25ms
 
 	std::vector<std::string> btns;
 
@@ -61,8 +62,9 @@ int Click::run(int argc, char **argv) {
 			mode = 1;
 		}
 
+		repeat = cmd["repeat"].as<int>();
 		next_delay = cmd["next-delay"].as<int>();
-
+        
 		btns = cmd["buttons"].as<std::vector<std::string>>();
 		btns.insert(btns.end(), cmd.unmatched().begin(), cmd.unmatched().end());
 
@@ -72,30 +74,31 @@ int Click::run(int argc, char **argv) {
 		std::cout << options.help();
 		return 0;
 	}
+    
+    for (int j=1; j<=repeat; ++j) {
+        for (size_t i=0; i<btns.size(); i++) {
+            auto &btn = btns[i];
 
-	for (size_t i=0; i<btns.size(); i++) {
-		auto &btn = btns[i];
+            int keycode = BTN_LEFT;
 
-		int keycode = BTN_LEFT;
+            if (btn == "left")
+                keycode = BTN_LEFT;
+            else if (btn == "right")
+                keycode = BTN_RIGHT;
+            else if (btn == "middle")
+                keycode = BTN_MIDDLE;
 
-		if (btn == "left")
-			keycode = BTN_LEFT;
-		else if (btn == "right")
-			keycode = BTN_RIGHT;
-		else if (btn == "middle")
-			keycode = BTN_MIDDLE;
+            if (mode != 2)
+                uInputContext->send_key(keycode, 1);
 
+            if (mode != 1)
+                uInputContext->send_key(keycode, 0);
 
-		if (mode != 2)
-			uInputContext->send_key(keycode, 1);
-
-		if (mode != 1)
-			uInputContext->send_key(keycode, 0);
-
-		if (next_delay && i<(btns.size()-1))
-			usleep(next_delay * 1000);
-	}
-
+            //if (next_delay && i<(btns.size()-1))
+            if (next_delay)
+                usleep(next_delay * 1000);
+        }
+    }
 
 	return 0;
 }
