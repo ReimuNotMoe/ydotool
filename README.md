@@ -44,7 +44,7 @@ Close a window in graphical environment:
 
 Relatively move mouse pointer to -100,100:
 
-    ydotool mousemove -100 100    
+    ydotool mousemove -100 100
 
     Warning: implicit mousemove call does not work with negative values, so until https://github.com/ReimuNotMoe/ydotool/issues/119 is fixed, use explicit method:
     ydotool mousemove -x -100 -y 100
