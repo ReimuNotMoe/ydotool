@@ -5,23 +5,17 @@ Generic Linux command-line automation tool (no X!)
 
 ## Important Notes
 ### Current situation
-It's simple: **Pay for it or fork it.**
+This project is now being maintained **thanks to all the people that are supporting this project!**
 
-Thanks for all the people that are supporting this project!
-
-All backers and sponsors are listed [here](https://github.com/TheNeuronProject/BACKERS/blob/main/README.md)
-
-Recently we've read [the story of faker.js and the poor developer behind it](https://github.com/Marak/faker.js/issues/1046). And independent software developers in China, like us, have 10 times more life pressure than the author of faker.js. Since ydotool has the opportunity to benefit large IT companies (these large IT companies are the main cause of life pressure here, such as the "996" working hours), we need to stop this from the beginning. ydotool only has 1% stars of faker.js has, so it's not too late ;)
-
-This project will not receive any updates from us unless there are supports.
-
-If you are uncomfortable with the new refactored version, you can simply `git checkout` an older version.
+All backers and sponsors are listed [here](https://github.com/TheNeuronProject/BACKERS/blob/main/README.md).
 
 ### How to support us
 - Donate on [Patreon](https://www.patreon.com/classicoldsong)
 - Buy our products on our [Tindie Store](https://www.tindie.com/stores/sudomaker/), if they are meaningful to you (please leave a message: `ydotool user`, so we can know that this purchase is for supporting ydotool)
 
 ### [READ THIS BEFORE COMPLAINING ANYTING ABOUT THE PRICING](https://christine.website/blog/open-source-broken-2021-12-11)
+
+Recently we've read [the story of faker.js and the poor developer behind it](https://github.com/Marak/faker.js/issues/1046). And independent software developers in China, like us, have 10 times more life pressure than the author of faker.js. Since ydotool has the opportunity to benefit large IT companies (these large IT companies are the main cause of life pressure here, such as the "996" working hours), we need to stop this from the beginning. ydotool only has 1% stars of faker.js has, so it's not too late ;)
 
 ## Usage
 Currently implemented command(s):
