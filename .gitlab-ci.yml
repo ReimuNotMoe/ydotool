@@ -1,6 +1,6 @@
 before_script:
   - apt update
-  - DEBIAN_FRONTEND=noninteractive apt install -yq build-essential cmake git
+  - DEBIAN_FRONTEND=noninteractive apt install -yq build-essential cmake git scdoc
 
 build:ubuntu:20.04:
   stage: build
@@ -14,3 +14,4 @@ build:ubuntu:20.04:
     - cd build
     - cmake -DCMAKE_CXX_FLAGS='-O2' ..
     - make -j2
+
