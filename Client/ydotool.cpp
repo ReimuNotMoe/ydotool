@@ -25,7 +25,7 @@ using namespace ydotool;
 static void ShowHelp(Tool::ToolManager *tool_mgr) {
 	std::cerr << "Usage: ydotool <opts> <cmd> <args>\n"
 		"Options:\n"
-		"  --socket-path\tPath to daemon socket, default: /tmp.ydotool_socket\n\n"
+		"  --socket-path\tPath to daemon socket (default: /tmp.ydotool_socket)\n\n"
 		"Available commands:\n";
 
 	for (auto &it : tool_mgr->tools) {
