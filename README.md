@@ -13,9 +13,14 @@ All backers and sponsors are listed [here](https://github.com/TheNeuronProject/B
 - Donate on [Patreon](https://www.patreon.com/classicoldsong)
 - Buy our products on our [Tindie Store](https://www.tindie.com/stores/sudomaker/), if they are meaningful to you (please leave a message: `ydotool user`, so we can know that this purchase is for supporting ydotool)
 
-### [READ THIS BEFORE COMPLAINING ANYTING ABOUT THE PRICING](https://christine.website/blog/open-source-broken-2021-12-11)
+### More talks
+[READ THIS BEFORE COMPLAINING ANYTHING ABOUT THE DONATION & ITS PRICING](https://christine.website/blog/open-source-broken-2021-12-11)
 
-Recently we've read [the story of faker.js and the poor developer behind it](https://github.com/Marak/faker.js/issues/1046). And independent software developers in China, like us, have 10 times more life pressure than the author of faker.js. Since ydotool has the opportunity to benefit large IT companies (these large IT companies are the main cause of life pressure here, such as the "996" working hours), we need to stop this from the beginning. ydotool only has 1% stars of faker.js has, so it's not too late ;)
+Independent software developers in China, like us, have 10 times more life pressure than Marak, the author of faker.js. Since ydotool has the opportunity to benefit large IT companies who won't pay a penny to us, we've changed the license to AGPLv3. These large IT companies are the main cause of life pressure here, such as the "996" working hours.
+
+**Marak's fate will repeat on all open source developers eventually (of course we aren't talking about those who were born in billionare families) if we just keep fighting with each other and do nothing to improve the situation. If you make open source software as well, don't hesitate to ask for donations if you actually want them.**
+
+Also make sure you understand all the terms of AGPLv3 before using this software.
 
 ## Usage
 Currently implemented command(s):
