@@ -6,9 +6,9 @@ ydotool - command-line _/dev/uinput_ automation tool
 
 # SYNOPSIS
 
-*ydotool* [OPTION...] *cmd* _args_ [ , *cmd* _args_ ... ]
+*ydotool* *cmd* _args_ [ , *cmd* _args_ ... ]
 
-*ydotool* [OPTION... ] *cmd* --help
+*ydotool* *cmd* --help
 
 # DESCRIPTION
 
@@ -30,11 +30,6 @@ Currently implemented command(s):
 	Record/replay input events
 *sleep*
 	sleep for a while
-
-# OPTIONS
-
-	*--socket-path arg*  _<path>_
-		Socket path (default: /tmp/.ydotool_socket)
 
 # KEYBOARD COMMANDS
 *key* [*--up*] [*--down*] [*--next-delay* _<ms>_] [*--key-delay* _<ms>_] [*--repeat* _<times>_] [*--repeat-delay <ms>*] _<key sequence>_
