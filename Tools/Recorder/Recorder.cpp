@@ -137,7 +137,7 @@ int Recorder::run(int argc, char **argv) {
 	}
 
 	if (mode == 1) {
-		if (device_list.empty()) {
+		if (device_list.empty() || (device_list.size() == 1 && device_list[0] == "")) {
 			device_list = find_all_devices();
 
 			if (device_list.empty()) {
