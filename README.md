@@ -5,7 +5,7 @@ Generic Linux command-line automation tool (no X!)
 **`ydotool` is not limited to Wayland.** You can use it on anything as long as it accepts keyboard/mouse/whatever input. For example, X11, text console, "RetroArch OS", fbdev apps (fbterm/mplayer/SDL1/LittleVGL/Qt Embedded), etc.
 
 ## ChangeLog
-This project is now refactored.
+This project is now refactored. (v1.0.0)
 
 Changes:
 - Rewritten in pure C99
@@ -52,7 +52,7 @@ Currently implemented command(s):
 ## Examples
 Switch to tty1 (Ctrl+Alt+F1), wait 2 seconds, and type some words:
 
-    ydotool key 29:1 56:1 59:1 59:0 56:0 29:0; sleep 2; ydotool type 'echo Hey guys. This is Austin.\n'
+    ydotool key 29:1 56:1 59:1 59:0 56:0 29:0; sleep 2; ydotool type 'echo Hey guys. This is Austin.'
 
 Close a window in graphical environment (Alt+F4):
 
@@ -91,13 +91,7 @@ So, if the delay was too short, the virtual input device may not got recognized 
 In order to solve this problem, I made a persistent background service, ydotoold, to hold a persistent virtual device, and accept input from ydotool. When ydotoold is unavailable, ydotool will try to work without it.
 
 ## Build
-**CMake 3.14+ is required.**
-
-All dependencies will be configured by CPM automatically to save you from building & installing them manually. **So an Internet connection is required.**
-
-The libraries, `libevdevPlus` and `libuInputPlus`, are too small and too troublesome to be complied as shared libraries. So now they are statically linked. As a result, the compiled binaries will only depend on `libc` and `libstdc++`.
-
-CMake will no longer build the packages or install compiled files to system directories. Because it's complicated to build packages for every distro correctly using CPack, and every distribution has its own customs of filesystem hierarchy. I suggest you to copy compiled files to desired destination manually.
+**CMake 3.4+ is required.**
 
 
 ### Compile
