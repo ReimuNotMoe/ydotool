@@ -1,7 +1,27 @@
-# ydotool
+# ydotool [![Build Status](https://github.com/ReimuNotMoe/ydotool/workflows/Build/badge.svg)](https://github.com/ReimuNotMoe/ydotool/actions/workflows/push_pr_build_cmake.yml) [![Release Status](https://github.com/ReimuNotMoe/ydotool/workflows/Release/badge.svg)](https://github.com/ReimuNotMoe/ydotool/actions/workflows/release_cmake.yml)
+
 Generic Linux command-line automation tool (no X!)
 
-[![Build Status](https://github.com/ReimuNotMoe/ydotool/workflows/Build/badge.svg)](https://github.com/ReimuNotMoe/ydotool/actions/workflows/push_pr_build_cmake.yml) [![Release Status](https://github.com/ReimuNotMoe/ydotool/workflows/Release/badge.svg)](https://github.com/ReimuNotMoe/ydotool/actions/workflows/release_cmake.yml)
+**`ydotool` is not limited to Wayland.** You can use it on anything as long as it accepts keyboard/mouse/whatever input. For example, X11, text console, "RetroArch OS", fbdev apps (fbterm/mplayer/SDL1/LittleVGL/Qt Embedded), etc.
+
+## ChangeLog
+This project is now refactored.
+
+Changes:
+- Rewritten in pure C99
+- No external dependencies
+- Uses a lot less memory & no dynamic memory allocation
+
+Breaking Changes:
+- `recorder` removed because it's irrelevant. It will become a separate project
+- Command chaining and `sleep` are removed because this should be your shell's job
+- `ydotool` now must work with `ydotoold`
+- Usage of `click` and `key` are changed
+
+Good News:
+- Some people can finally build this project offline
+- `key` now (only) accepts keycodes, so it's not limited to a specific keyboard layout
+- Now it's possible to implement support for different keyboard layouts in `type`
 
 ## Important Notes
 ### Current situation
@@ -25,51 +45,38 @@ Also make sure you understand all the terms of AGPLv3 before using this software
 ## Usage
 Currently implemented command(s):
 - `type` - Type a string
-- `sleep` - Sleep some time
 - `key` - Press keys
 - `mousemove` - Move mouse pointer to absolute position
 - `click` - Click on mouse buttons
-- `recorder` - Record/replay input events
-
-Now it's possible to chain multiple commands together, separated by a comma between two spaces.
 
 ## Examples
-Switch to tty1, wait 2 seconds, and type some words:
+Switch to tty1 (Ctrl+Alt+F1), wait 2 seconds, and type some words:
 
-    ydotool key ctrl+alt+f1 , sleep 2000 , type 'Hey guys. This is Austin.'
+    ydotool key 29:1 56:1 59:1 59:0 56:0 29:0; sleep 2; ydotool type 'echo Hey guys. This is Austin.\n'
 
-Close a window in graphical environment:
+Close a window in graphical environment (Alt+F4):
 
-    ydotool key Alt+F4
+    ydotool key 56:1 62:1 62:0 56:0
 
 Relatively move mouse pointer to -100,100:
 
-    ydotool mousemove -100 100
-
-    Warning: implicit mousemove call does not work with negative values, so until https://github.com/ReimuNotMoe/ydotool/issues/119 is fixed, use explicit method:
-    ydotool mousemove -x -100 -y 100
+    ydotool mousemove -- -100 100
 
 Move mouse pointer to 100,100:
 
-    ydotool mousemove --absolute 100 100
+    ydotool mousemove --absolute -- 100 100
 
 Mouse right click:
 
-    ydotool click right
-
-Mouse click queue:
-
-    ydotool click left right left
+    ydotool click 0xC1
 
 Mouse repeating left click:
 
-    ydotool click --repeat 5 --next-delay 25 left
+    ydotool click --repeat 5 --next-delay 25 0xC0
 
 ## Notes
 #### Runtime
 This program requires access to `/dev/uinput`. **This usually requires root permissions.**
-
-You can use it on anything as long as it accepts keyboard/mouse/whatever input. For example, wayland, text console, etc.
 
 #### Available key names
 See `/usr/include/linux/input-event-codes.h`
