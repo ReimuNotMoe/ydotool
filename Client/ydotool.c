@@ -35,6 +35,10 @@
 */
 
 #include "ydotool.h"
+#include <asm-generic/errno-base.h>
+#include <asm-generic/errno.h>
+#include <stdio.h>
+#include <string.h>
 
 struct tool_def {
 	char name[16];
@@ -151,7 +155,19 @@ int main(int argc, char **argv) {
 	strncpy(sa.sun_path, daemon_socket_path, sizeof(sa.sun_path)-1);
 
 	if (connect(fd_daemon_socket, (const struct sockaddr *) &sa, sizeof(sa))) {
-		perror("failed to connect socket");
+    int err = errno;
+		printf("failed to connect socket: %s\n", strerror(err));
+    
+    switch (err) {
+      case ECONNREFUSED:
+        puts("could not connect to the socket, is ydotoold started?");
+        break;
+      case EACCES:
+      case EPERM:
+        puts("could not access the socket, are you root?");
+        break;
+    }
+    
 		abort();
 	}
 
