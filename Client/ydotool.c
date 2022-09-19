@@ -35,6 +35,7 @@
 */
 
 #include "ydotool.h"
+#include <string.h>
 
 struct tool_def {
 	char name[16];

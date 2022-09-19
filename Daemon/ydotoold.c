@@ -40,6 +40,7 @@
 #include <assert.h>
 #include <time.h>
 #include <signal.h>
+#include <string.h>
 
 #include <getopt.h>
 
