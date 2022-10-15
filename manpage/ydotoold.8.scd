@@ -10,29 +10,24 @@ ydotoold \- daemon for *ydotool*(1)
 
 # DESCRIPTION
 
-*ydotool* lets you programmatically (or manually) simulate
-keyboard input and mouse activity, etc. It does this by writing
-directly to */dev/uinput* so it generally needs to run as root.
-
-When *ydotool*(1) runs and creates a virtual input device, it will take some time for your graphical environment (eg X11/Wayland) to recognize and enable the virtual input device. (Usually done by udev)
-
-If the delay is too short, the virtual input device may not be recognized & enabled by the graphical environment in time.
-
-In order to solve this problem, the *ydotoold* background service holds a persistent virtual device, and accepts input from *ydotool*(1). When *ydotoold*(1) is unavailable, *ydotool*(1) will work without it.
+*ydotoold* holds a persistent virtual device, and accepts input from *ydotool*(1).
 
 # OPTIONS
 
-	*--socket-path arg*  _<path>_
-		Socket path (default: /tmp/.ydotool_socket)
+	*-p*, *--socket-path arg* _<path>_
+		Set socket path.
 
-	*--socket-perm arg* _<perms>_
-		Socket permission (default: 0600)
+	*-P*, *--socket-perm arg* _<perms>_
+		Set socket permission.
+
+	*-h*, *--help*
+		Display help and exit.
 
 # AUTHOR
 
 *ydotool*(1) and *ydotoold*(8) were written by ReimuNotMoe.
 
-This man page by bob.hepple@gmail.com
+This manpage was written by bob.hepple@gmail.com but updated since.
 
 # LICENCE
 
