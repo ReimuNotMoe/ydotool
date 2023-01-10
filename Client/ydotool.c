@@ -132,16 +132,6 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	const char *daemon_socket_path;
-
-	if (getenv("YDOTOOL_SOCKET")) {
-		daemon_socket_path = strcat(getenv("XDG_RUNTIME_DIR"), "/.ydotool_socket");
-	} else if (getenv("XDG_RUNTIME_DIR")){
-		daemon_socket_path = getenv("YDOTOOL_SOCKET");
-	} else {
-		daemon_socket_path = "/tmp/.ydotool_socket";
-	}
-
 	fd_daemon_socket = socket(AF_UNIX, SOCK_DGRAM, 0);
 
 	if (fd_daemon_socket < 0) {
@@ -153,22 +143,33 @@ int main(int argc, char **argv) {
 		.sun_family = AF_UNIX
 	};
 
-	strncpy(sa.sun_path, daemon_socket_path, sizeof(sa.sun_path)-1);
+	char *env_ys = getenv("YDOTOOL_SOCKET");
+	char *env_xrd = getenv("XDG_RUNTIME_DIR");
+
+	if (env_ys) {
+		snprintf(sa.sun_path, sizeof(sa.sun_path)-1, "%s", env_ys);
+	} else if (env_xrd){
+		snprintf(sa.sun_path, sizeof(sa.sun_path)-1, "%s/.ydotool_socket", env_xrd);
+	} else {
+		snprintf(sa.sun_path, sizeof(sa.sun_path)-1, "%s", "/tmp/.ydotool_socket");
+	}
+
+	printf("%s\n", sa.sun_path);
 
 	if (connect(fd_daemon_socket, (const struct sockaddr *) &sa, sizeof(sa))) {
-    int err = errno;
+		int err = errno;
 		printf("failed to connect socket: %s\n", strerror(err));
-    
-    switch (err) {
-      case ECONNREFUSED:
-        puts("could not connect to the socket, is ydotoold started?");
-        break;
-      case EACCES:
-      case EPERM:
-        puts("could not access the socket, are you root?");
-        break;
-    }
-    
+
+		switch (err) {
+			case ECONNREFUSED:
+				puts("could not connect to the socket, is ydotoold started?");
+				break;
+			case EACCES:
+			case EPERM:
+				puts("could not access the socket, are you root?");
+				break;
+		}
+
 		abort();
 	}
 
