@@ -64,6 +64,10 @@
 
 #include <linux/uinput.h>
 
+#ifndef VERSION
+#define VERSION "unknown"
+#endif
+
 #define SOCKET_PATH_LEN		108
 
 static char opt_socket_path[SOCKET_PATH_LEN] = "/tmp/.ydotool_socket";
@@ -78,10 +82,15 @@ static void show_help() {
 		"  -p, --socket-path=PATH     Custom socket path\n"
 		"  -P, --socket-perm=PERM     Socket permission\n"
 		"  -m, --mouse-off            Disable mouse (EV_REL)\n"
-		"  -k, --keyboard-off         Disable mouse (EV_KEY)\n"
+		"  -k, --keyboard-off         Disable keyboard (EV_KEY)\n"
 		"  -T, --touch-on             Enable touchscreen (EV_ABS)\n"
 		"  -h, --help                 Display this help and exit\n"
+		"  -V, --version              Show version information\n"
 	);
+}
+
+static void show_version() {
+	puts(VERSION);
 }
 
 enum ydotool_uinput_setup_options {
@@ -175,15 +184,18 @@ int main(int argc, char **argv) {
 
 		static struct option long_options[] = {
 			{"help", no_argument, 0, 'h'},
+			{"version", no_argument, 0, 'V'},
 			{"socket-perm", required_argument, 0, 'P'},
 			{"socket-path", required_argument, 0, 'p'},
 			{"mouse-off", no_argument, 0, 'm'},
+			{"keyboard-off", no_argument, 0, 'k'},
+			{"touch-on", no_argument, 0, 'T'},
 			{0, 0, 0, 0}
 		};
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 
-		c = getopt_long (argc, argv, "hp:P:m",
+		c = getopt_long (argc, argv, "hVp:P:mkT",
 				 long_options, &option_index);
 
 		/* Detect the end of the options. */
@@ -222,6 +234,11 @@ int main(int argc, char **argv) {
 
 			case 'h':
 				show_help();
+				exit(0);
+				break;
+
+			case 'V':
+				show_version();
 				exit(0);
 				break;
 

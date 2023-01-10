@@ -17,6 +17,15 @@ else()
     set(SD_UNITDIR "lib/systemd/user")
 endif()
 
+execute_process(COMMAND git describe --tags --long --always RESULT_VARIABLE RC_GIT_VER OUTPUT_VARIABLE GIT_VERSION)
+
+if (${RC_GIT_VER} EQUAL 0)
+    string(STRIP ${GIT_VERSION} GIT_VERSION)
+    message("-- Version: " ${GIT_VERSION})
+    add_definitions(-DVERSION=\"${GIT_VERSION}\")
+endif()
+
+
 
 set(SOURCE_FILES_DAEMON Daemon/ydotoold.c)
 set(SOURCE_FILES_CLIENT Client/ydotool.c Client/tool_click.c Client/tool_mousemove.c Client/tool_type.c Client/tool_key.c)
