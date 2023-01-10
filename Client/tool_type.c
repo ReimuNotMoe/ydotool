@@ -35,6 +35,7 @@
 */
 
 #include "ydotool.h"
+#include <string.h>
 
 #define FLAG_UPPERCASE		0x80000000
 
