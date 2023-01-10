@@ -64,7 +64,7 @@ static int tool_bakers(int argc, char **argv) {
 	     "\n"
 	     "Dustin Van Tate Testa\n"
 	     "Elliot Wolk\n"
-	     "Kaido Kert\n"
+	     "tofik\n"
 	);
 
 	return 0;
