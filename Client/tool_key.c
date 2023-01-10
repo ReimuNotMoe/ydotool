@@ -35,6 +35,7 @@
 */
 
 #include "ydotool.h"
+#include <string.h>
 
 static void show_help() {
 	puts(
