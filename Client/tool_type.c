@@ -80,6 +80,7 @@ static void show_help() {
 		"Options:\n"
 		"  -d, --key-delay=N          Delay N milliseconds between key events (up/down each)\n"
 		"  -D, --next-delay=N         Delay N milliseconds between strings\n"
+		"  -H, --key-hold=N           Time N millisions to hold each key for\n"
 		"  -f, --file=PATH            Specify a file, the contents of which will be be typed as if passed as an argument.\n"
 		"                               The filepath may also be '-' to read from stdin\n"
 		"  -h, --help                 Display this help and exit\n"
@@ -88,8 +89,9 @@ static void show_help() {
 }
 
 static int key_delay = 12;
+static int key_hold = 0;
 
-static void type_char(char c) {
+static void type_char(char c, bool delay) {
 		int kdef = ascii2keycode_map[c];
 		if (kdef == -1) {
 			return;
@@ -102,14 +104,16 @@ static void type_char(char c) {
 		}
 		uinput_emit(EV_KEY, kc, 1, 1);
 
-		usleep(key_delay * 1000);
+		usleep(key_hold * 1000);
 
 		uinput_emit(EV_KEY, kc, 0, 1);
 		if (kdef & FLAG_UPPERCASE) {
 			uinput_emit(EV_KEY, KEY_LEFTSHIFT, 0, 1);
 		}
 
-		usleep(key_delay * 1000);
+		if (delay) {
+			usleep(key_delay * 1000);
+		}
 }
 
 int tool_type(int argc, char **argv) {
@@ -128,6 +132,7 @@ int tool_type(int argc, char **argv) {
 		static struct option long_options[] = {
 			{"key-delay", required_argument, 0, 'd'},
 			{"next-delay", required_argument, 0, 'D'},
+			{"key-hold", required_argument, 0, 'H'},
 			{"file", required_argument, 0, 'f'},
 			{"help", no_argument, 0, 'h'},
 			{0, 0, 0, 0}
@@ -135,7 +140,7 @@ int tool_type(int argc, char **argv) {
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 
-		c = getopt_long (argc, argv, "hd:D:f:",
+		c = getopt_long (argc, argv, "hd:D:H:f:",
 				 long_options, &option_index);
 
 		/* Detect the end of the options. */
@@ -152,12 +157,16 @@ int tool_type(int argc, char **argv) {
 					printf (" with arg %s", optarg);
 				printf ("\n");
 				break;
-			case 'D':
+			case 'd':
 				key_delay = strtol(optarg, NULL, 10);
 				break;
 
-			case 'd':
+			case 'D':
 				next_delay_ms = strtol(optarg, NULL, 10);
+				break;
+
+			case 'H':
+				key_hold = strtol(optarg, NULL, 10);
 				break;
 
 			case 'f':
@@ -197,7 +206,7 @@ int tool_type(int argc, char **argv) {
 				for (int i = 0; i<rc; i++) {
 					char c = buf[i];
 					if (c) {
-						type_char(c);
+						type_char(c, i != rc - 1);
 					}
 				}
 			} else if (rc < 0) {
@@ -213,8 +222,9 @@ int tool_type(int argc, char **argv) {
 
 				for (int i = 0;; i++) {
 					char c = pstr[i];
+					char next = pstr[i+1];
 					if (c) {
-						type_char(c);
+						type_char(c, next);
 					} else {
 						break;
 					}
