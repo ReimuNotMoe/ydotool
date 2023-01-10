@@ -41,8 +41,10 @@
 #include <errno.h>
 #include <time.h>
 #include <signal.h>
+#include <stdbool.h>
 #include <string.h>
 #include <limits.h>
+
 
 #include <getopt.h>
 
@@ -74,11 +76,12 @@ static void show_help() {
 		"Options:\n"
 		"  -p, --socket-path=PATH     Custom socket path\n"
 		"  -P, --socket-perm=PERM     Socket permission\n"
+		"  -m, --mouse-off            mouse disabled/enabled\n"
 		"  -h, --help                 Display this help and exit\n"
 	);
 }
 
-static void uinput_setup(int fd) {
+static void uinput_setup(int fd, bool opt_socket_mouse) {
 	static const int ev_list[] = {EV_KEY, EV_REL};
 
 	for (int i=0; i<sizeof(ev_list)/sizeof(int); i++) {
@@ -97,12 +100,15 @@ static void uinput_setup(int fd) {
 		}
 	}
 
-	static const int rel_list[] = {REL_X, REL_Y, REL_Z, REL_WHEEL, REL_HWHEEL};
+	if (opt_socket_mouse == true)
+	{
+		static const int rel_list[] = {REL_X, REL_Y, REL_Z, REL_WHEEL, REL_HWHEEL};
 
-	for (int i=0; i<sizeof(rel_list)/sizeof(int); i++) {
-		if (ioctl(fd, UI_SET_RELBIT, rel_list[i])) {
-			fprintf(stderr, "UI_SET_RELBIT %d failed\n", i);
+		for (int i=0; i<sizeof(rel_list)/sizeof(int); i++) {
+			if (ioctl(fd, UI_SET_RELBIT, rel_list[i])) {
+				fprintf(stderr, "UI_SET_RELBIT %d failed\n", i);
 
+			}
 		}
 	}
 
@@ -139,9 +145,13 @@ static void uinput_setup(int fd) {
 
 int main(int argc, char **argv) {
 
+	bool opt_socket_mouse = true;
+
+
 	if (getenv("XDG_RUNTIME_DIR")) {
 		opt_socket_path = strcat(getenv("XDG_RUNTIME_DIR"), "/.ydotool_socket");
 	}
+
 
 	while (1) {
 		int c;
@@ -150,12 +160,13 @@ int main(int argc, char **argv) {
 			{"help", no_argument, 0, 'h'},
 			{"socket-perm", required_argument, 0, 'P'},
 			{"socket-path", required_argument, 0, 'p'},
+			{"mouse-off", no_argument, 0, 'm'},
 			{0, 0, 0, 0}
 		};
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 
-		c = getopt_long (argc, argv, "hp:P:",
+		c = getopt_long (argc, argv, "hp:P:m",
 				 long_options, &option_index);
 
 		/* Detect the end of the options. */
@@ -178,6 +189,10 @@ int main(int argc, char **argv) {
 
 			case 'P':
 				strncpy(opt_socket_perm, optarg, sizeof(opt_socket_perm)-1);
+				break;
+
+			case 'm':
+				opt_socket_mouse = false;
 				break;
 
 			case 'h':
@@ -205,6 +220,8 @@ int main(int argc, char **argv) {
 		abort();
 	}
 
+	uinput_setup(fd_ui,opt_socket_mouse);
+
 	printf("Socket path: %s\n", opt_socket_path);
 
 	struct stat sbuf;
@@ -217,6 +234,7 @@ int main(int argc, char **argv) {
 			abort();
 		}
 	}
+
 
 	int fd_so = socket(AF_UNIX, SOCK_DGRAM, 0);
 
