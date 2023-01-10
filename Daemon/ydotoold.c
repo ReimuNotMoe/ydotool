@@ -138,6 +138,11 @@ static void uinput_setup(int fd) {
 }
 
 int main(int argc, char **argv) {
+
+	if (getenv("XDG_RUNTIME_DIR")) {
+		opt_socket_path = strcat(getenv("XDG_RUNTIME_DIR"), "/.ydotool_socket");
+	}
+
 	while (1) {
 		int c;
 

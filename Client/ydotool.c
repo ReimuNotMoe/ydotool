@@ -134,10 +134,10 @@ int main(int argc, char **argv) {
 
 	const char *daemon_socket_path;
 
-	char *env_sp = getenv("YDOTOOL_SOCKET");
-
-	if (env_sp) {
-		daemon_socket_path = env_sp;
+	if (getenv("YDOTOOL_SOCKET")) {
+		daemon_socket_path = strcat(getenv("XDG_RUNTIME_DIR"), "/.ydotool_socket");
+	} else if (getenv("XDG_RUNTIME_DIR")){
+		daemon_socket_path = getenv("YDOTOOL_SOCKET");
 	} else {
 		daemon_socket_path = "/tmp/.ydotool_socket";
 	}
