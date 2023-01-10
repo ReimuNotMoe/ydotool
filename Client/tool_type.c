@@ -179,7 +179,9 @@ int tool_type(int argc, char **argv) {
 	}
 
 	if (file_path) {
-		int fd = open(file_path, O_RDONLY);
+		int fd = (strcmp(file_path, "-") == 0)
+				? STDIN_FILENO
+				: open(file_path, O_RDONLY);
 
 		if (fd == -1) {
 			fprintf(stderr, "ydotool: type: error: failed to open %s: %s\n", file_path,
