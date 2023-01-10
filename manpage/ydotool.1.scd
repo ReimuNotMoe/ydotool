@@ -11,7 +11,9 @@ ydotool - command-line _/dev/uinput_ automation tool
 
 # DESCRIPTION
 
-*ydotool* lets you programmatically (or manually) simulate keyboard input and mouse activity, etc. It does this by writing directly to _/dev/uinput_ so it generally needs to run as root.
+*ydotool* lets you programmatically (or manually) simulate keyboard input and mouse activity, etc.
+The *ydotoold*(8) daemon must be running.
+
 
 Currently implemented command(s):
 
@@ -104,19 +106,15 @@ Currently implemented command(s):
 
 	The '0x' prefix can be omitted if you want.
 
+# YDOTOOL SOCKET
+
+The socket to write to for *ydotoold*(8) can be changed by the environment variable YDOTOOL_SOCKET.
+
 # AUTHOR
 
 ydotool was written by ReimuNotMoe.
 
-This man page by bob.hepple@gmail.com
-
-# BUGS
-
-When *ydotool*(1) runs and creates a virtual input device, it will take some time for your graphical environment (eg X11/Wayland) to recognize and enable the virtual input device. (Usually done by udev)
-
-If the delay is too short, the virtual input device may not be recognized & enabled by the graphical environment in time.
-
-In order to solve this problem, there is a persistent background service, *ydotoold*(1), to hold a persistent virtual device, and accept input from *ydotool*(1). When *ydotoold*(1) is unavailable, *ydotool*(1) will work without it.
+This manpage was written by bob.hepple@gmail.com but updated since.
 
 # LICENCE
 AGPLv3
