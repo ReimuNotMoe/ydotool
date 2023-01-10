@@ -39,10 +39,11 @@
 static void show_help() {
 	puts(
 		"Usage: mousemove [OPTION]... -- <xpos> <ypos>\n"
-		"Move mouse pointer.\n"
+		"Move mouse pointer or wheel.\n"
 		"\n"
 		"Options:\n"
-		"  -a, --absolute             Use absolute position\n"
+		"  -w, --wheel                Move mouse wheel relatively\n"
+		"  -a, --absolute             Use absolute position, not applicable to wheel\n"
 		"  -h, --help                 Display this help and exit\n"
 	);
 }
@@ -54,6 +55,7 @@ int tool_mousemove(int argc, char **argv) {
 	}
 
 	int is_abs = 0;
+	int is_wheel = 0;
 
 	while (1) {
 		int c;
@@ -61,12 +63,13 @@ int tool_mousemove(int argc, char **argv) {
 		static struct option long_options[] = {
 			{"absolute", no_argument, 0, 'a'},
 			{"help", no_argument, 0, 'h'},
+			{"wheel", no_argument, 0, 'w'},
 			{0, 0, 0, 0}
 		};
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 
-		c = getopt_long (argc, argv, "ha",
+		c = getopt_long (argc, argv, "haw",
 				 long_options, &option_index);
 
 		/* Detect the end of the options. */
@@ -91,6 +94,10 @@ int tool_mousemove(int argc, char **argv) {
 				show_help();
 				return 0;
 
+			case 'w':
+				is_wheel = 1;
+				break;
+
 			case '?':
 				/* getopt_long already printed an error message. */
 				break;
@@ -111,13 +118,23 @@ int tool_mousemove(int argc, char **argv) {
 	}
 
 	if (i == 2) {
+		if (is_abs && is_wheel) {
+			puts("Mouse wheel moves should not be absolute values");
+			return 1;
+		}
+
 		if (is_abs) {
 			uinput_emit(EV_REL, REL_X, INT32_MIN, 0);
 			uinput_emit(EV_REL, REL_Y, INT32_MIN, 1);
 		}
 
-		uinput_emit(EV_REL, REL_X, arg[0], 0);
-		uinput_emit(EV_REL, REL_Y, arg[1], 1);
+		if (is_wheel) {
+			uinput_emit(EV_REL, REL_HWHEEL, arg[0], 0);
+			uinput_emit(EV_REL, REL_WHEEL, arg[1], 1);
+		} else {
+			uinput_emit(EV_REL, REL_X, arg[0], 0);
+			uinput_emit(EV_REL, REL_Y, arg[1], 1);
+		}
 	} else {
 		show_help();
 		return 1;

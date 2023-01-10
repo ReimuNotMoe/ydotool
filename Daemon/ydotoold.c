@@ -34,13 +34,15 @@
     并将在法律允许的最大范围内被起诉。
 */
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <errno.h>
-#include <assert.h>
 #include <time.h>
 #include <signal.h>
 #include <string.h>
+#include <limits.h>
 
 #include <getopt.h>
 
@@ -49,6 +51,7 @@
 #include <dirent.h>
 #include <dlfcn.h>
 
+#include <sys/stat.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
@@ -60,8 +63,8 @@
 
 #include <linux/uinput.h>
 
-static const char *opt_socket_path = "/tmp/.ydotool_socket";
-static const char *opt_socket_perm = "0600";
+static char opt_socket_path[108] = "/tmp/.ydotool_socket";
+static char opt_socket_perm[16] = "0600";
 
 static void show_help() {
 	puts(
@@ -165,11 +168,11 @@ int main(int argc, char **argv) {
 				printf ("\n");
 				break;
 			case 'p':
-				opt_socket_path = optarg;
+				strncpy(opt_socket_path, optarg, sizeof(opt_socket_path)-1);
 				break;
 
 			case 'P':
-				opt_socket_perm = optarg;
+				strncpy(opt_socket_perm, optarg, sizeof(opt_socket_perm)-1);
 				break;
 
 			case 'h':
@@ -186,6 +189,10 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	if (getuid() || getegid()) {
+		puts("You're advised to run this program as root, or YMMV.");
+	}
+
 	int fd_ui = open("/dev/uinput", O_WRONLY);
 
 	if (fd_ui < 0) {
@@ -193,7 +200,18 @@ int main(int argc, char **argv) {
 		abort();
 	}
 
-	uinput_setup(fd_ui);
+	printf("Socket path: %s\n", opt_socket_path);
+
+	struct stat sbuf;
+
+	if (stat(opt_socket_path, &sbuf) == 0) {
+		puts("Removing old stale socket");
+
+		if (unlink(opt_socket_path)) {
+			perror("failed remove old stale socket");
+			abort();
+		}
+	}
 
 	int fd_so = socket(AF_UNIX, SOCK_DGRAM, 0);
 
@@ -201,8 +219,6 @@ int main(int argc, char **argv) {
 		perror("failed to create socket");
 		abort();
 	}
-
-	unlink(opt_socket_path);
 
 	struct sockaddr_un sa = {
 		.sun_family = AF_UNIX
@@ -216,6 +232,10 @@ int main(int argc, char **argv) {
 	}
 
 	chmod(opt_socket_path, strtol(opt_socket_perm, NULL, 8));
+
+	uinput_setup(fd_ui);
+
+	puts("READY");
 
 	struct input_event uev;
 
