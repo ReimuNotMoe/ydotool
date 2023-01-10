@@ -250,11 +250,32 @@ int main(int argc, char **argv) {
 	struct stat sbuf;
 
 	if (stat(opt_socket_path, &sbuf) == 0) {
-		puts("Removing old stale socket");
 
-		if (unlink(opt_socket_path)) {
-			perror("failed remove old stale socket");
+		int fd_sot = socket(AF_UNIX, SOCK_DGRAM, 0);
+
+		if (fd_sot < 0) {
+			perror("failed to create socket for daemon collision detection");
 			abort();
+		}
+
+		struct sockaddr_un sa = {
+			.sun_family = AF_UNIX
+		};
+
+		strncpy(sa.sun_path, opt_socket_path, sizeof(sa.sun_path)-1);
+
+		if (connect(fd_sot, (const struct sockaddr *) &sa, sizeof(sa))) {
+			close(fd_sot);
+
+			puts("Removing old stale socket");
+
+			if (unlink(opt_socket_path)) {
+				perror("failed remove old stale socket");
+				abort();
+			}
+		} else {
+			puts("error: Another ydotoold is running with the same socket.");
+			exit(2);
 		}
 	}
 
