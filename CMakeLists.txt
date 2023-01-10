@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.4)
-project(ydotool)
+project(ydotool C)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_C_STANDARD 99)
 
 # Include GNU install directory module to detect where to install
 # files on Linux/Unix systems (e.g., lib vs lib64)
