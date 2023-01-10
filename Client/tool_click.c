@@ -43,7 +43,7 @@ static void show_help() {
 		"\n"
 		"Options:\n"
 		"  -r, --repeat=N             Repeat entire sequence N times\n"
-		"  -d, --next-delay=N         Delay N milliseconds between input events (up/down, "
+		"  -D, --next-delay=N         Delay N milliseconds between input events (up/down, "
 		"                               a complete click means doubled time)\n"
 		"  -h, --help                 Display this help and exit\n"
 		"\n"
@@ -83,14 +83,14 @@ int tool_click(int argc, char **argv) {
 
 		static struct option long_options[] = {
 			{"repeat", required_argument, 0, 'r'},
-			{"next-delay", required_argument, 0, 'd'},
+			{"next-delay", required_argument, 0, 'D'},
 			{"help", no_argument, 0, 'h'},
 			{0, 0, 0, 0}
 		};
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 
-		c = getopt_long (argc, argv, "hr:d:",
+		c = getopt_long (argc, argv, "hr:D:",
 				 long_options, &option_index);
 
 		/* Detect the end of the options. */
@@ -111,7 +111,7 @@ int tool_click(int argc, char **argv) {
 				repeats = strtol(optarg, NULL, 10);
 				break;
 
-			case 'd':
+			case 'D':
 				next_delay_ms = strtol(optarg, NULL, 10);
 				break;
 
