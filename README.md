@@ -30,15 +30,15 @@ This project is now being maintained **thanks to all the people that are support
 All backers and sponsors are listed [here](https://github.com/TheNeuronProject/BACKERS/blob/main/README.md).
 
 ### How to support us
-- Donate on [Patreon](https://www.patreon.com/classicoldsong)
-- Buy our products on our [Tindie Store](https://www.tindie.com/stores/sudomaker/), if they are meaningful to you (please leave a message: `ydotool user`, so we can know that this purchase is for supporting ydotool)
+- Donate on our [Patreon](https://www.patreon.com/classicoldsong)
+- Buy our products on our [Official Store](https://su.mk/store), if they are meaningful to you (please leave a message: `ydotool user`, so we can know that this purchase is for supporting ydotool)
 
 ### More talks
-[READ THIS BEFORE COMPLAINING ANYTHING ABOUT THE DONATION & ITS PRICING](https://christine.website/blog/open-source-broken-2021-12-11)
+[Article: "Open Source" is Broken](https://christine.website/blog/open-source-broken-2021-12-11)
 
 Independent software developers in China, like us, have 10 times more life pressure than Marak, the author of faker.js. Since ydotool has the opportunity to benefit large IT companies who won't pay a penny to us, we've changed the license to AGPLv3. These large IT companies are the main cause of life pressure here, such as the "996" working hours.
 
-**Marak's fate will repeat on all open source developers eventually (of course we aren't talking about those who were born in billionare families) if we just keep fighting with each other and do nothing to improve the situation. If you make open source software as well, don't hesitate to ask for donations if you actually want them.**
+**Marak's fate will repeat on all open source developers eventually (of course we aren't talking about those who were born in billionare families) if we just _keep fighting with each other and do nothing to improve the situation._ If you make open source software as well, don't hesitate to ask for donations if you actually _need_ them.**
 
 Also make sure you understand all the terms of AGPLv3 before using this software.
 
@@ -86,9 +86,11 @@ ydotool works differently from xdotool. xdotool sends X events directly to X ser
 
 When ydotool runs and creates a virtual input device, it will take some time for your graphical environment (X11/Wayland) to recognize and enable the virtual input device. (Usually done by udev)
 
-So, if the delay was too short, the virtual input device may not got recognized & enabled by your graphical environment in time.
+So, if the delay was too short, the virtual input device may not get recognized & enabled by your graphical environment in time.
 
-In order to solve this problem, I made a persistent background service, ydotoold, to hold a persistent virtual device, and accept input from ydotool. When ydotoold is unavailable, ydotool will try to work without it.
+In order to solve this problem, a persistent background service, ydotoold, is made to hold a persistent virtual device, and accept input from ydotool.
+
+Since v1.0.0, the use of ydotoold is mandatory.
 
 ## Build
 **CMake 3.4+ is required.**
