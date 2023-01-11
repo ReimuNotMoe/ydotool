@@ -73,48 +73,104 @@ static const int32_t ascii2keycode_map[128] = {
 	KEY_X,KEY_Y,KEY_Z,KEY_LEFTBRACE|FLAG_UPPERCASE,KEY_BACKSLASH|FLAG_UPPERCASE,KEY_RIGHTBRACE|FLAG_UPPERCASE,KEY_GRAVE|FLAG_UPPERCASE,-1
 };
 
+static int opt_key_delay_ms = 20;
+static int opt_key_hold_ms = 20;
+static int opt_next_delay_ms = 0;
+
 static void show_help() {
 	puts(
 		"Usage: type [OPTION]... [STRINGS]...\n"
 		"Type strings.\n"
 		"\n"
-		"Options:\n"
-		"  -d, --key-delay=N          Delay N milliseconds between key events (up/down each)\n"
-		"  -D, --next-delay=N         Delay N milliseconds between strings\n"
-		"  -H, --key-hold=N           Time N milliseconds to hold each key for\n"
+		"Options:");
+
+	printf(
+		"  -d, --key-delay=N          Delay N milliseconds between keys (the delay between every key down/up pair) (default: %d)\n", opt_key_delay_ms
+	);
+
+	printf(
+		"  -H, --key-hold=N           Hold each key for N milliseconds (the delay between key down and up) (default: %d)\n", opt_key_hold_ms
+	);
+
+	printf(
+		"  -D, --next-delay=N         Delay N milliseconds between command line strings (default: %d)\n", opt_next_delay_ms
+	);
+
+	puts(
 		"  -f, --file=PATH            Specify a file, the contents of which will be be typed as if passed as an argument.\n"
 		"                               The filepath may also be '-' to read from stdin\n"
+		"  -e, --escape=BOOL          Escape enable (1) or disable (0)\n"
 		"  -h, --help                 Display this help and exit\n"
 		"\n"
+		"Escape is enabled by default when typing command line arguments, and disabled by default when typing from file and stdin."
 	);
 }
 
-static int key_delay = 12;
-static int key_hold = 0;
+
 
 static void type_char(char c, bool delay) {
-		int kdef = ascii2keycode_map[c];
-		if (kdef == -1) {
-			return;
-		}
+	int kdef = ascii2keycode_map[c];
+	if (kdef == -1) {
+		return;
+	}
 
-		uint16_t kc = kdef & 0xffff;
+	uint16_t kc = kdef & 0xffff;
 
-		if (kdef & FLAG_UPPERCASE) {
-			uinput_emit(EV_KEY, KEY_LEFTSHIFT, 1, 1);
-		}
-		uinput_emit(EV_KEY, kc, 1, 1);
+	if (kdef & FLAG_UPPERCASE) {
+		uinput_emit(EV_KEY, KEY_LEFTSHIFT, 1, 1);
+	}
+	uinput_emit(EV_KEY, kc, 1, 1);
 
-		usleep(key_hold * 1000);
+	usleep(opt_key_hold_ms * 1000);
 
-		uinput_emit(EV_KEY, kc, 0, 1);
-		if (kdef & FLAG_UPPERCASE) {
-			uinput_emit(EV_KEY, KEY_LEFTSHIFT, 0, 1);
-		}
+	uinput_emit(EV_KEY, kc, 0, 1);
+	if (kdef & FLAG_UPPERCASE) {
+		uinput_emit(EV_KEY, KEY_LEFTSHIFT, 0, 1);
+	}
 
-		if (delay) {
-			usleep(key_delay * 1000);
-		}
+	if (delay) {
+		usleep(opt_key_delay_ms * 1000);
+	}
+}
+
+static int escape(char in) {
+	static int state = 0;
+	static char hex_str[3] = {0, 0, 0};
+
+	switch (state) {
+		case 0:
+			if (in == '\\') {
+				state = 1;
+				return -1;
+			} else {
+				return in;
+			}
+		case 1:
+			state = 0;
+			switch (in) {
+				case 'n':
+					return '\n';
+				case 't':
+					return '\t';
+				case 'x':
+					state = 2;
+					return -1;
+				case '\\':
+					return '\\';
+				default:
+					return -1;
+			}
+		case 2:
+			state = 3;
+			hex_str[0] = in;
+			return -1;
+		case 3:
+			state = 0;
+			hex_str[1] = in;
+			return (int)strtol(hex_str, NULL, 16);
+		default:
+			abort();
+	}
 }
 
 int tool_type(int argc, char **argv) {
@@ -124,8 +180,10 @@ int tool_type(int argc, char **argv) {
 	}
 
 
-	int next_delay_ms = 0;
+
 	const char *file_path = NULL;
+
+	int enable_escape = -1;
 
 	while (1) {
 		int c;
@@ -134,6 +192,7 @@ int tool_type(int argc, char **argv) {
 			{"key-delay", required_argument, 0, 'd'},
 			{"next-delay", required_argument, 0, 'D'},
 			{"key-hold", required_argument, 0, 'H'},
+			{"escape", required_argument, 0, 'e'},
 			{"file", required_argument, 0, 'f'},
 			{"help", no_argument, 0, 'h'},
 			{0, 0, 0, 0}
@@ -141,7 +200,7 @@ int tool_type(int argc, char **argv) {
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 
-		c = getopt_long (argc, argv, "hd:D:H:f:",
+		c = getopt_long (argc, argv, "hd:D:H:f:e:",
 				 long_options, &option_index);
 
 		/* Detect the end of the options. */
@@ -159,15 +218,15 @@ int tool_type(int argc, char **argv) {
 				printf ("\n");
 				break;
 			case 'd':
-				key_delay = strtol(optarg, NULL, 10);
+				opt_key_delay_ms = strtol(optarg, NULL, 10);
 				break;
 
 			case 'D':
-				next_delay_ms = strtol(optarg, NULL, 10);
+				opt_next_delay_ms = strtol(optarg, NULL, 10);
 				break;
 
 			case 'H':
-				key_hold = strtol(optarg, NULL, 10);
+				opt_key_hold_ms = strtol(optarg, NULL, 10);
 				break;
 
 			case 'f':
@@ -177,6 +236,10 @@ int tool_type(int argc, char **argv) {
 			case 'h':
 				show_help();
 				exit(0);
+				break;
+
+			case 'e':
+				enable_escape = strtol(optarg, NULL, 10);
 				break;
 
 			case '?':
@@ -189,9 +252,13 @@ int tool_type(int argc, char **argv) {
 	}
 
 	if (file_path) {
+		if (enable_escape == -1) {
+			enable_escape = 0;
+		}
+
 		int fd = (strcmp(file_path, "-") == 0)
-				? STDIN_FILENO
-				: open(file_path, O_RDONLY);
+			 ? STDIN_FILENO
+			 : open(file_path, O_RDONLY);
 
 		if (fd == -1) {
 			fprintf(stderr, "ydotool: type: error: failed to open %s: %s\n", file_path,
@@ -205,9 +272,9 @@ int tool_type(int argc, char **argv) {
 		while ((rc = read(fd, buf, sizeof(buf)))) {
 			if (rc > 0) {
 				for (int i = 0; i<rc; i++) {
-					char c = buf[i];
-					if (c) {
-						type_char(c, i != rc - 1);
+					int c = enable_escape ? escape(buf[i]) : buf[i];
+					if (c != -1) {
+						type_char((char)c, i != rc - 1);
 					}
 				}
 			} else if (rc < 0) {
@@ -216,22 +283,29 @@ int tool_type(int argc, char **argv) {
 			}
 		}
 	} else {
+		if (enable_escape == -1) {
+			enable_escape = 1;
+		}
 
 		if (optind < argc) {
 			while (optind < argc) {
 				char *pstr = argv[optind++];
 
-				for (int i = 0;; i++) {
-					char c = pstr[i];
+//				printf("pstr: %s\n", pstr);
+
+				for (int i = 0; ; i++) {
+					int c = enable_escape ? escape(pstr[i]) : pstr[i];
 					char next = pstr[i+1];
-					if (c) {
-						type_char(c, next);
-					} else {
+
+					if (c == 0) {
 						break;
+					} else if (c != -1) {
+						type_char((char)c, next);
 					}
 				}
 
-				usleep(next_delay_ms * 1000);
+				if (argv[optind])
+					usleep(opt_next_delay_ms * 1000);
 			}
 		} else {
 			show_help();
