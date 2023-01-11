@@ -159,12 +159,12 @@ static void uinput_setup(int fd, enum ydotool_uinput_setup_options setup_opt) {
 
 	if (ioctl(fd, UI_DEV_SETUP, &usetup)) {
 		perror("UI_DEV_SETUP ioctl failed");
-		abort();
+		exit(2);
 	}
 
 	if (ioctl(fd, UI_DEV_CREATE)) {
 		perror("UI_DEV_CREATE ioctl failed");
-		abort();
+		exit(2);
 	}
 
 }
@@ -247,7 +247,7 @@ int main(int argc, char **argv) {
 				break;
 
 			default:
-				abort();
+				exit(2);
 		}
 	}
 
@@ -259,7 +259,7 @@ int main(int argc, char **argv) {
 
 	if (fd_ui < 0) {
 		perror("failed to open uinput device");
-		abort();
+		exit(2);
 	}
 
 	printf("Socket path: %s\n", opt_socket_path);
@@ -272,7 +272,7 @@ int main(int argc, char **argv) {
 
 		if (fd_sot < 0) {
 			perror("failed to create socket for daemon collision detection");
-			abort();
+			exit(2);
 		}
 
 		struct sockaddr_un sa = {
@@ -288,7 +288,7 @@ int main(int argc, char **argv) {
 
 			if (unlink(opt_socket_path)) {
 				perror("failed remove old stale socket");
-				abort();
+				exit(2);
 			}
 		} else {
 			puts("error: Another ydotoold is running with the same socket.");
@@ -300,7 +300,7 @@ int main(int argc, char **argv) {
 
 	if (fd_so < 0) {
 		perror("failed to create socket");
-		abort();
+		exit(2);
 	}
 
 	struct sockaddr_un sa = {
@@ -311,7 +311,7 @@ int main(int argc, char **argv) {
 
 	if (bind(fd_so, (const struct sockaddr *) &sa, sizeof(sa))) {
 		perror("failed to bind socket");
-		abort();
+		exit(2);
 	}
 
 	chmod(opt_socket_path, strtol(opt_socket_perm, NULL, 8));

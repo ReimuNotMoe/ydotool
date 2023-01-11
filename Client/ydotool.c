@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
 
 	if (fd_daemon_socket < 0) {
 		perror("failed to create socket");
-		abort();
+		exit(2);
 	}
 
 	struct sockaddr_un sa = {
@@ -154,23 +154,22 @@ int main(int argc, char **argv) {
 		snprintf(sa.sun_path, sizeof(sa.sun_path)-1, "%s", "/tmp/.ydotool_socket");
 	}
 
-	printf("%s\n", sa.sun_path);
-
 	if (connect(fd_daemon_socket, (const struct sockaddr *) &sa, sizeof(sa))) {
 		int err = errno;
-		printf("failed to connect socket: %s\n", strerror(err));
+		printf("failed to connect socket `%s': %s\n", sa.sun_path, strerror(err));
 
 		switch (err) {
+			case ENOENT:
 			case ECONNREFUSED:
-				puts("could not connect to the socket, is ydotoold started?");
+				puts("Please check if ydotoold is running.");
 				break;
 			case EACCES:
 			case EPERM:
-				puts("could not access the socket, are you root?");
+				puts("Please check if the current user has sufficient permissions to access the socket file.");
 				break;
 		}
 
-		abort();
+		exit(2);
 	}
 
 	return tool_main(argc-1, argv+1);
