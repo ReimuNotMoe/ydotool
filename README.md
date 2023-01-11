@@ -60,11 +60,11 @@ Close a window in graphical environment (Alt+F4):
 
 Relatively move mouse pointer to -100,100:
 
-    ydotool mousemove -- -100 100
+    ydotool mousemove -x -100 -y 100
 
 Move mouse pointer to 100,100:
 
-    ydotool mousemove --absolute -- 100 100
+    ydotool mousemove --absolute -x 100 -y 100
 
 Mouse right click:
 

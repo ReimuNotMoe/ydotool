@@ -38,13 +38,17 @@
 
 static void show_help() {
 	puts(
-		"Usage: mousemove [OPTION]... -- <xpos> <ypos>\n"
+		"Usage: mousemove [OPTION]... [-x <xpos> -y <ypos>] [-- <xpos> <ypos>]\n"
 		"Move mouse pointer or wheel.\n"
 		"\n"
 		"Options:\n"
 		"  -w, --wheel                Move mouse wheel relatively\n"
 		"  -a, --absolute             Use absolute position, not applicable to wheel\n"
+		"  -x, --xpos                 X position\n"
+		"  -y, --ypos                 Y position\n"
 		"  -h, --help                 Display this help and exit\n"
+		"\n"
+		"You need to disable mouse speed acceleration for correct absolute movement."
 	);
 }
 
@@ -57,6 +61,9 @@ int tool_mousemove(int argc, char **argv) {
 	int is_abs = 0;
 	int is_wheel = 0;
 
+	int i = 0;
+	int32_t pos[2] = {0, 0};
+
 	while (1) {
 		int c;
 
@@ -64,12 +71,14 @@ int tool_mousemove(int argc, char **argv) {
 			{"absolute", no_argument, 0, 'a'},
 			{"help", no_argument, 0, 'h'},
 			{"wheel", no_argument, 0, 'w'},
+			{"xpos", required_argument, 0, 'x'},
+			{"ypos", required_argument, 0, 'y'},
 			{0, 0, 0, 0}
 		};
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 
-		c = getopt_long (argc, argv, "haw",
+		c = getopt_long (argc, argv, "hawx:y:",
 				 long_options, &option_index);
 
 		/* Detect the end of the options. */
@@ -97,6 +106,14 @@ int tool_mousemove(int argc, char **argv) {
 			case 'w':
 				is_wheel = 1;
 				break;
+			case 'x':
+				pos[0] = strtol(optarg, NULL, 10);
+				i++;
+				break;
+			case 'y':
+				pos[1] = strtol(optarg, NULL, 10);
+				i++;
+				break;
 
 			case '?':
 				/* getopt_long already printed an error message. */
@@ -107,12 +124,11 @@ int tool_mousemove(int argc, char **argv) {
 		}
 	}
 
-	int i = 0;
-	int32_t arg[2] = {0, 0};
+
 
 	if (optind < argc) {
 		while (optind < argc) {
-			arg[i] = strtol(argv[optind++], NULL, 10);
+			pos[i] = strtol(argv[optind++], NULL, 10);
 			i++;
 		}
 	}
@@ -129,11 +145,11 @@ int tool_mousemove(int argc, char **argv) {
 		}
 
 		if (is_wheel) {
-			uinput_emit(EV_REL, REL_HWHEEL, arg[0], 0);
-			uinput_emit(EV_REL, REL_WHEEL, arg[1], 1);
+			uinput_emit(EV_REL, REL_HWHEEL, pos[0], 0);
+			uinput_emit(EV_REL, REL_WHEEL, pos[1], 1);
 		} else {
-			uinput_emit(EV_REL, REL_X, arg[0], 0);
-			uinput_emit(EV_REL, REL_Y, arg[1], 1);
+			uinput_emit(EV_REL, REL_X, pos[0], 0);
+			uinput_emit(EV_REL, REL_Y, pos[1], 1);
 		}
 	} else {
 		show_help();
