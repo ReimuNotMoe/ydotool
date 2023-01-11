@@ -72,6 +72,7 @@
 
 static char opt_socket_path[SOCKET_PATH_LEN] = "/tmp/.ydotool_socket";
 static char opt_socket_perm[16] = "0600";
+static char opt_socket_own[16] = "";
 
 static void show_help() {
 	puts(
@@ -80,7 +81,8 @@ static void show_help() {
 		"\n"
 		"Options:\n"
 		"  -p, --socket-path=PATH     Custom socket path\n"
-		"  -P, --socket-perm=PERM     Socket permission\n"
+		"  -P, --socket-perm=PERM     Socket permission (default 0600)\n"
+		"  -o, --socket-own=UID:GID   Socket ownership\n"
 		"  -m, --mouse-off            Disable mouse (EV_REL)\n"
 		"  -k, --keyboard-off         Disable keyboard (EV_KEY)\n"
 		"  -T, --touch-on             Enable touchscreen (EV_ABS)\n"
@@ -186,6 +188,7 @@ int main(int argc, char **argv) {
 			{"help", no_argument, 0, 'h'},
 			{"version", no_argument, 0, 'V'},
 			{"socket-perm", required_argument, 0, 'P'},
+			{"socket-own", required_argument, 0, 'o'},
 			{"socket-path", required_argument, 0, 'p'},
 			{"mouse-off", no_argument, 0, 'm'},
 			{"keyboard-off", no_argument, 0, 'k'},
@@ -195,7 +198,7 @@ int main(int argc, char **argv) {
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 
-		c = getopt_long (argc, argv, "hVp:P:mkT",
+		c = getopt_long (argc, argv, "hVp:P:o:mkT",
 				 long_options, &option_index);
 
 		/* Detect the end of the options. */
@@ -218,6 +221,10 @@ int main(int argc, char **argv) {
 
 			case 'P':
 				strncpy(opt_socket_perm, optarg, sizeof(opt_socket_perm)-1);
+				break;
+
+			case 'o':
+				strncpy(opt_socket_own, optarg, sizeof(opt_socket_perm)-1);
 				break;
 
 			case 'm':
@@ -314,7 +321,34 @@ int main(int argc, char **argv) {
 		exit(2);
 	}
 
-	chmod(opt_socket_path, strtol(opt_socket_perm, NULL, 8));
+
+	if (chmod(opt_socket_path, strtol(opt_socket_perm, NULL, 8))) {
+		perror("failed to change socket permission");
+		exit(2);
+	}
+
+	printf("Socket permission: %s\n", opt_socket_perm);
+
+	if (opt_socket_own[0]) {
+		char *gid_pos = strchr(opt_socket_own, ':');
+
+		if (!gid_pos) {
+			puts("invalid ownership specification");
+			exit(2);
+		}
+
+		gid_pos++;
+
+		uid_t uid = strtol(opt_socket_own, NULL, 10);
+		gid_t gid = strtol(gid_pos, NULL, 10);
+
+		if (chown(opt_socket_path, uid, gid)) {
+			perror("failed to change socket ownership");
+			exit(2);
+		}
+
+		printf("Socket ownership: UID=%d, GID=%d\n", uid, gid);
+	}
 
 	uinput_setup(fd_ui, opt_ui_setup);
 
