@@ -81,7 +81,7 @@ static void show_help() {
 		"Options:\n"
 		"  -d, --key-delay=N          Delay N milliseconds between key events (up/down each)\n"
 		"  -D, --next-delay=N         Delay N milliseconds between strings\n"
-		"  -H, --key-hold=N           Time N millisions to hold each key for\n"
+		"  -H, --key-hold=N           Time N milliseconds to hold each key for\n"
 		"  -f, --file=PATH            Specify a file, the contents of which will be be typed as if passed as an argument.\n"
 		"                               The filepath may also be '-' to read from stdin\n"
 		"  -h, --help                 Display this help and exit\n"
