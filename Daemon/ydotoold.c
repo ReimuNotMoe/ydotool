@@ -352,6 +352,24 @@ int main(int argc, char **argv) {
 
 	uinput_setup(fd_ui, opt_ui_setup);
 
+	sleep(1);
+
+	const char *xinput_path = "/usr/bin/xinput";
+
+	if (stat(xinput_path, &sbuf) == 0) {
+		pid_t npid = vfork();
+
+		if (npid == 0) {
+			execl(xinput_path, "xinput", "--set-prop", "pointer:ydotoold virtual device", "libinput Accel Profile Enabled", "0,", "1", NULL);
+			perror("failed to run xinput command");
+			_exit(2);
+		} else if (npid == -1) {
+			perror("failed to fork");
+		}
+	} else {
+		printf("xinput command not found in `%s', not disabling mouser pointer acceleration", xinput_path);
+	}
+
 	puts("READY");
 
 	struct input_event uev;
