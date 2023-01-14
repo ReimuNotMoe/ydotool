@@ -51,6 +51,7 @@ static void show_help() {
 		"\n"
 		"Syntax: <keycode>:<pressed>\n"
 		"e.g. 28:1 28:0 means pressing on the Enter button on a standard US keyboard.\n"
+		"     (where :1 for pressed means the key is down and then :0 means the key is released)"
 		"     42:1 38:1 38:0 24:1 24:0 38:1 38:0 42:0 - \"LOL\"\n"
 		"\n"
 		"Non-interpretable values, such as 0, aaa, l0l, will only cause a delay.\n"
