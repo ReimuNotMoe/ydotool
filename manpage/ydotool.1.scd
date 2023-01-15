@@ -32,7 +32,7 @@ Currently implemented command(s):
 	Type a given keycode.
 	
 	e.g. 28:1 28:0 means pressing on the Enter button on a standard US keyboard.
-  (where :1 for pressed means the key is down and then :0 means the key is released)
+	(where :1 for pressed means the key is down and then :0 means the key is released)
 
 	42:1 38:1 38:0 24:1 24:0 38:1 38:0 42:0 - "LOL"
 
