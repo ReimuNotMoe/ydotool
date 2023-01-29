@@ -40,6 +40,8 @@ Currently implemented command(s):
 
 	See `/usr/include/linux/input-event-codes.h' for available key codes (KEY_\*).
 
+	You can find the key name/number your keyboard is sending to libinput by running `sudo libinput record` and then selecting your keyboard from the list it will show you the libinput proper key name and number for each key you press.
+
 	Options:
 	*-d*,*--key-delay* _<ms>_
 		Delay time between keystrokes. Default 12ms.
