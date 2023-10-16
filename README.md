@@ -103,6 +103,18 @@ input "16700:8197:DELL_DELL_USB_Keyboard" {
 ```
 The identifier for your keyboard can be obtained from the output of `swaymsg -t get_inputs`.
 
+#### Hyprland
+
+You can use [Per-device input configs](https://wiki.hyprland.org/Configuring/Keywords/#per-device-input-configs) in [Hyprland](https://hyprland.org/). Simply add following snippet to your config:
+
+```
+device:ydotoold-virtual-device {
+    kb_layout = us
+    kb_variant =
+    kb_options =
+}
+```
+
 #### Use a hardware-configurable keyboard
 [As mentioned here](https://github.com/ReimuNotMoe/ydotool/issues/43#issuecomment-605921288), consider using a hardware-based configuration that supports using a custom layout without configuring it in software.
 
