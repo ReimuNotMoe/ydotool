@@ -235,7 +235,7 @@ int main(int argc, char **argv) {
 				opt_ui_setup &= ~ENABLE_KEY;
 				break;
 
-			case 'A':
+			case 'T':
 				opt_ui_setup |= ENABLE_ABS;
 				break;
 
