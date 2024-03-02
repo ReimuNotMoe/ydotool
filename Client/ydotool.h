@@ -68,3 +68,4 @@ extern int tool_click(int argc, char **argv);
 extern int tool_mousemove(int argc, char **argv);
 extern int tool_type(int argc, char **argv);
 extern int tool_key(int argc, char **argv);
+extern int tool_stdin(int argc, char **argv);

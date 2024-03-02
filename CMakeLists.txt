@@ -26,7 +26,7 @@ if (${RC_GIT_VER} EQUAL 0)
 endif()
 
 set(SOURCE_FILES_DAEMON Daemon/ydotoold.c)
-set(SOURCE_FILES_CLIENT Client/ydotool.c Client/tool_click.c Client/tool_mousemove.c Client/tool_type.c Client/tool_key.c)
+set(SOURCE_FILES_CLIENT Client/ydotool.c Client/tool_click.c Client/tool_mousemove.c Client/tool_type.c Client/tool_key.c Client/tool_stdin.c)
 
 add_executable(ydotoold ${SOURCE_FILES_DAEMON})
 install(TARGETS ydotoold DESTINATION ${CMAKE_INSTALL_BINDIR})
