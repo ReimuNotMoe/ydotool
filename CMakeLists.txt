@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.22)
 project(ydotool C)
 
-set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD 11)
 
 # Include GNU install directory module to detect where to install
 # files on Linux/Unix systems (e.g., lib vs lib64)
@@ -24,8 +24,6 @@ if (${RC_GIT_VER} EQUAL 0)
     message("-- Version: " ${GIT_VERSION})
     add_definitions(-DVERSION=\"${GIT_VERSION}\")
 endif()
-
-
 
 set(SOURCE_FILES_DAEMON Daemon/ydotoold.c)
 set(SOURCE_FILES_CLIENT Client/ydotool.c Client/tool_click.c Client/tool_mousemove.c Client/tool_type.c Client/tool_key.c)
