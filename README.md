@@ -81,6 +81,7 @@ Since v1.0.0, the use of ydotoold is mandatory.
 
 
 ### Compile
+At least on Fedora 39, might require ``sudo dnf install -y scdoc`` to have acccess to the ``scdoc`` manpage generator.
 
     mkdir build
     cd build
