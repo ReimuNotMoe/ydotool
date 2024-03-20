@@ -48,6 +48,7 @@ static void show_help() {
 		"  -y, --ypos                 Y position\n"
 		"  -h, --help                 Display this help and exit\n"
 		"\n"
+		"Mouse wheel need to define two -w argument, first one for horizontal, second one for vertical.\n"
 		"You need to disable mouse speed acceleration for correct absolute movement."
 	);
 }
@@ -70,7 +71,7 @@ int tool_mousemove(int argc, char **argv) {
 		static struct option long_options[] = {
 			{"absolute", no_argument, 0, 'a'},
 			{"help", no_argument, 0, 'h'},
-			{"wheel", no_argument, 0, 'w'},
+			{"wheel", required_argument, 0, 'w'},
 			{"xpos", required_argument, 0, 'x'},
 			{"ypos", required_argument, 0, 'y'},
 			{0, 0, 0, 0}
@@ -78,9 +79,8 @@ int tool_mousemove(int argc, char **argv) {
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 
-		c = getopt_long (argc, argv, "hawx:y:",
+		c = getopt_long (argc, argv, "haw:x:y:",
 				 long_options, &option_index);
-
 		/* Detect the end of the options. */
 		if (c == -1)
 			break;
@@ -105,6 +105,8 @@ int tool_mousemove(int argc, char **argv) {
 
 			case 'w':
 				is_wheel = 1;
+				pos[i] = strtol(optarg, NULL, 10);
+				i++;
 				break;
 			case 'x':
 				pos[0] = strtol(optarg, NULL, 10);
