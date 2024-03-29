@@ -4,6 +4,13 @@ Generic Linux command-line automation tool (no X!)
 
 **`ydotool` is not limited to Wayland.** You can use it on anything as long as it accepts keyboard/mouse/whatever input. For example, X11, text console, "RetroArch OS", fbdev apps (fbterm/mplayer/SDL1/LittleVGL/Qt Embedded), etc.
 
+## 2024 Roadmap
+Our **ultra-lightweight** JavaScript runtime, *Resonance*, will be released in Q2 2024 in LGPL license.
+
+ydotool will then be rewritten in JavaScript afterwards, to enable more people to understand the code & contribute.
+
+**You have NO reason to reject this. The RAM consumption (RSS) will NOT exceed 1MB.**
+
 ## Important Note
 The man page is not always up to date. Please use `--help` to ensure correctness.
 
