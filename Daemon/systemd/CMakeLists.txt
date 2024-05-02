@@ -1,7 +1,8 @@
 find_package(PkgConfig)
 
 # Try to get the systemd directory for system/user units from the package
-# and fall back on upstream default without the '/usr' prefix
+# and fall back on upstream default without the '/usr' prefix if not forced by
+# command line.
 pkg_check_modules(SYSTEMD systemd)
 if (SYSTEMD_FOUND)
     if(SYSTEMD_USER_SERVICE)
