@@ -1,5 +1,5 @@
 [Unit]
-Description=Starts ydotoold user service
+Description=Starts ydotoold Daemon
 
 [Service]
 Type=simple
@@ -13,4 +13,3 @@ TimeoutSec=180
 
 [Install]
 WantedBy=basic.target
-
