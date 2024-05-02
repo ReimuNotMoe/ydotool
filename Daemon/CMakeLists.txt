@@ -7,23 +7,9 @@ if(SYSTEMD_USER_SERVICE AND SYSTEMD_SYSTEM_SERVICE)
 endif()
 
 if(SYSTEMD_USER_SERVICE OR SYSTEMD_SYSTEM_SERVICE) 
-    find_package(PkgConfig)
-    # Try to get the systemd directory for system/user units from the package
-    # and fall back on upstream default without the '/usr' prefix
-    pkg_check_modules(SYSTEMD systemd)
-    if (SYSTEMD_FOUND)
-        if(SYSTEMD_USER_SERVICE)
-            pkg_get_variable(SD_UNITDIR systemd systemduserunitdir)
-        elseif(SYSTEMD_SYSTEM_SERVICE)
-            pkg_get_variable(SD_UNITDIR systemd systemdsystemunitdir)
-        endif()
-    # else()
-    #     set(SD_UNITDIR "lib/systemd/user")
-    endif()
+    add_subdirectory(systemd)
+endif()
 
-    configure_file(
-        "${CMAKE_CURRENT_SOURCE_DIR}/ydotoold.service.in"
-        "${PROJECT_BINARY_DIR}/ydotoold.service"
-        @ONLY)
-    install(FILES "${PROJECT_BINARY_DIR}/ydotoold.service" DESTINATION ${SD_UNITDIR})
+if(OPENRC)
+    add_subdirectory(openrc)
 endif()
