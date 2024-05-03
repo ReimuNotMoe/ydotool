@@ -38,8 +38,13 @@
 
 #include <errno.h>
 #include <stdio.h>
+#include <getopt.h>
 
 #include <string.h>
+
+#ifndef VERSION
+#define VERSION "unknown"
+#endif
 
 struct tool_def {
 	char name[16];
@@ -81,7 +86,10 @@ static const struct tool_def tool_list[] = {
 };
 
 static void show_help() {
-	puts("Usage: ydotool <cmd> <args>\n"
+	puts("Usage: ydotool [OPTION] <cmd> <args>\n"
+		"Options:\n"
+		"  -h, --help                 Display this help and exit\n"
+		"  -V, --version              Show version information\n"
 	     "Available commands:");
 
 	int tool_count = sizeof(tool_list) / sizeof(struct tool_def);
@@ -91,6 +99,11 @@ static void show_help() {
 	}
 
 	puts("Use environment variable YDOTOOL_SOCKET to specify daemon socket.");
+}
+
+static void show_version() {
+	puts("ydotool version(or hash): ");
+	puts(VERSION);
 }
 
 void uinput_emit(uint16_t type, uint16_t code, int32_t val, bool syn_report) {
@@ -112,9 +125,29 @@ void uinput_emit(uint16_t type, uint16_t code, int32_t val, bool syn_report) {
 }
 
 int main(int argc, char **argv) {
-	if (argc < 2 || strncmp(argv[1], "-h", 2) == 0 || strncmp(argv[1], "--h", 3) == 0 || strcmp(argv[1], "help") == 0) {
-		show_help();
-		return 0;
+
+	static struct option long_options[] = {
+		{"help", no_argument, 0, 'h'},
+		{"version", no_argument, 0, 'V'},
+	};
+
+	int opt = getopt_long(argc, argv, "hV", long_options, NULL);
+	if (opt != -1)
+	{
+		switch (opt) {
+			case 'h':
+				show_help();
+				exit(0);
+
+			case 'V':
+				show_version();
+				exit(0);
+
+			default:
+				puts("Not a valid option\n");
+				show_help();
+				exit(1);
+		}
 	}
 
 	int (*tool_main)(int argc, char **argv) = NULL;
@@ -129,7 +162,7 @@ int main(int argc, char **argv) {
 
 	if (!tool_main) {
 		printf("ydotool: Unknown command: %s\n"
-		       "Run 'ydotool help' if you want a command list\n", argv[1]);
+		       "Run 'ydotool --help' if you want a command list\n", argv[1]);
 		return 1;
 	}
 

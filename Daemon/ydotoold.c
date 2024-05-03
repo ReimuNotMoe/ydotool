@@ -92,6 +92,7 @@ static void show_help() {
 }
 
 static void show_version() {
+	puts("ydotoold version(or hash): ");
 	puts(VERSION);
 }
 
