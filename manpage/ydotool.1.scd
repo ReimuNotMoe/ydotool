@@ -25,6 +25,8 @@ Currently implemented command(s):
 	Move mouse pointer to absolute position
 *click*
 	Click on mouse buttons
+*stdin*
+	Resend all keypresses as a keyboard (i.e. from ssh)
 
 # KEYBOARD COMMANDS
 *key* [*-d*,*--key-delay* _<ms>_] [_<KEYCODE:PRESSED>_ ...]
