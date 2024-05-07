@@ -93,16 +93,31 @@ Since v1.0.0, the use of ydotoold is mandatory.
 ## Build
 **CMake 3.22+ is required.**
 
+### Build options
+There are a few extra options that can be configured when running CMake
+
+- BUILD_DOCS=ON|OFF - whether to build the documentation, depends on ``scdoc``. Default: ON
+- SYSTEMD_USER_SERVICE=ON|OFF - whether to use systemd user service file, depends on ``systemd``. Default: ON
+- SYSTEMD_SYSTEM_SERVICE=ON|OFF - whether to use systemd system service file, depends on ``systemd``. Default: OFF
+- OPENRC=ON|OFF - whether to use openrc service file. Default: OFF (TBD)
+
 
 ### Compile
-At least on Fedora 39, might require ``sudo dnf install -y scdoc`` to have acccess to the ``scdoc`` manpage generator.
 
     mkdir build
     cd build
     cmake ..
     make -j `nproc`
 
+If issues appears, check the build options, but try to install the dependecies:
 
+Debian-based:
+
+    sudo apt install scdoc
+
+RHEL-based:
+
+    sudo dnf install scdoc
 ## Troubleshooting
 ### Custom keyboard layouts
 Currently, ydotool does not recognize if the user is using a custom keyboard layout. In order to comfortably use ydotool alongside a custom keyboard layout, the user could use one of the following fixes/workarounds:
