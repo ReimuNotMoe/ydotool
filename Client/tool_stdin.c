@@ -4,7 +4,7 @@
 #include "ydotool.h"
 
 #define FLAG_UPPERCASE		0x80000000
-#define FLAG_CTRL               0x40000000
+#define FLAG_CTRL           0x40000000
 
 static const int32_t ascii2keycode_map[128] = {
 	// 00 - 0f
@@ -83,47 +83,47 @@ int tool_stdin(int argc, char **argv) {
     printf("Type anything (CTRL-C to exit):\n");
 
     while (1) {
-	char buffer[4] = {0};
-	read(STDIN_FILENO, buffer, 3);
+		char buffer[4] = {0};
+		read(STDIN_FILENO, buffer, 3);
 
-	printf("Key code: %d %d %d\n", buffer[0], buffer[1], buffer[2]);
+		printf("Key code: %d %d %d\n", buffer[0], buffer[1], buffer[2]);
 
-	char c = buffer[0];
+		char c = buffer[0];
 
-        // Convert char to keycode and flags based on the ascii2keycode_map
-        int kdef = ascii2keycode_map[(int)c];
+		// Convert char to keycode and flags based on the ascii2keycode_map
+		int kdef = ascii2keycode_map[(int)c];
 
-	if ((int)buffer[0] == 27 && (int)buffer[1] == 91 && (int)buffer[2] >= 65 && (int)buffer[2] <= 76) {
-	    kdef = ascii2ctrlcode_map[(int)buffer[2] - 65];
-	}
+		if ((int)buffer[0] == 27 && (int)buffer[1] == 91 && (int)buffer[2] >= 65 && (int)buffer[2] <= 76) {
+			kdef = ascii2ctrlcode_map[(int)buffer[2] - 65];
+		}
 
-        if (kdef == -1) continue; // Skip unsupported characters
-        printf("  Maps to: %d\n", kdef);
+		if (kdef == -1) continue; // Skip unsupported characters
+		printf("  Maps to: %d\n", kdef);
 
-        uint16_t kc = kdef & 0xffff; // Extract keycode
-        bool isUppercase = (kdef & FLAG_UPPERCASE) != 0;
-	bool isCtrl = (kdef & FLAG_CTRL) != 0;
+		uint16_t kc = kdef & 0xffff; // Extract keycode
+		bool isUppercase = (kdef & FLAG_UPPERCASE) != 0;
+		bool isCtrl = (kdef & FLAG_CTRL) != 0;
 
-        // Emit key events
-        if (isUppercase) {
-	    printf("  Sending shift\n");
-            uinput_emit(EV_KEY, KEY_LEFTSHIFT, 1, 1); // Press shift for uppercase
-        }
-	if (isCtrl) {
-	    printf("  Sending ctrl\n");
-	    uinput_emit(EV_KEY, KEY_LEFTCTRL, 1, 1); // Press ctrl
-        }
-        uinput_emit(EV_KEY, kc, 1, 1); // Key down
-        usleep(opt_key_hold_ms * 1000); // Hold key
-        uinput_emit(EV_KEY, kc, 0, 1); // Key up
-	if (isCtrl) {
-	    uinput_emit(EV_KEY, KEY_LEFTCTRL, 0, 1); // Release ctrl
-	}
-        if (isUppercase) {
-            uinput_emit(EV_KEY, KEY_LEFTSHIFT, 0, 1); // Release shift for uppercase
-        }
+		// Emit key events
+		if (isUppercase) {
+		printf("  Sending shift\n");
+			uinput_emit(EV_KEY, KEY_LEFTSHIFT, 1, 1); // Press shift for uppercase
+		}
+		if (isCtrl) {
+			printf("  Sending ctrl\n");
+			uinput_emit(EV_KEY, KEY_LEFTCTRL, 1, 1); // Press ctrl
+			}
+			uinput_emit(EV_KEY, kc, 1, 1); // Key down
+			usleep(opt_key_hold_ms * 1000); // Hold key
+			uinput_emit(EV_KEY, kc, 0, 1); // Key up
+		if (isCtrl) {
+			uinput_emit(EV_KEY, KEY_LEFTCTRL, 0, 1); // Release ctrl
+		}
+		if (isUppercase) {
+			uinput_emit(EV_KEY, KEY_LEFTSHIFT, 0, 1); // Release shift for uppercase
+		}
 
-        usleep(opt_key_delay_ms * 1000); // Delay between keys
+		usleep(opt_key_delay_ms * 1000); // Delay between keys
     }
 
     return 0;

@@ -15,7 +15,7 @@ ydotool will then be rewritten in JavaScript afterwards, to enable more people t
 The man page is not always up to date. Please use `--help` to ensure correctness.
 
 ## ChangeLog
-This project is now refactored. (v1.0.0)
+This project is now refactored. (from v1.0.0)
 
 Changes:
 - Rewritten in pure C99
@@ -35,10 +35,13 @@ Good News:
 
 ## Usage
 Currently implemented command(s):
+- `click` - Click on mouse buttons
+- `mousemove` - Move mouse pointer to absolute position
 - `type` - Type a string
 - `key` - Press keys
-- `mousemove` - Move mouse pointer to absolute position
-- `click` - Click on mouse buttons
+- `debug` - Print the socket, number of parameters and parameter values
+- `bakers` - Show the honorable bakers
+- `stdin` - Sends the key presses as it was a keyboard (i.e from ssh) See [PR #229](https://github.com/ReimuNotMoe/ydotool/pull/229)
 
 ## Examples
 Switch to tty1 (Ctrl+Alt+F1), wait 2 seconds, and type some words:
@@ -65,9 +68,13 @@ Mouse repeating left click:
 
     ydotool click --repeat 5 --next-delay 25 0xC0
 
+Repeat the keyboard presses from stdin:
+
+    ydotool stdin
+
 ## Notes
 #### Runtime
-This program requires access to `/dev/uinput`. **This usually requires root permissions.**
+`ydotoold` (daemon) program requires access to `/dev/uinput`. **This usually requires root permissions.**
 
 #### Available key names
 See `/usr/include/linux/input-event-codes.h`
@@ -84,18 +91,33 @@ In order to solve this problem, a persistent background service, ydotoold, is ma
 Since v1.0.0, the use of ydotoold is mandatory.
 
 ## Build
-**CMake 3.4+ is required.**
+**CMake 3.22+ is required.**
+
+### Build options
+There are a few extra options that can be configured when running CMake
+
+- BUILD_DOCS=ON|OFF - whether to build the documentation, depends on ``scdoc``. Default: ON
+- SYSTEMD_USER_SERVICE=ON|OFF - whether to use systemd user service file, depends on ``systemd``. Default: ON
+- SYSTEMD_SYSTEM_SERVICE=ON|OFF - whether to use systemd system service file, depends on ``systemd``. Default: OFF
+- OPENRC=ON|OFF - whether to use openrc service file. Default: OFF (TBD)
 
 
 ### Compile
-At least on Fedora 39, might require ``sudo dnf install -y scdoc`` to have acccess to the ``scdoc`` manpage generator.
 
     mkdir build
     cd build
     cmake ..
     make -j `nproc`
 
+If issues appears, check the build options, but try to install the dependecies:
 
+Debian-based:
+
+    sudo apt install scdoc
+
+RHEL-based:
+
+    sudo dnf install scdoc
 ## Troubleshooting
 ### Custom keyboard layouts
 Currently, ydotool does not recognize if the user is using a custom keyboard layout. In order to comfortably use ydotool alongside a custom keyboard layout, the user could use one of the following fixes/workarounds:
@@ -126,7 +148,6 @@ device:ydotoold-virtual-device {
 #### Use a hardware-configurable keyboard
 [As mentioned here](https://github.com/ReimuNotMoe/ydotool/issues/43#issuecomment-605921288), consider using a hardware-based configuration that supports using a custom layout without configuring it in software.
 
-## Older Notes
 ### Current situation
 This project is now being maintained **thanks to all the people that are supporting this project!**
 
