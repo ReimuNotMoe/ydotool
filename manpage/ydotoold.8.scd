@@ -21,16 +21,16 @@ ydotoold \- daemon for *ydotool*(1)
 		Set socket permission.
 
 	*-o*, *--socket-own=UID:GID*
-	    Socket ownership.
+		Socket ownership.
 
 	*-m*, *--mouse-off*
-	    Disable mouse (EV_REL)
+		Disable mouse (EV_REL)
 
 	*-k*, *--keyboard-off*
-	    Disable keyboard (EV_KEY)
+		Disable keyboard (EV_KEY)
 		
 	*-T*, *--touch-on*
-        Enable touchscreen (EV_ABS)
+		Enable touchscreen (EV_ABS)
 
 	*-h*, *--help*
 		Display help and exit.
