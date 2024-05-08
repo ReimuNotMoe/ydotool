@@ -101,7 +101,7 @@ Currently implemented command(s):
 	- 0x07 - TASK
 	- 0x40 - Mouse down
 	- 0x80 - Mouse up
-    
+	
 	Examples:
 
 	- 0x00: chooses left button, but does nothing (you can use this to implement extra sleeps)
