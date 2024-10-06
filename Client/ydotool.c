@@ -126,30 +126,20 @@ void uinput_emit(uint16_t type, uint16_t code, int32_t val, bool syn_report) {
 
 int main(int argc, char **argv) {
 
-	static struct option long_options[] = {
-		{"help", no_argument, 0, 'h'},
-		{"version", no_argument, 0, 'V'},
-	};
-
-	int opt = getopt_long(argc, argv, "hV", long_options, NULL);
-	if (opt != -1)
-	{
-		switch (opt) {
-			case 'h':
-				show_help();
-				exit(0);
-
-			case 'V':
-				show_version();
-				exit(0);
-
-			default:
-				puts("Not a valid option\n");
-				show_help();
-				exit(1);
-		}
+	if (argc < 2) {
+		puts("ydotool: Missing arguments\n"
+		     "Run 'ydotool --help' if you want a command list\n");
+		exit(0);
 	}
-
+	else if (strncmp(argv[1], "-h", 2) == 0 || strncmp(argv[1], "--help", 6) == 0 ) {
+		show_help();
+		exit(0);
+	}
+	else if (strncmp(argv[1], "-V", 2) == 0 || strncmp(argv[1], "--version", 9) == 0 ) {
+		show_version();
+		exit(0);
+	}
+ 
 	int (*tool_main)(int argc, char **argv) = NULL;
 
 	int tool_count = sizeof(tool_list) / sizeof(struct tool_def);
