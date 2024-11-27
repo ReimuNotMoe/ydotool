@@ -148,7 +148,7 @@ int tool_mousemove(int argc, char **argv) {
 			uinput_emit(EV_REL, REL_HWHEEL, pos[0], 0);
 			uinput_emit(EV_REL, REL_WHEEL, pos[1], 1);
 		} else {
-			uinput_emit(EV_REL, REL_X, pos[0], 0);
+			uinput_emit(EV_REL, REL_X, pos[0], 1);
 			uinput_emit(EV_REL, REL_Y, pos[1], 1);
 		}
 	} else {
