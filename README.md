@@ -138,7 +138,8 @@ The identifier for your keyboard can be obtained from the output of `swaymsg -t 
 You can use [Per-device input configs](https://wiki.hyprland.org/Configuring/Keywords/#per-device-input-configs) in [Hyprland](https://hyprland.org/). Simply add following snippet to your config:
 
 ```
-device:ydotoold-virtual-device {
+device {
+    name = ydotoold-virtual-device
     kb_layout = us
     kb_variant =
     kb_options =
