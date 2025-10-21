@@ -90,6 +90,56 @@ In order to solve this problem, a persistent background service, ydotoold, is ma
 
 Since v1.0.0, the use of ydotoold is mandatory.
 
+## User Service Setup (Recommended)
+
+### Option A: From Distribution Package (Easiest)
+
+1. Configure /dev/uinput permissions:
+```bash
+echo 'KERNEL=="uinput", GROUP="input", MODE="0660"' | sudo tee /etc/udev/rules.d/99-uinput.rules
+sudo udevadm control --reload && sudo udevadm trigger
+sudo usermod -a -G input $USER
+# Re-login required for group change
+```
+
+2. Create user service:
+```bash
+mkdir -p ~/.config/systemd/user
+tee ~/.config/systemd/user/ydotoold.service >/dev/null <<'EOF'
+[Unit]
+Description=ydotool user daemon
+
+[Service]
+ExecStart=/usr/bin/ydotoold --socket-perm=0660
+Restart=always
+
+[Install]
+WantedBy=default.target
+EOF
+```
+
+3. Enable and start:
+```bash
+systemctl --user daemon-reload
+systemctl --user enable --now ydotoold
+# Verify:
+systemctl --user status ydotoold
+```
+
+### Option B: Building from Source
+
+When building from source with CMake:
+```bash
+mkdir build && cd build
+cmake -DSYSTEMD_USER_SERVICE=ON ..
+make
+sudo make install
+systemctl --user daemon-reload
+systemctl --user enable --now ydotoold
+# Verify:
+systemctl --user status ydotoold
+```
+
 ## Build
 **CMake 3.22+ is required.**
 
