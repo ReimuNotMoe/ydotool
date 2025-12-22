@@ -14,26 +14,8 @@ ydotool will then be rewritten in JavaScript afterwards, to enable more people t
 ## Important Note
 The man page is not always up to date. Please use `--help` to ensure correctness.
 
-## ChangeLog
-This project is now refactored. (from v1.0.0)
-
-Changes:
-- Rewritten in pure C99
-- No external dependencies
-- Uses a lot less memory & no dynamic memory allocation
-
-Breaking Changes:
-- `recorder` removed because it's irrelevant. It will become a separate project
-- Command chaining and `sleep` are removed because this should be your shell's job
-- `ydotool` now must work with `ydotoold`
-- Usage of `click` and `key` are changed
-
-Good News:
-- Some people can finally build this project offline
-- `key` now (only) accepts keycodes, so it's not limited to a specific keyboard layout
-- Now it's possible to implement support for different keyboard layouts in `type`
-
 ## Usage
+### Commands
 Currently implemented command(s):
 - `click` - Click on mouse buttons
 - `mousemove` - Move mouse pointer to absolute position
@@ -43,7 +25,7 @@ Currently implemented command(s):
 - `bakers` - Show the honorable bakers
 - `stdin` - Sends the key presses as it was a keyboard (i.e from ssh) See [PR #229](https://github.com/ReimuNotMoe/ydotool/pull/229)
 
-## Examples
+### Examples
 Switch to tty1 (Ctrl+Alt+F1), wait 2 seconds, and type some words:
 
     ydotool key 29:1 56:1 59:1 59:0 56:0 29:0; sleep 2; ydotool type 'echo Hey guys. This is Austin.'
@@ -72,14 +54,18 @@ Repeat the keyboard presses from stdin:
 
     ydotool stdin
 
+Click keys ctrl+Tab (equivalent of `xdotool ctrl+Tab`):
+
+    ydotool key 29:1 15:1 29:0 15:0
+
 ## Notes
-#### Runtime
+### Available key names
+To get all key names check out `/usr/include/linux/input-event-codes.h`.
+
+### Runtime
 `ydotoold` (daemon) program requires access to `/dev/uinput`. **This usually requires root permissions.**
 
-#### Available key names
-See `/usr/include/linux/input-event-codes.h`
-
-#### Why a background service is needed
+### Why a background service is needed
 ydotool works differently from xdotool. xdotool sends X events directly to X server, while ydotool uses the uinput framework of Linux kernel to emulate an input device.
 
 When ydotool runs and creates a virtual input device, it will take some time for your graphical environment (X11/Wayland) to recognize and enable the virtual input device. (Usually done by udev)
@@ -101,7 +87,6 @@ There are a few extra options that can be configured when running CMake
 - SYSTEMD_SYSTEM_SERVICE=ON|OFF - whether to use systemd system service file, depends on ``systemd``. Default: OFF
 - OPENRC=ON|OFF - whether to use openrc service file. Default: OFF (TBD)
 
-
 ### Compile
 
     mkdir build
@@ -118,6 +103,48 @@ Debian-based:
 RHEL-based:
 
     sudo dnf install scdoc
+
+## Installation
+### Create a systemd service
+In order for `ydotool` to work the `ydotoold` deaemon must be running.  
+1. Create a new service file:   
+`sudo nano /etc/systemd/system/ydotool.service`  
+and paste this:
+```
+[Unit]
+Description=ydotool daemon
+Documentation=https://github.com/ReimuNotMoe/ydotool
+After=systemd-user-sessions.service
+Requires=systemd-user-sessions.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/ydotoold --socket-path=/run/user/1000/.ydotool_socket --socket-perm 0666
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+2. Start the service:
+```
+sudo systemctl daemon-reload
+sudo systemctl enable ydotool
+sudo systemctl start ydotool
+```
+3. Check that the service is running correctly:
+```
+sudo systemctl status ydotool
+```
+4. Add this to your `~/.zshrc` (or `~/.bashrc` or else):
+```bash
+export YDOTOOL_SOCKET="/run/user/1000/.ydotool_socket"
+```
+5. Test that everything is working as expected:
+```
+ydotool type hello
+```
+
 ## Troubleshooting
 ### Custom keyboard layouts
 Currently, ydotool does not recognize if the user is using a custom keyboard layout. In order to comfortably use ydotool alongside a custom keyboard layout, the user could use one of the following fixes/workarounds:
