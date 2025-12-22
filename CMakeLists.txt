@@ -26,3 +26,29 @@ install(TARGETS ydotool DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 add_subdirectory(Daemon)
 add_subdirectory(manpage)
+
+# Install bash completion scripts
+install(FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/completions/ydotool-completion.bash
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/bash-completion/completions
+    RENAME ydotool
+)
+
+install(FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/completions/ydotoold-completion.bash
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/bash-completion/completions
+    RENAME ydotoold
+)
+
+# Install zsh completion scripts
+install(FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/completions/ydotool-completion.zsh
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/zsh/site-functions
+    RENAME _ydotool
+)
+
+install(FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/completions/ydotoold-completion.zsh
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/zsh/site-functions
+    RENAME _ydotoold
+)
