@@ -15,11 +15,14 @@ jobs:
     # well on Windows or Mac.  You can convert this to a matrix build if you need
     # cross-platform coverage.
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-    runs-on: ${{matrix.os}}
+    runs-on: ${{matrix.runner}}
     strategy:
       matrix:
-        os: [ubuntu-latest]
-
+        include:
+          - runner: ubuntu-latest
+            arch: x86_64
+          - runner: ubuntu-24.04-arm
+            arch: arm64
     steps:
       - uses: actions/checkout@v4
 
@@ -49,24 +52,24 @@ jobs:
 
       - name: Rename build files
         run: |
-          mv ${{github.workspace}}/build/ydotool ${{github.workspace}}/build/ydotool-release-${{matrix.os}}
-          mv ${{github.workspace}}/build/ydotoold ${{github.workspace}}/build/ydotoold-release-${{matrix.os}}
+          mv ${{github.workspace}}/build/ydotool ${{github.workspace}}/build/ydotool-release-${{matrix.arch}}
+          mv ${{github.workspace}}/build/ydotoold ${{github.workspace}}/build/ydotoold-release-${{matrix.arch}}
 
       - name: Archive production artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{matrix.os}} build artifact
+          name: ${{matrix.arch}} build artifact
           path: |
-            ${{github.workspace}}/build/ydotool-release-${{matrix.os}}
-            ${{github.workspace}}/build/ydotoold-release-${{matrix.os}}
+            ${{github.workspace}}/build/ydotool-release-${{matrix.arch}}
+            ${{github.workspace}}/build/ydotoold-release-${{matrix.arch}}
 
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            ${{github.workspace}}/build/ydotool-release-${{matrix.os}}
-            ${{github.workspace}}/build/ydotoold-release-${{matrix.os}}
+            ${{github.workspace}}/build/ydotool-release-${{matrix.arch}}
+            ${{github.workspace}}/build/ydotoold-release-${{matrix.arch}}
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
