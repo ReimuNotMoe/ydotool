@@ -361,14 +361,17 @@ int main(int argc, char **argv) {
 			pid_t npid = vfork();
 
 			if (npid == 0) {
+				// Make sure we don't warning unnecessarily if user is on XWayland session
+				freopen("/dev/null", "w", stderr);
+
 				execl(xinput_path, "xinput", "--set-prop", "pointer:ydotoold virtual device", "libinput Accel Profile Enabled", "0,", "1", NULL);
-				perror("failed to run xinput command");
+				printf("failed to run xinput command\n");
 				_exit(2);
 			} else if (npid == -1) {
 				perror("failed to fork");
 			}
 		} else {
-			printf("xinput command not found in `%s', not disabling mouser pointer acceleration", xinput_path);
+			printf("xinput command not found in `%s', not disabling mouser pointer acceleration\n", xinput_path);
 		}
 	}
 
