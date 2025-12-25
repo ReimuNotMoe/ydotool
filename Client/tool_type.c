@@ -118,6 +118,7 @@ static void type_char(char c, bool delay) {
 
 	if (kdef & FLAG_UPPERCASE) {
 		uinput_emit(EV_KEY, KEY_LEFTSHIFT, 1, 1);
+		usleep(opt_key_hold_ms * 1000);
 	}
 	uinput_emit(EV_KEY, kc, 1, 1);
 
