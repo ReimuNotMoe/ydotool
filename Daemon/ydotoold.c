@@ -368,7 +368,7 @@ int main(int argc, char **argv) {
 				perror("failed to fork");
 			}
 		} else {
-			printf("xinput command not found in `%s', not disabling mouser pointer acceleration", xinput_path);
+			printf("xinput command not found in `%s', not disabling mouser pointer acceleration\n", xinput_path);
 		}
 	}
 

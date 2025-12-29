@@ -103,9 +103,12 @@ There are a few extra options that can be configured when running CMake
 
 
 ### Compile
+#### Create build directory
 
     mkdir build
     cd build
+#### Build with CMake
+
     cmake ..
     make -j `nproc`
 
