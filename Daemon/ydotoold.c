@@ -149,19 +149,38 @@ static void uinput_setup(int fd, enum ydotool_uinput_setup_options setup_opt) {
 		}
 	}
 
-	static const struct uinput_setup usetup = {
-		.name = "ydotoold virtual device",
-		.id = {
-			.bustype = BUS_VIRTUAL,
-			.vendor = 0x2333,
-			.product = 0x6666,
-			.version = 1
-		}
-	};
+	int rc, version;
+	rc = ioctl(fd, UI_GET_VERSION, &version);
 
-	if (ioctl(fd, UI_DEV_SETUP, &usetup)) {
-		perror("UI_DEV_SETUP ioctl failed");
-		exit(2);
+	// https://kernel.org/doc/html/latest/input/uinput.html#uinput-old-interface
+	if (rc == 0 && version >= 5) {
+		static const struct uinput_setup usetup = {
+			.name = "ydotoold virtual device",
+			.id = {
+				.bustype = BUS_VIRTUAL,
+				.vendor = 0x2333,
+				.product = 0x6666,
+				.version = 1
+			}
+		};
+
+		if (ioctl(fd, UI_DEV_SETUP, &usetup)) {
+			perror("UI_DEV_SETUP ioctl failed");
+			exit(2);
+		}
+	} else {
+		// see /include/uapi/linux/uinput.h
+		static const struct uinput_user_dev uud = {
+			.name = "ydotoold virtual device",
+			.id = {
+				.bustype = BUS_VIRTUAL,
+				.vendor = 0x2333,
+				.product = 0x6666,
+				.version = 1
+			}
+		};
+
+		write(fd, &uud, sizeof(uud));
 	}
 
 	if (ioctl(fd, UI_DEV_CREATE)) {
