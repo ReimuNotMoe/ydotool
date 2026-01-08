@@ -46,6 +46,8 @@
 #include <limits.h>
 
 #include <getopt.h>
+#include <pwd.h>
+#include <grp.h>
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -72,7 +74,7 @@
 
 static char opt_socket_path[SOCKET_PATH_LEN] = "/tmp/.ydotool_socket";
 static char opt_socket_perm[16] = "0600";
-static char opt_socket_own[16] = "";
+static char opt_socket_own[66] = "";  // 32 username + 32 groupname + 2 delimiters
 
 static void show_help() {
 	puts(
@@ -224,7 +226,7 @@ int main(int argc, char **argv) {
 				break;
 
 			case 'o':
-				strncpy(opt_socket_own, optarg, sizeof(opt_socket_perm)-1);
+				strncpy(opt_socket_own, optarg, sizeof(opt_socket_own)-1);
 				break;
 
 			case 'm':
@@ -337,13 +339,35 @@ int main(int argc, char **argv) {
 			exit(2);
 		}
 
+		*gid_pos = '\0';
 		gid_pos++;
 
-		uid_t uid = strtol(opt_socket_own, NULL, 10);
-		gid_t gid = strtol(gid_pos, NULL, 10);
+		char *endptr = NULL;
+		uid_t uid = strtol(opt_socket_own, &endptr, 10);
+		if (endptr < gid_pos-1) {
+			// Not the full uid part was converted - Look up username instead
+			struct passwd *pw = getpwnam(opt_socket_own);
+			if (!pw) {
+				printf("no such user: %s\n", opt_socket_own);
+				exit(2);
+			}
+			uid = pw->pw_uid;
+		}
+
+		gid_t gid = strtol(gid_pos, &endptr, 10);
+		if (endptr < gid_pos + strlen(gid_pos)) {
+			// Not the full gid part was converted - Look up groupname instead
+			struct group *gr = getgrnam(gid_pos);
+			if (!gr) {
+				printf("no such group: %s\n", gid_pos);
+				exit(2);
+			}
+			gid = gr->gr_gid;
+		}
 
 		if (chown(opt_socket_path, uid, gid)) {
-			perror("failed to change socket ownership");
+			fprintf(stderr, "failed to change socket ownership to %d:%d: ", uid, gid);
+			perror(NULL);
 			exit(2);
 		}
 
