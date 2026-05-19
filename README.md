@@ -76,6 +76,55 @@ Repeat the keyboard presses from stdin:
 #### Runtime
 `ydotoold` (daemon) program requires access to `/dev/uinput`. **This usually requires root permissions.**
 
+#### Running ydotoold without root (recommended setup)
+
+`ydotoold` does not have to run as root. A minimal non-root setup uses
+the `input` group, a udev rule to relax `/dev/uinput` permissions, and
+the bundled systemd user service (built when `-DSYSTEMD_USER_SERVICE=ON`,
+which is the default).
+
+1. Add your user to the `input` group:
+
+   ```sh
+   sudo usermod -aG input "$USER"
+   ```
+
+2. Create `/etc/udev/rules.d/60-uinput.rules`:
+
+   ```
+   KERNEL=="uinput", GROUP="input", MODE="0660", OPTIONS+="static_node=uinput"
+   ```
+
+3. Reload udev rules and ensure the `uinput` module is loaded (the
+   `static_node` option only applies on next module load):
+
+   ```sh
+   sudo udevadm control --reload-rules
+   sudo modprobe -r uinput && sudo modprobe uinput
+   ```
+
+   Log out and back in (or `newgrp input`) so the group change takes
+   effect for your session.
+
+4. Enable and start the user service:
+
+   ```sh
+   systemctl --user enable --now ydotoold.service
+   ```
+
+5. Export the socket path so `ydotool` knows where to find the daemon:
+
+   ```sh
+   export YDOTOOL_SOCKET="$XDG_RUNTIME_DIR/.ydotool_socket"
+   ```
+
+   The user service writes the socket under `$XDG_RUNTIME_DIR`, not
+   `/tmp`. Add the export to your shell rc so it persists.
+
+This non-root setup is the recurring pattern in #42, #73, #207, and
+#210; documenting it inline avoids re-deriving it from external
+blog posts.
+
 #### Available key names
 See `/usr/include/linux/input-event-codes.h`
 
