@@ -19,7 +19,7 @@ This project is now refactored. (from v1.0.0)
 
 Changes:
 - Rewritten in pure C99
-- No external dependencies
+- Minimal external dependencies
 - Uses a lot less memory & no dynamic memory allocation
 
 Breaking Changes:
@@ -31,7 +31,7 @@ Breaking Changes:
 Good News:
 - Some people can finally build this project offline
 - `key` now (only) accepts keycodes, so it's not limited to a specific keyboard layout
-- Now it's possible to implement support for different keyboard layouts in `type`
+- `type` can use libxkbcommon to resolve UTF-8 text through an XKB keymap
 
 ## Usage
 Currently implemented command(s):
@@ -73,6 +73,44 @@ Repeat the keyboard presses from stdin:
     ydotool stdin
 
 ## Notes
+#### Unicode text in `type`
+`ydotool type` accepts UTF-8 input. By default, ASCII characters keep using the
+historical built-in US/QWERTY key table for compatibility with existing scripts,
+while non-ASCII Unicode characters are resolved through libxkbcommon using an
+XKB keymap.
+
+The keymap is built from libxkbcommon's standard defaults and can be adjusted
+with the `XKB_DEFAULT_RULES`, `XKB_DEFAULT_MODEL`, `XKB_DEFAULT_LAYOUT`,
+`XKB_DEFAULT_VARIANT`, and `XKB_DEFAULT_OPTIONS` environment variables. For
+example:
+
+    XKB_DEFAULT_LAYOUT=fr XKB_DEFAULT_VARIANT=oss ydotool type 'é È œ'
+
+If any explicit XKB option is passed to `type`, all characters, including ASCII,
+are resolved through that XKB keymap instead of the historical ASCII table:
+
+    ydotool type --xkb-layout fr --xkb-variant latin9 'Élève déjà à Lomé'
+    ydotool type --xkb-layout us --xkb-variant altgr-intl 'é œ'
+
+Available explicit XKB options are:
+
+- `--xkb-rules=RULES`
+- `--xkb-model=MODEL`
+- `--xkb-layout=LAYOUT`
+- `--xkb-variant=VARIANT`
+- `--xkb-options=OPTIONS`
+
+libxkbcommon does not automatically read the active GNOME, KDE, Sway, or other
+desktop/compositor layout. The `XKB_DEFAULT_*` variables and `--xkb-*` options
+only control the client-side resolution performed by `ydotool type`; they do
+not change the keymap that the compositor applies to the ydotool virtual
+keyboard. For correct visible output, the compositor-side keymap for the
+ydotoold virtual device must be compatible with the keymap used by `ydotool`.
+
+If a Unicode character is not directly reachable from the selected keymap,
+`ydotool type` reports an explicit error instead of silently dropping it.
+Compose and dead-key fallback sequences are not generated.
+
 #### Runtime
 `ydotoold` (daemon) program requires access to `/dev/uinput`. **This usually requires root permissions.**
 
@@ -113,11 +151,11 @@ If issues appears, check the build options, but try to install the dependecies:
 
 Debian-based:
 
-    sudo apt install scdoc
+    sudo apt install scdoc libxkbcommon-dev
 
 RHEL-based:
 
-    sudo dnf install scdoc
+    sudo dnf install scdoc libxkbcommon-devel
 ## Troubleshooting
 ### Custom keyboard layouts
 Currently, ydotool does not recognize if the user is using a custom keyboard layout. In order to comfortably use ydotool alongside a custom keyboard layout, the user could use one of the following fixes/workarounds:

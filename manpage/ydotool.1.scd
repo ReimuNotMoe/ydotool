@@ -48,9 +48,30 @@ Currently implemented command(s):
 	*-d*,*--key-delay* _<ms>_
 		Delay time between keystrokes. Default 12ms.
 
-*type* [*-D*,*--next-delay* _<ms>_] [*-d*,*--key-delay* _<ms>_] [*-f*,*--file* _<filepath>_] "_text_"
+*type* [*-D*,*--next-delay* _<ms>_] [*-d*,*--key-delay* _<ms>_] [*-f*,*--file* _<filepath>_] [*--xkb-layout* _<layout>_] "_text_"
 
-	Types text as if you had typed it on the keyboard.
+	Types UTF-8 text as if you had typed it on the keyboard.
+
+	By default, ASCII characters use ydotool's historical built-in US/QWERTY
+	key table for compatibility. Non-ASCII Unicode characters are resolved
+	with libxkbcommon using the XKB keymap selected by the standard
+	*XKB_DEFAULT_RULES*, *XKB_DEFAULT_MODEL*, *XKB_DEFAULT_LAYOUT*,
+	*XKB_DEFAULT_VARIANT*, and *XKB_DEFAULT_OPTIONS* environment variables.
+
+	If any *--xkb-\** option is provided, all characters, including ASCII, are
+	resolved through that explicit XKB keymap.
+
+	libxkbcommon does not automatically read the active GNOME, KDE, Sway, or
+	other desktop/compositor layout. The *XKB_DEFAULT_\** variables and
+	*--xkb-\** options only control client-side resolution in *ydotool type*;
+	they do not change the keymap that the compositor applies to the ydotool
+	virtual keyboard. For correct visible output, the compositor-side keymap
+	for the ydotoold virtual device must be compatible with the keymap used by
+	*ydotool*.
+
+	If a character is not directly reachable from the selected keymap, or the
+	input is not valid UTF-8, *type* exits with an explicit error. Compose and
+	dead-key fallback sequences are not generated.
 
 	Options:
 
@@ -63,8 +84,31 @@ Currently implemented command(s):
 	*-f*,*--file* _<filepath>_
 		Specify a file, the contents of which will be typed as if passed as an argument. The filepath may also be '-' to read from stdin.
 
+	*--xkb-rules* _<rules>_
+		XKB rules to use for explicit XKB text resolution.
+
+	*--xkb-model* _<model>_
+		XKB model to use for explicit XKB text resolution.
+
+	*--xkb-layout* _<layout>_
+		XKB layout to use for explicit XKB text resolution.
+
+	*--xkb-variant* _<variant>_
+		XKB variant to use for explicit XKB text resolution.
+
+	*--xkb-options* _<options>_
+		XKB options to use for explicit XKB text resolution.
+
 	Example: to type 'Hello world!' you would do:
 		ydotool type 'Hello world!'
+
+	Example: to type French accented text and resolve ASCII through the same
+	XKB keymap:
+		ydotool type --xkb-layout fr --xkb-variant latin9 'Élève déjà à Lomé'
+
+	Example: to type characters available through AltGr in a US international
+	layout:
+		ydotool type --xkb-layout us --xkb-variant altgr-intl 'é œ'
 
 # MOUSE COMMANDS
 
