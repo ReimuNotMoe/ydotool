@@ -35,52 +35,36 @@
 */
 
 #include "ydotool.h"
+#include "type_text.h"
 #include <string.h>
-
-#define FLAG_UPPERCASE		0x80000000
-
-static const int32_t ascii2keycode_map[128] = {
-	// 00 - 0f
-	-1,-1,-1,-1,-1,-1,-1,-1,
-	-1,KEY_TAB,KEY_ENTER,-1,-1,-1,-1,-1,
-
-	// 10 - 1f
-	-1,-1,-1,-1,-1,-1,-1,-1,
-	-1,-1,-1,-1,-1,-1,-1,-1,
-
-	// 20 - 2f
-	KEY_SPACE,KEY_1|FLAG_UPPERCASE,KEY_APOSTROPHE|FLAG_UPPERCASE,KEY_3|FLAG_UPPERCASE,KEY_4|FLAG_UPPERCASE,KEY_5|FLAG_UPPERCASE,KEY_7|FLAG_UPPERCASE,KEY_APOSTROPHE,
-	KEY_9|FLAG_UPPERCASE,KEY_0|FLAG_UPPERCASE,KEY_8|FLAG_UPPERCASE,KEY_EQUAL|FLAG_UPPERCASE,KEY_COMMA,KEY_MINUS,KEY_DOT,KEY_SLASH,
-
-	// 30 - 3f
-	KEY_0,KEY_1,KEY_2,KEY_3,KEY_4,KEY_5,KEY_6,KEY_7,
-	KEY_8,KEY_9,KEY_SEMICOLON|FLAG_UPPERCASE,KEY_SEMICOLON,KEY_COMMA|FLAG_UPPERCASE,KEY_EQUAL,KEY_DOT|FLAG_UPPERCASE,KEY_SLASH|FLAG_UPPERCASE,
-
-	// 40 - 4f
-	KEY_2|FLAG_UPPERCASE,KEY_A|FLAG_UPPERCASE,KEY_B|FLAG_UPPERCASE,KEY_C|FLAG_UPPERCASE,KEY_D|FLAG_UPPERCASE,KEY_E|FLAG_UPPERCASE,KEY_F|FLAG_UPPERCASE,KEY_G|FLAG_UPPERCASE,
-	KEY_H|FLAG_UPPERCASE,KEY_I|FLAG_UPPERCASE,KEY_J|FLAG_UPPERCASE,KEY_K|FLAG_UPPERCASE,KEY_L|FLAG_UPPERCASE,KEY_M|FLAG_UPPERCASE,KEY_N|FLAG_UPPERCASE,KEY_O|FLAG_UPPERCASE,
-
-	// 50 - 5f
-	KEY_P|FLAG_UPPERCASE,KEY_Q|FLAG_UPPERCASE,KEY_R|FLAG_UPPERCASE,KEY_S|FLAG_UPPERCASE,KEY_T|FLAG_UPPERCASE,KEY_U|FLAG_UPPERCASE,KEY_V|FLAG_UPPERCASE,KEY_W|FLAG_UPPERCASE,
-	KEY_X|FLAG_UPPERCASE,KEY_Y|FLAG_UPPERCASE,KEY_Z|FLAG_UPPERCASE,KEY_LEFTBRACE,KEY_BACKSLASH,KEY_RIGHTBRACE,KEY_6|FLAG_UPPERCASE,KEY_MINUS|FLAG_UPPERCASE,
-
-	// 60 - 6f
-	KEY_GRAVE,KEY_A,KEY_B,KEY_C,KEY_D,KEY_E,KEY_F,KEY_G,
-	KEY_H,KEY_I,KEY_J,KEY_K,KEY_L,KEY_M,KEY_N,KEY_O,
-
-	// 70 - 7f
-	KEY_P,KEY_Q,KEY_R,KEY_S,KEY_T,KEY_U,KEY_V,KEY_W,
-	KEY_X,KEY_Y,KEY_Z,KEY_LEFTBRACE|FLAG_UPPERCASE,KEY_BACKSLASH|FLAG_UPPERCASE,KEY_RIGHTBRACE|FLAG_UPPERCASE,KEY_GRAVE|FLAG_UPPERCASE,-1
-};
 
 static int opt_key_delay_ms = 20;
 static int opt_key_hold_ms = 20;
 static int opt_next_delay_ms = 0;
 
+enum {
+	OPT_XKB_RULES = 256,
+	OPT_XKB_MODEL,
+	OPT_XKB_LAYOUT,
+	OPT_XKB_VARIANT,
+	OPT_XKB_OPTIONS
+};
+
+struct escape_state {
+	int state;
+	char hex_str[3];
+};
+
+struct type_state {
+	struct ydotool_type_resolver resolver;
+	struct ydotool_type_utf8_decoder decoder;
+	struct ydotool_type_options options;
+};
+
 static void show_help() {
 	puts(
 		"Usage: type [OPTION]... [STRINGS]...\n"
-		"Type strings.\n"
+		"Type UTF-8 strings.\n"
 		"\n"
 		"Options:");
 
@@ -100,60 +84,42 @@ static void show_help() {
 		"  -f, --file=PATH            Specify a file, the contents of which will be be typed as if passed as an argument.\n"
 		"                               The filepath may also be '-' to read from stdin\n"
 		"  -e, --escape=BOOL          Escape enable (1) or disable (0)\n"
+		"      --xkb-rules=RULES      XKB rules to use when resolving text\n"
+		"      --xkb-model=MODEL      XKB model to use when resolving text\n"
+		"      --xkb-layout=LAYOUT    XKB layout to use when resolving text\n"
+		"      --xkb-variant=VARIANT  XKB variant to use when resolving text\n"
+		"      --xkb-options=OPTIONS  XKB options to use when resolving text\n"
 		"  -h, --help                 Display this help and exit\n"
 		"\n"
-		"Escape is enabled by default when typing command line arguments, and disabled by default when typing from file and stdin."
+		"Escape is enabled by default when typing command line arguments, and disabled by default when typing from file and stdin.\n"
+		"Unicode characters outside ASCII are resolved through libxkbcommon using the XKB_DEFAULT_* keymap settings.\n"
+		"When any --xkb-* option is set, all characters, including ASCII, are resolved through XKB."
 	);
 }
 
-
-
-static void type_char(char c, bool delay) {
-	int kdef = ascii2keycode_map[c];
-	if (kdef == -1) {
-		return;
-	}
-
-	uint16_t kc = kdef & 0xffff;
-
-	if (kdef & FLAG_UPPERCASE) {
-		uinput_emit(EV_KEY, KEY_LEFTSHIFT, 1, 1);
-	}
-	uinput_emit(EV_KEY, kc, 1, 1);
-
-	usleep(opt_key_hold_ms * 1000);
-
-	uinput_emit(EV_KEY, kc, 0, 1);
-	if (kdef & FLAG_UPPERCASE) {
-		uinput_emit(EV_KEY, KEY_LEFTSHIFT, 0, 1);
-	}
-
-	if (delay) {
-		usleep(opt_key_delay_ms * 1000);
-	}
+static void type_emit(uint16_t code, int32_t value, void *userdata) {
+	(void)userdata;
+	uinput_emit(EV_KEY, code, value, 1);
 }
 
-static int escape(char in) {
-	static int state = 0;
-	static char hex_str[3] = {0, 0, 0};
-
-	switch (state) {
+static int escape(struct escape_state *escape_state, unsigned char in) {
+	switch (escape_state->state) {
 		case 0:
 			if (in == '\\') {
-				state = 1;
+				escape_state->state = 1;
 				return -1;
 			} else {
 				return in;
 			}
 		case 1:
-			state = 0;
+			escape_state->state = 0;
 			switch (in) {
 				case 'n':
 					return '\n';
 				case 't':
 					return '\t';
 				case 'x':
-					state = 2;
+					escape_state->state = 2;
 					return -1;
 				case '\\':
 					return '\\';
@@ -161,16 +127,73 @@ static int escape(char in) {
 					return -1;
 			}
 		case 2:
-			state = 3;
-			hex_str[0] = in;
+			escape_state->state = 3;
+			escape_state->hex_str[0] = in;
 			return -1;
 		case 3:
-			state = 0;
-			hex_str[1] = in;
-			return (int)strtol(hex_str, NULL, 16);
+			escape_state->state = 0;
+			escape_state->hex_str[1] = in;
+			return (int)strtol(escape_state->hex_str, NULL, 16);
 		default:
 			abort();
 	}
+}
+
+static void print_type_error(int rc, uint32_t codepoint) {
+	switch (rc) {
+		case YDOTOOL_TYPE_INVALID_UTF8:
+			fprintf(stderr, "ydotool: type: error: invalid UTF-8 input\n");
+			break;
+		case YDOTOOL_TYPE_TRUNCATED_UTF8:
+			fprintf(stderr, "ydotool: type: error: truncated UTF-8 input\n");
+			break;
+		case YDOTOOL_TYPE_NOT_TYPEABLE:
+			fprintf(stderr, "ydotool: type: error: U+%04X is not typeable with the current XKB keymap\n", codepoint);
+			break;
+		case YDOTOOL_TYPE_UNSUPPORTED_MODIFIERS:
+			fprintf(stderr, "ydotool: type: error: U+%04X requires modifiers that ydotool cannot emit\n", codepoint);
+			break;
+		case YDOTOOL_TYPE_KEYMAP_ERROR:
+			fprintf(stderr, "ydotool: type: error: failed to initialize XKB keymap\n");
+			break;
+		default:
+			fprintf(stderr, "ydotool: type: error: failed to type U+%04X\n", codepoint);
+			break;
+	}
+}
+
+static int type_byte(struct type_state *state, unsigned char byte, bool delay) {
+	uint32_t codepoint = 0;
+	bool complete = false;
+	int rc = ydotool_type_utf8_feed(&state->decoder, byte, &codepoint, &complete);
+
+	if (rc != YDOTOOL_TYPE_OK) {
+		print_type_error(rc, 0);
+		return 2;
+	}
+
+	if (!complete) {
+		return 0;
+	}
+
+	rc = ydotool_type_emit_codepoint(&state->resolver, codepoint, &state->options,
+					 delay, type_emit, NULL);
+	if (rc != YDOTOOL_TYPE_OK) {
+		print_type_error(rc, codepoint);
+		return 2;
+	}
+
+	return 0;
+}
+
+static int type_finish(struct type_state *state) {
+	int rc = ydotool_type_utf8_finish(&state->decoder);
+	if (rc != YDOTOOL_TYPE_OK) {
+		print_type_error(rc, 0);
+		return 2;
+	}
+
+	return 0;
 }
 
 int tool_type(int argc, char **argv) {
@@ -184,6 +207,11 @@ int tool_type(int argc, char **argv) {
 	const char *file_path = NULL;
 
 	int enable_escape = -1;
+	bool force_xkb = false;
+	struct ydotool_xkb_names xkb_names = {0};
+	struct type_state type_state;
+	ydotool_type_resolver_init(&type_state.resolver);
+	ydotool_type_utf8_init(&type_state.decoder);
 
 	while (1) {
 		int c;
@@ -195,6 +223,11 @@ int tool_type(int argc, char **argv) {
 			{"escape", required_argument, 0, 'e'},
 			{"file", required_argument, 0, 'f'},
 			{"help", no_argument, 0, 'h'},
+			{"xkb-rules", required_argument, 0, OPT_XKB_RULES},
+			{"xkb-model", required_argument, 0, OPT_XKB_MODEL},
+			{"xkb-layout", required_argument, 0, OPT_XKB_LAYOUT},
+			{"xkb-variant", required_argument, 0, OPT_XKB_VARIANT},
+			{"xkb-options", required_argument, 0, OPT_XKB_OPTIONS},
 			{0, 0, 0, 0}
 		};
 		/* getopt_long stores the option index here. */
@@ -242,6 +275,31 @@ int tool_type(int argc, char **argv) {
 				enable_escape = strtol(optarg, NULL, 10);
 				break;
 
+			case OPT_XKB_RULES:
+				xkb_names.rules = optarg;
+				force_xkb = true;
+				break;
+
+			case OPT_XKB_MODEL:
+				xkb_names.model = optarg;
+				force_xkb = true;
+				break;
+
+			case OPT_XKB_LAYOUT:
+				xkb_names.layout = optarg;
+				force_xkb = true;
+				break;
+
+			case OPT_XKB_VARIANT:
+				xkb_names.variant = optarg;
+				force_xkb = true;
+				break;
+
+			case OPT_XKB_OPTIONS:
+				xkb_names.options = optarg;
+				force_xkb = true;
+				break;
+
 			case '?':
 				/* getopt_long already printed an error message. */
 				break;
@@ -250,6 +308,10 @@ int tool_type(int argc, char **argv) {
 				abort();
 		}
 	}
+
+	type_state.options.key_hold_ms = opt_key_hold_ms;
+	type_state.options.key_delay_ms = opt_key_delay_ms;
+	ydotool_type_resolver_set_xkb(&type_state.resolver, &xkb_names, force_xkb);
 
 	if (file_path) {
 		if (enable_escape == -1) {
@@ -263,24 +325,37 @@ int tool_type(int argc, char **argv) {
 		if (fd == -1) {
 			fprintf(stderr, "ydotool: type: error: failed to open %s: %s\n", file_path,
 				strerror(errno));
+			ydotool_type_resolver_destroy(&type_state.resolver);
 			return 2;
 		}
 
 		char buf[128];
+		struct escape_state escape_state = {0, {0, 0, 0}};
 
 		ssize_t rc;
 		while ((rc = read(fd, buf, sizeof(buf)))) {
 			if (rc > 0) {
 				for (int i = 0; i<rc; i++) {
-					int c = enable_escape ? escape(buf[i]) : buf[i];
+					int c = enable_escape ? escape(&escape_state, (unsigned char)buf[i]) : (unsigned char)buf[i];
 					if (c != -1) {
-						type_char((char)c, i != rc - 1);
+						int trc = type_byte(&type_state, (unsigned char)c, true);
+						if (trc) {
+							ydotool_type_resolver_destroy(&type_state.resolver);
+							return trc;
+						}
 					}
 				}
 			} else if (rc < 0) {
 				fprintf(stderr, "ydotool: type: error: read %s failed: %s\n", file_path, strerror(errno));
+				ydotool_type_resolver_destroy(&type_state.resolver);
 				return 2;
 			}
+		}
+
+		int trc = type_finish(&type_state);
+		ydotool_type_resolver_destroy(&type_state.resolver);
+		if (trc) {
+			return trc;
 		}
 	} else {
 		if (enable_escape == -1) {
@@ -290,18 +365,29 @@ int tool_type(int argc, char **argv) {
 		if (optind < argc) {
 			while (optind < argc) {
 				char *pstr = argv[optind++];
+				struct escape_state escape_state = {0, {0, 0, 0}};
 
 //				printf("pstr: %s\n", pstr);
 
 				for (int i = 0; ; i++) {
-					int c = enable_escape ? escape(pstr[i]) : pstr[i];
+					int c = enable_escape ? escape(&escape_state, (unsigned char)pstr[i]) : (unsigned char)pstr[i];
 					char next = pstr[i+1];
 
 					if (c == 0) {
 						break;
 					} else if (c != -1) {
-						type_char((char)c, next);
+						int trc = type_byte(&type_state, (unsigned char)c, next);
+						if (trc) {
+							ydotool_type_resolver_destroy(&type_state.resolver);
+							return trc;
+						}
 					}
+				}
+
+				int trc = type_finish(&type_state);
+				if (trc) {
+					ydotool_type_resolver_destroy(&type_state.resolver);
+					return trc;
 				}
 
 				if (argv[optind])
@@ -313,5 +399,6 @@ int tool_type(int argc, char **argv) {
 
 	}
 
+	ydotool_type_resolver_destroy(&type_state.resolver);
 	return 0;
 }
