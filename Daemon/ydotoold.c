@@ -110,8 +110,8 @@ static void uinput_setup(int fd, enum ydotool_uinput_setup_options setup_opt) {
 			fprintf(stderr, "UI_SET_EVBIT %s failed\n", "EV_KEY");
 		}
 
-		for (size_t i=0; i<sizeof(ydotool_key_list)/sizeof(int); i++) {
-			if (ioctl(fd, UI_SET_KEYBIT, ydotool_key_list[i])) {
+		for (size_t i=0; i<sizeof(key_list)/sizeof(int); i++) {
+			if (ioctl(fd, UI_SET_KEYBIT, key_list[i])) {
 				fprintf(stderr, "UI_SET_KEYBIT %d failed\n", i);
 
 			}

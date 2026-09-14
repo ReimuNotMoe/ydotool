@@ -27,6 +27,7 @@
 
 static int opt_key_delay_ms = 20;
 static int opt_key_hold_ms = 20;
+static int opt_key_unicode_ms = 3;
 static int opt_next_delay_ms = 0;
 static int opt_debug = 0;
 static int opt_four_digit = 0;
@@ -512,10 +513,13 @@ static void type_unicode_codepoint(uint32_t codepoint) {
 
 	for (int i = digit_count - 1; i >= 0; i--) {
 		type_hex_digit(hex_digits[i]);
+                usleep(opt_key_unicode_ms * 10 * 1000);
 		usleep(opt_key_delay_ms * 1000);
 	}
 
 	type_key(KEY_ENTER);
+        // wait unicode time to allow unicode replacement
+        usleep(opt_key_unicode_ms * 10 * 1000);
 	usleep(opt_key_delay_ms * 1000);
 }
 
@@ -566,6 +570,8 @@ static void parse_and_send_unicode_hotkey(void) {
 				fprintf(stderr, "[DEBUG]   Pressing modifier: %s\n", keycode_to_name(modifiers[i]));
 			}
 			uinput_emit(EV_KEY, modifiers[i], 1, 0);
+                        usleep(opt_key_unicode_ms * 1000);
+
 		}
 	}
 
@@ -594,6 +600,7 @@ static void parse_and_send_unicode_hotkey(void) {
 		fprintf(stderr, "[DEBUG] Step 2: Waiting before typing hex digits (%dms)\n", opt_key_delay_ms);
 	}
 
+		usleep(opt_key_unicode_ms * 5 * 1000);
 	usleep(opt_key_delay_ms * 1000);
 }
 
@@ -788,6 +795,9 @@ static void show_help(void) {
 		"  -H, --key-hold=N           Hold each key for N milliseconds (default: %d)\n", opt_key_hold_ms
 		);
 	printf(
+		"  -U, --unicode-delay=N      Wait after entering unicode for N milliseconds (default: %d)\n", opt_key_unicode_ms
+		);
+	printf(
 		"  -D, --next-delay=N         Delay N milliseconds between command line strings (default: %d)\n", opt_next_delay_ms
 		);
 	puts(
@@ -866,6 +876,7 @@ int tool_type(int argc, char **argv) {
 			{"key-delay", required_argument, 0, 'd'},
 			{"next-delay", required_argument, 0, 'D'},
 			{"key-hold", required_argument, 0, 'H'},
+                        {"unicode-delay", required_argument, 0, 'U'},
 			{"four-digit", no_argument, 0, '4'},
 			{"unicode-only", no_argument, 0, 'u'},
 			{"debug", no_argument, 0, 'v'},
@@ -876,7 +887,7 @@ int tool_type(int argc, char **argv) {
 		};
 
 		int option_index = 0;
-		c = getopt_long(argc, argv, "hd:D:H:4uvf:e:", long_options, &option_index);
+		c = getopt_long(argc, argv, "hd:D:H:U:4uvf:e:", long_options, &option_index);
 
 		if (c == -1)
 			break;
@@ -895,6 +906,11 @@ int tool_type(int argc, char **argv) {
 			case 'H':
 				opt_key_hold_ms = strtol(optarg, NULL, 10);
 				if (opt_debug) fprintf(stderr, "[DEBUG] Key hold set to %dms\n", opt_key_hold_ms);
+				break;
+
+			case 'U':
+				opt_key_unicode_ms = strtol(optarg, NULL, 10);
+				if (opt_debug) fprintf(stderr, "[DEBUG] Unicode wait set to %dms\n", opt_key_unicode_ms);
 				break;
 
 			case 'f':
