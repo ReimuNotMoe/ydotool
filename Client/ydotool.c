@@ -87,7 +87,8 @@ static void show_help() {
 	int tool_count = sizeof(tool_list) / sizeof(struct tool_def);
 
 	for (int i=0; i<tool_count; i++) {
-		printf("  %s\n", tool_list[i].name);
+		printf("  %s", tool_list[i].name);
+		puts("");
 	}
 
 	puts("Use environment variable YDOTOOL_SOCKET to specify daemon socket.");
