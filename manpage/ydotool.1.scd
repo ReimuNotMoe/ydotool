@@ -48,9 +48,16 @@ Currently implemented command(s):
 	*-d*,*--key-delay* _<ms>_
 		Delay time between keystrokes. Default 12ms.
 
-*type* [*-D*,*--next-delay* _<ms>_] [*-d*,*--key-delay* _<ms>_] [*-f*,*--file* _<filepath>_] "_text_"
+*type* [*-D*,*--next-delay* _<ms>_] [*-d*,*--key-delay* _<ms>_] [*-H*,*--key-hold* _<ms>_] [*-U*,*--unicode-delay* _<ms>_] [*-4*,*--four-digit*] [*-u*,*--unicode-only*] [*-f*,*--file* _<filepath>_] "_text_"
 
 	Types text as if you had typed it on the keyboard.
+
+	Characters that have no key on the active keyboard layout (accented
+	letters, Turkish, Cyrillic, CJK, ...) are typed through the desktop
+	unicode input sequence (IBUS-style: press the unicode hotkey, type the
+	hexadecimal codepoint, commit). The sequence is adapted to the active
+	layout, which is read through libxkbcommon. ASCII text is typed
+	directly.
 
 	Options:
 
@@ -60,11 +67,29 @@ Currently implemented command(s):
 	*-D*,*--next-delay* _<ms>_
 		Delay between strings. Default 0ms.
 
+	*-H*,*--key-hold* _<ms>_
+		Hold each key for N milliseconds. Default 12ms.
+
+	*-U*,*--unicode-delay* _<ms>_
+		Wait N milliseconds after the unicode hotkey and after the
+		codepoint commit, for desktops that are slow to react. Default 3ms.
+
+	*-4*,*--four-digit*
+		Pad unicode codepoints to exactly 4 hex digits (BMP only).
+
+	*-u*,*--unicode-only*
+		Send all characters through the unicode input sequence, even
+		those that have a key on the current layout.
+
 	*-f*,*--file* _<filepath>_
 		Specify a file, the contents of which will be typed as if passed as an argument. The filepath may also be '-' to read from stdin.
 
 	Example: to type 'Hello world!' you would do:
 		ydotool type 'Hello world!'
+
+	Example: Turkish characters are typed through the unicode sequence
+	automatically:
+		ydotool type 'Türkçe: ğüşçıöİ'
 
 # MOUSE COMMANDS
 
