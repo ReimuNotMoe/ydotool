@@ -35,47 +35,22 @@
 */
 
 #include "ydotool.h"
+#include "keymap.h"
+
 #include <string.h>
-
-#define FLAG_UPPERCASE		0x80000000
-
-static const int32_t ascii2keycode_map[128] = {
-	// 00 - 0f
-	-1,-1,-1,-1,-1,-1,-1,-1,
-	-1,KEY_TAB,KEY_ENTER,-1,-1,-1,-1,-1,
-
-	// 10 - 1f
-	-1,-1,-1,-1,-1,-1,-1,-1,
-	-1,-1,-1,-1,-1,-1,-1,-1,
-
-	// 20 - 2f
-	KEY_SPACE,KEY_1|FLAG_UPPERCASE,KEY_APOSTROPHE|FLAG_UPPERCASE,KEY_3|FLAG_UPPERCASE,KEY_4|FLAG_UPPERCASE,KEY_5|FLAG_UPPERCASE,KEY_7|FLAG_UPPERCASE,KEY_APOSTROPHE,
-	KEY_9|FLAG_UPPERCASE,KEY_0|FLAG_UPPERCASE,KEY_8|FLAG_UPPERCASE,KEY_EQUAL|FLAG_UPPERCASE,KEY_COMMA,KEY_MINUS,KEY_DOT,KEY_SLASH,
-
-	// 30 - 3f
-	KEY_0,KEY_1,KEY_2,KEY_3,KEY_4,KEY_5,KEY_6,KEY_7,
-	KEY_8,KEY_9,KEY_SEMICOLON|FLAG_UPPERCASE,KEY_SEMICOLON,KEY_COMMA|FLAG_UPPERCASE,KEY_EQUAL,KEY_DOT|FLAG_UPPERCASE,KEY_SLASH|FLAG_UPPERCASE,
-
-	// 40 - 4f
-	KEY_2|FLAG_UPPERCASE,KEY_A|FLAG_UPPERCASE,KEY_B|FLAG_UPPERCASE,KEY_C|FLAG_UPPERCASE,KEY_D|FLAG_UPPERCASE,KEY_E|FLAG_UPPERCASE,KEY_F|FLAG_UPPERCASE,KEY_G|FLAG_UPPERCASE,
-	KEY_H|FLAG_UPPERCASE,KEY_I|FLAG_UPPERCASE,KEY_J|FLAG_UPPERCASE,KEY_K|FLAG_UPPERCASE,KEY_L|FLAG_UPPERCASE,KEY_M|FLAG_UPPERCASE,KEY_N|FLAG_UPPERCASE,KEY_O|FLAG_UPPERCASE,
-
-	// 50 - 5f
-	KEY_P|FLAG_UPPERCASE,KEY_Q|FLAG_UPPERCASE,KEY_R|FLAG_UPPERCASE,KEY_S|FLAG_UPPERCASE,KEY_T|FLAG_UPPERCASE,KEY_U|FLAG_UPPERCASE,KEY_V|FLAG_UPPERCASE,KEY_W|FLAG_UPPERCASE,
-	KEY_X|FLAG_UPPERCASE,KEY_Y|FLAG_UPPERCASE,KEY_Z|FLAG_UPPERCASE,KEY_LEFTBRACE,KEY_BACKSLASH,KEY_RIGHTBRACE,KEY_6|FLAG_UPPERCASE,KEY_MINUS|FLAG_UPPERCASE,
-
-	// 60 - 6f
-	KEY_GRAVE,KEY_A,KEY_B,KEY_C,KEY_D,KEY_E,KEY_F,KEY_G,
-	KEY_H,KEY_I,KEY_J,KEY_K,KEY_L,KEY_M,KEY_N,KEY_O,
-
-	// 70 - 7f
-	KEY_P,KEY_Q,KEY_R,KEY_S,KEY_T,KEY_U,KEY_V,KEY_W,
-	KEY_X,KEY_Y,KEY_Z,KEY_LEFTBRACE|FLAG_UPPERCASE,KEY_BACKSLASH|FLAG_UPPERCASE,KEY_RIGHTBRACE|FLAG_UPPERCASE,KEY_GRAVE|FLAG_UPPERCASE,-1
-};
 
 static int opt_key_delay_ms = 20;
 static int opt_key_hold_ms = 20;
 static int opt_next_delay_ms = 0;
+
+struct type_parser {
+	int esc;		/* 0 normal, 1 after '\', 2 first hex digit, 3 second hex digit */
+	char hex[2];
+	uint32_t u8_cp;
+	int u8_need;
+	int key_delay_ms;
+	int key_hold_ms;
+};
 
 static void show_help() {
 	puts(
@@ -96,81 +71,189 @@ static void show_help() {
 		"  -D, --next-delay=N         Delay N milliseconds between command line strings (default: %d)\n", opt_next_delay_ms
 	);
 
+	printf(
+		"  -l, --layout=NAME          Keyboard layout to type with (default: us)\n"
+		"                               Available layouts: "
+	);
+
+	keymap_print_list(stdout);
+
 	puts(
+		"\n"
 		"  -f, --file=PATH            Specify a file, the contents of which will be be typed as if passed as an argument.\n"
 		"                               The filepath may also be '-' to read from stdin\n"
 		"  -e, --escape=BOOL          Escape enable (1) or disable (0)\n"
 		"  -h, --help                 Display this help and exit\n"
 		"\n"
-		"Escape is enabled by default when typing command line arguments, and disabled by default when typing from file and stdin."
+		"Escape is enabled by default when typing command line arguments, and disabled by default when typing from file and stdin.\n"
+		"Recognized escapes: \\n, \\t, \\\\ and \\xHH. Unknown escapes are an error.\n"
+		"Input is decoded as UTF-8. Characters the selected layout cannot produce without dead keys are skipped with a warning."
 	);
 }
 
+static void type_parser_init(struct type_parser *p, int key_delay_ms, int key_hold_ms) {
+	memset(p, 0, sizeof(*p));
+	p->key_delay_ms = key_delay_ms;
+	p->key_hold_ms = key_hold_ms;
+}
 
+static void type_codepoint(struct type_parser *p, const struct keymap *km, uint32_t cp) {
+	struct keydef kd;
 
-static void type_char(char c, bool delay) {
-	int kdef = ascii2keycode_map[c];
-	if (kdef == -1) {
+	if (cp == '\n') {
+		kd.code = KEY_ENTER;
+		kd.mods = 0;
+	} else if (cp == '\t') {
+		kd.code = KEY_TAB;
+		kd.mods = 0;
+	} else if (!keymap_lookup(km, cp, &kd)) {
+		fprintf(stderr, "ydotool: type: warning: U+%04X is not available on layout '%s'\n",
+			cp, km->name);
 		return;
 	}
 
-	uint16_t kc = kdef & 0xffff;
-
-	if (kdef & FLAG_UPPERCASE) {
+	if (kd.mods & KM_SHIFT)
 		uinput_emit(EV_KEY, KEY_LEFTSHIFT, 1, 1);
-	}
-	uinput_emit(EV_KEY, kc, 1, 1);
+	if (kd.mods & KM_ALTGR)
+		uinput_emit(EV_KEY, KEY_RIGHTALT, 1, 1);
 
-	usleep(opt_key_hold_ms * 1000);
+	uinput_emit(EV_KEY, kd.code, 1, 1);
 
-	uinput_emit(EV_KEY, kc, 0, 1);
-	if (kdef & FLAG_UPPERCASE) {
+	usleep(p->key_hold_ms * 1000);
+
+	uinput_emit(EV_KEY, kd.code, 0, 1);
+
+	if (kd.mods & KM_ALTGR)
+		uinput_emit(EV_KEY, KEY_RIGHTALT, 0, 1);
+	if (kd.mods & KM_SHIFT)
 		uinput_emit(EV_KEY, KEY_LEFTSHIFT, 0, 1);
-	}
 
-	if (delay) {
-		usleep(opt_key_delay_ms * 1000);
-	}
+	usleep(p->key_delay_ms * 1000);
 }
 
-static int escape(char in) {
-	static int state = 0;
-	static char hex_str[3] = {0, 0, 0};
+static int hexval(unsigned char c) {
+	if (c >= '0' && c <= '9')
+		return c - '0';
+	if (c >= 'a' && c <= 'f')
+		return c - 'a' + 10;
+	if (c >= 'A' && c <= 'F')
+		return c - 'A' + 10;
+	return -1;
+}
 
-	switch (state) {
+/* Returns the codepoint, -1 when more bytes are needed, or -2 on invalid input. */
+static int utf8_feed(struct type_parser *p, unsigned char b) {
+	if (p->u8_need == 0) {
+		if (b < 0x80)
+			return (int)b;
+		if ((b & 0xE0) == 0xC0) {
+			p->u8_cp = b & 0x1F;
+			p->u8_need = 1;
+		} else if ((b & 0xF0) == 0xE0) {
+			p->u8_cp = b & 0x0F;
+			p->u8_need = 2;
+		} else if ((b & 0xF8) == 0xF0) {
+			p->u8_cp = b & 0x07;
+			p->u8_need = 3;
+		} else {
+			return -2;
+		}
+		return -1;
+	}
+
+	if ((b & 0xC0) != 0x80) {
+		p->u8_need = 0;
+		return -2;
+	}
+
+	p->u8_cp = (p->u8_cp << 6) | (b & 0x3F);
+
+	if (--p->u8_need == 0)
+		return (int)p->u8_cp;
+
+	return -1;
+}
+
+/* Feed one input byte. Returns 0 on success, -1 on a malformed escape. */
+static int type_parser_feed(struct type_parser *p, const struct keymap *km,
+			    unsigned char b, bool escape) {
+	if (escape) {
+		switch (p->esc) {
 		case 0:
-			if (in == '\\') {
-				state = 1;
-				return -1;
-			} else {
-				return in;
+			if (b == '\\') {
+				p->esc = 1;
+				return 0;
 			}
+			break;
 		case 1:
-			state = 0;
-			switch (in) {
-				case 'n':
-					return '\n';
-				case 't':
-					return '\t';
-				case 'x':
-					state = 2;
-					return -1;
-				case '\\':
-					return '\\';
-				default:
-					return -1;
+			p->esc = 0;
+			switch (b) {
+			case 'n':
+				type_codepoint(p, km, '\n');
+				return 0;
+			case 't':
+				type_codepoint(p, km, '\t');
+				return 0;
+			case '\\':
+				type_codepoint(p, km, '\\');
+				return 0;
+			case 'x':
+				p->esc = 2;
+				return 0;
+			default:
+				fprintf(stderr, "ydotool: type: error: unknown escape sequence '\\%c'\n", b);
+				return -1;
 			}
 		case 2:
-			state = 3;
-			hex_str[0] = in;
-			return -1;
+			if (hexval(b) < 0) {
+				fprintf(stderr, "ydotool: type: error: '\\x' must be followed by two hex digits\n");
+				return -1;
+			}
+			p->hex[0] = (char)b;
+			p->esc = 3;
+			return 0;
 		case 3:
-			state = 0;
-			hex_str[1] = in;
-			return (int)strtol(hex_str, NULL, 16);
-		default:
-			abort();
+			if (hexval(b) < 0) {
+				fprintf(stderr, "ydotool: type: error: '\\x' must be followed by two hex digits\n");
+				return -1;
+			}
+			p->hex[1] = (char)b;
+			p->esc = 0;
+			type_codepoint(p, km, (uint32_t)strtol(p->hex, NULL, 16));
+			return 0;
+		}
 	}
+
+	int cp = utf8_feed(p, b);
+
+	if (cp == -2) {
+		fprintf(stderr, "ydotool: type: warning: invalid UTF-8 byte 0x%02x skipped\n", b);
+		return 0;
+	}
+	if (cp < 0)
+		return 0;
+
+	type_codepoint(p, km, (uint32_t)cp);
+	return 0;
+}
+
+int type_string(const char *s, bool escape, const struct keymap *km,
+		int key_delay_ms, int key_hold_ms) {
+	struct type_parser p;
+
+	type_parser_init(&p, key_delay_ms, key_hold_ms);
+
+	for (const unsigned char *q = (const unsigned char *)s; *q; q++) {
+		if (type_parser_feed(&p, km, *q, escape) < 0)
+			return -1;
+	}
+
+	if (p.esc != 0) {
+		fprintf(stderr, "ydotool: type: error: incomplete escape sequence at end of input\n");
+		return -1;
+	}
+
+	return 0;
 }
 
 int tool_type(int argc, char **argv) {
@@ -179,9 +262,8 @@ int tool_type(int argc, char **argv) {
 		return 0;
 	}
 
-
-
 	const char *file_path = NULL;
+	const char *layout_name = "us";
 
 	int enable_escape = -1;
 
@@ -192,6 +274,7 @@ int tool_type(int argc, char **argv) {
 			{"key-delay", required_argument, 0, 'd'},
 			{"next-delay", required_argument, 0, 'D'},
 			{"key-hold", required_argument, 0, 'H'},
+			{"layout", required_argument, 0, 'l'},
 			{"escape", required_argument, 0, 'e'},
 			{"file", required_argument, 0, 'f'},
 			{"help", no_argument, 0, 'h'},
@@ -200,7 +283,7 @@ int tool_type(int argc, char **argv) {
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 
-		c = getopt_long (argc, argv, "hd:D:H:f:e:",
+		c = getopt_long (argc, argv, "hd:D:H:l:f:e:",
 				 long_options, &option_index);
 
 		/* Detect the end of the options. */
@@ -229,6 +312,10 @@ int tool_type(int argc, char **argv) {
 				opt_key_hold_ms = strtol(optarg, NULL, 10);
 				break;
 
+			case 'l':
+				layout_name = optarg;
+				break;
+
 			case 'f':
 				file_path = optarg;
 				break;
@@ -251,6 +338,14 @@ int tool_type(int argc, char **argv) {
 		}
 	}
 
+	const struct keymap *km = keymap_get(layout_name);
+	if (!km) {
+		fprintf(stderr, "ydotool: type: error: unknown layout '%s'. Available layouts: ", layout_name);
+		keymap_print_list(stderr);
+		fprintf(stderr, "\n");
+		return 2;
+	}
+
 	if (file_path) {
 		if (enable_escape == -1) {
 			enable_escape = 0;
@@ -267,20 +362,26 @@ int tool_type(int argc, char **argv) {
 		}
 
 		char buf[128];
+		struct type_parser p;
+
+		type_parser_init(&p, opt_key_delay_ms, opt_key_hold_ms);
 
 		ssize_t rc;
 		while ((rc = read(fd, buf, sizeof(buf)))) {
 			if (rc > 0) {
-				for (int i = 0; i<rc; i++) {
-					int c = enable_escape ? escape(buf[i]) : buf[i];
-					if (c != -1) {
-						type_char((char)c, i != rc - 1);
-					}
+				for (ssize_t i = 0; i<rc; i++) {
+					if (type_parser_feed(&p, km, (unsigned char)buf[i], enable_escape) < 0)
+						return 2;
 				}
 			} else if (rc < 0) {
 				fprintf(stderr, "ydotool: type: error: read %s failed: %s\n", file_path, strerror(errno));
 				return 2;
 			}
+		}
+
+		if (p.esc != 0) {
+			fprintf(stderr, "ydotool: type: error: incomplete escape sequence at end of input\n");
+			return 2;
 		}
 	} else {
 		if (enable_escape == -1) {
@@ -289,20 +390,11 @@ int tool_type(int argc, char **argv) {
 
 		if (optind < argc) {
 			while (optind < argc) {
-				char *pstr = argv[optind++];
+				if (type_string(argv[optind], enable_escape, km,
+						opt_key_delay_ms, opt_key_hold_ms) < 0)
+					return 2;
 
-//				printf("pstr: %s\n", pstr);
-
-				for (int i = 0; ; i++) {
-					int c = enable_escape ? escape(pstr[i]) : pstr[i];
-					char next = pstr[i+1];
-
-					if (c == 0) {
-						break;
-					} else if (c != -1) {
-						type_char((char)c, next);
-					}
-				}
+				optind++;
 
 				if (argv[optind])
 					usleep(opt_next_delay_ms * 1000);

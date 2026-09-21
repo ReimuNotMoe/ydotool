@@ -35,6 +35,9 @@
 */
 
 #include "ydotool.h"
+#include "keynames.h"
+
+#include <ctype.h>
 #include <string.h>
 
 static void show_help() {
@@ -46,18 +49,37 @@ static void show_help() {
 		"  -d, --key-delay=N          Delay N milliseconds between key events\n"
 		"  -h, --help                 Display this help and exit\n"
 		"\n"
-		"Since there's no way to know how many keyboard layouts are there in the world,\n"
-		"we're using raw keycodes now.\n"
-		"\n"
-		"Syntax: <keycode>:<pressed>\n"
-		"e.g. 28:1 28:0 means pressing on the Enter button on a standard US keyboard.\n"
-		"     (where :1 for pressed means the key is down and then :0 means the key is released)"
+		"Syntax: <key>[:<pressed>]\n"
+		"  <key>      an evdev keycode (decimal, or hex with a 0x prefix) or a key\n"
+		"             name such as enter, esc, f5, ctrl or a\n"
+		"  <pressed>  1 for key down, 0 for key up (default: 1)\n"
+		"e.g. enter:1 enter:0 means pressing and releasing the Enter key.\n"
 		"     42:1 38:1 38:0 24:1 24:0 38:1 38:0 42:0 - \"LOL\"\n"
-		"\n"
-		"Non-interpretable values, such as 0, aaa, l0l, will only cause a delay.\n"
 		"\n"
 		"See `/usr/include/linux/input-event-codes.h' for available key codes (KEY_*).\n"
 	);
+}
+
+static int parse_keyspec(const char *s) {
+	char *end;
+	long v;
+
+	if (s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) {
+		v = strtol(s + 2, &end, 16);
+		if (end == s + 2 || *end)
+			return -1;
+	} else if (isdigit((unsigned char)s[0])) {
+		v = strtol(s, &end, 10);
+		if (end == s || *end)
+			return -1;
+	} else {
+		return keyname_lookup(s);
+	}
+
+	if (v < 0 || v > 0xffff)
+		return -1;
+
+	return (int)v;
 }
 
 
@@ -74,7 +96,6 @@ int tool_key(int argc, char **argv) {
 
 		static struct option long_options[] = {
 			{"key-delay", required_argument, 0, 'd'},
-			{"file", required_argument, 0, 'f'},
 			{"help", no_argument, 0, 'h'},
 			{0, 0, 0, 0}
 		};
@@ -98,10 +119,6 @@ int tool_key(int argc, char **argv) {
 					printf (" with arg %s", optarg);
 				printf ("\n");
 				break;
-			case 'D':
-				key_delay = strtol(optarg, NULL, 10);
-				break;
-
 			case 'd':
 				key_delay = strtol(optarg, NULL, 10);
 				break;
@@ -124,23 +141,30 @@ int tool_key(int argc, char **argv) {
 	if (optind < argc) {
 		while (optind < argc) {
 			char *pstr = argv[optind++];
-			uint16_t kc;
-			if (strchr(pstr, 'x')) {
-				kc = strtol(pstr, NULL, 16);
-			} else {
-				kc = strtol(pstr, NULL, 10);
-			}
+			char *colon = strchr(pstr, ':');
+			int pressed = 1;
 
-			size_t slen = strlen(pstr);
-			if (slen) {
-				char cen = pstr[slen-1];
-
-				if (cen == '0') {
-					uinput_emit(EV_KEY, kc, 0, 1);
+			if (colon) {
+				*colon = '\0';
+				if (strcmp(colon + 1, "1") == 0) {
+					pressed = 1;
+				} else if (strcmp(colon + 1, "0") == 0) {
+					pressed = 0;
 				} else {
-					uinput_emit(EV_KEY, kc, 1, 1);
+					fprintf(stderr, "ydotool: key: error: '%s' is not a valid pressed value (expected 0 or 1)\n",
+						colon + 1);
+					return 2;
 				}
 			}
+
+			int kc = parse_keyspec(pstr);
+
+			if (kc < 0) {
+				fprintf(stderr, "ydotool: key: error: unknown key '%s'\n", pstr);
+				return 2;
+			}
+
+			uinput_emit(EV_KEY, (uint16_t)kc, pressed, 1);
 
 			usleep(key_delay * 1000);
 		}

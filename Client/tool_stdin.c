@@ -82,16 +82,23 @@ int tool_stdin(int argc, char **argv) {
 
     printf("Type anything (CTRL-C to exit):\n");
 
-    while (1) {
+	while (1) {
 		char buffer[4] = {0};
-		read(STDIN_FILENO, buffer, 3);
+		ssize_t n = read(STDIN_FILENO, buffer, 3);
+
+		if (n <= 0)
+			break;
 
 		printf("Key code: %d %d %d\n", buffer[0], buffer[1], buffer[2]);
 
-		char c = buffer[0];
+		unsigned char c = (unsigned char)buffer[0];
+
+		// Skip bytes the 7-bit map cannot describe
+		if (c > 127)
+			continue;
 
 		// Convert char to keycode and flags based on the ascii2keycode_map
-		int kdef = ascii2keycode_map[(int)c];
+		int kdef = ascii2keycode_map[c];
 
 		if ((int)buffer[0] == 27 && (int)buffer[1] == 91 && (int)buffer[2] >= 65 && (int)buffer[2] <= 76) {
 			kdef = ascii2ctrlcode_map[(int)buffer[2] - 65];
