@@ -84,11 +84,20 @@ int tool_stdin(int argc, char **argv) {
 
     while (1) {
 		char buffer[4] = {0};
-		read(STDIN_FILENO, buffer, 3);
+		ssize_t count = read(STDIN_FILENO, buffer, 3);
+		if (count == 0) return 0;
+		if (count < 0) {
+			perror("ydotool: read stdin");
+			return 2;
+		}
 
 		printf("Key code: %d %d %d\n", buffer[0], buffer[1], buffer[2]);
 
-		char c = buffer[0];
+		unsigned char c = (unsigned char)buffer[0];
+		if (c >= sizeof(ascii2keycode_map) / sizeof(ascii2keycode_map[0])) {
+			fputs("ydotool: stdin supports ASCII only; use clipboard paste for UTF-8 text\n", stderr);
+			return 2;
+		}
 
 		// Convert char to keycode and flags based on the ascii2keycode_map
 		int kdef = ascii2keycode_map[(int)c];

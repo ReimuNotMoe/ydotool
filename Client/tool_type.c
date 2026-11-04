@@ -108,10 +108,14 @@ static void show_help() {
 
 
 
-static void type_char(char c, bool delay) {
+static int type_char(char c, bool delay) {
+	if ((unsigned char)c >= sizeof(ascii2keycode_map) / sizeof(ascii2keycode_map[0])) {
+		fputs("ydotool: type supports ASCII only; use clipboard paste for UTF-8 text\n", stderr);
+		return 2;
+	}
 	int kdef = ascii2keycode_map[c];
 	if (kdef == -1) {
-		return;
+		return 0;
 	}
 
 	uint16_t kc = kdef & 0xffff;
@@ -131,6 +135,7 @@ static void type_char(char c, bool delay) {
 	if (delay) {
 		usleep(opt_key_delay_ms * 1000);
 	}
+	return 0;
 }
 
 static int escape(char in) {
@@ -143,7 +148,7 @@ static int escape(char in) {
 				state = 1;
 				return -1;
 			} else {
-				return in;
+				return (unsigned char)in;
 			}
 		case 1:
 			state = 0;
@@ -272,9 +277,9 @@ int tool_type(int argc, char **argv) {
 		while ((rc = read(fd, buf, sizeof(buf)))) {
 			if (rc > 0) {
 				for (int i = 0; i<rc; i++) {
-					int c = enable_escape ? escape(buf[i]) : buf[i];
+					int c = enable_escape ? escape(buf[i]) : (unsigned char)buf[i];
 					if (c != -1) {
-						type_char((char)c, i != rc - 1);
+						if (type_char((char)c, i != rc - 1)) return 2;
 					}
 				}
 			} else if (rc < 0) {
@@ -293,14 +298,13 @@ int tool_type(int argc, char **argv) {
 
 //				printf("pstr: %s\n", pstr);
 
-				for (int i = 0; ; i++) {
-					int c = enable_escape ? escape(pstr[i]) : pstr[i];
-					char next = pstr[i+1];
+				for (int i = 0; pstr[i]; i++) {
+					int c = enable_escape ? escape(pstr[i]) : (unsigned char)pstr[i];
 
 					if (c == 0) {
 						break;
 					} else if (c != -1) {
-						type_char((char)c, next);
+						if (type_char((char)c, pstr[i+1])) return 2;
 					}
 				}
 

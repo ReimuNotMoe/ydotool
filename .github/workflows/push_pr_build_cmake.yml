@@ -43,6 +43,9 @@ jobs:
         run: |
           cmake --build . --config $BUILD_TYPE 
 
+      - name: Test input byte validation
+        run: python3 tests/input_bytes_test.py build/ydotool
+
       - name: Rename build files
         run: |
           mv ${{github.workspace}}/build/ydotool ${{github.workspace}}/build/ydotool-${{matrix.os}}
