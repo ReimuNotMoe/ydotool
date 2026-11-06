@@ -102,16 +102,21 @@ static void show_help() {
 		"  -e, --escape=BOOL          Escape enable (1) or disable (0)\n"
 		"  -h, --help                 Display this help and exit\n"
 		"\n"
-		"Escape is enabled by default when typing command line arguments, and disabled by default when typing from file and stdin."
+		"Escape is enabled by default when typing command line arguments, and disabled by default when typing from file and stdin.\n"
+		"File input is streamed: valid ASCII before a later error may already have been typed."
 	);
 }
 
 
 
-static void type_char(char c, bool delay) {
+static int type_char(char c, bool delay) {
+	if ((unsigned char)c >= sizeof(ascii2keycode_map) / sizeof(ascii2keycode_map[0])) {
+		fputs("ydotool: type supports ASCII only; use clipboard paste for UTF-8 text\n", stderr);
+		return 2;
+	}
 	int kdef = ascii2keycode_map[c];
 	if (kdef == -1) {
-		return;
+		return 0;
 	}
 
 	uint16_t kc = kdef & 0xffff;
@@ -131,29 +136,31 @@ static void type_char(char c, bool delay) {
 	if (delay) {
 		usleep(opt_key_delay_ms * 1000);
 	}
+	return 0;
 }
 
-static int escape(char in) {
-	static int state = 0;
-	static char hex_str[3] = {0, 0, 0};
+static int escape_state;
+static char hex_str[3];
 
-	switch (state) {
+static int escape(char in) {
+
+	switch (escape_state) {
 		case 0:
 			if (in == '\\') {
-				state = 1;
+				escape_state = 1;
 				return -1;
 			} else {
-				return in;
+				return (unsigned char)in;
 			}
 		case 1:
-			state = 0;
+			escape_state = 0;
 			switch (in) {
 				case 'n':
 					return '\n';
 				case 't':
 					return '\t';
 				case 'x':
-					state = 2;
+					escape_state = 2;
 					return -1;
 				case '\\':
 					return '\\';
@@ -161,11 +168,11 @@ static int escape(char in) {
 					return -1;
 			}
 		case 2:
-			state = 3;
+			escape_state = 3;
 			hex_str[0] = in;
 			return -1;
 		case 3:
-			state = 0;
+			escape_state = 0;
 			hex_str[1] = in;
 			return (int)strtol(hex_str, NULL, 16);
 		default:
@@ -272,9 +279,9 @@ int tool_type(int argc, char **argv) {
 		while ((rc = read(fd, buf, sizeof(buf)))) {
 			if (rc > 0) {
 				for (int i = 0; i<rc; i++) {
-					int c = enable_escape ? escape(buf[i]) : buf[i];
+					int c = enable_escape ? escape(buf[i]) : (unsigned char)buf[i];
 					if (c != -1) {
-						type_char((char)c, i != rc - 1);
+						if (type_char((char)c, i != rc - 1)) return 2;
 					}
 				}
 			} else if (rc < 0) {
@@ -287,20 +294,30 @@ int tool_type(int argc, char **argv) {
 			enable_escape = 1;
 		}
 
+		for (int arg = optind; arg < argc; arg++) {
+			escape_state = 0;
+			for (int i = 0; argv[arg][i]; i++) {
+				int c = enable_escape ? escape(argv[arg][i]) : (unsigned char)argv[arg][i];
+				if (c >= 128) {
+					fputs("ydotool: type supports ASCII only; use clipboard paste for UTF-8 text\n", stderr);
+					return 2;
+				}
+			}
+		}
 		if (optind < argc) {
 			while (optind < argc) {
 				char *pstr = argv[optind++];
+				escape_state = 0;
 
 //				printf("pstr: %s\n", pstr);
 
-				for (int i = 0; ; i++) {
-					int c = enable_escape ? escape(pstr[i]) : pstr[i];
-					char next = pstr[i+1];
+				for (int i = 0; pstr[i]; i++) {
+					int c = enable_escape ? escape(pstr[i]) : (unsigned char)pstr[i];
 
 					if (c == 0) {
 						break;
 					} else if (c != -1) {
-						type_char((char)c, next);
+						if (type_char((char)c, pstr[i+1])) return 2;
 					}
 				}
 
